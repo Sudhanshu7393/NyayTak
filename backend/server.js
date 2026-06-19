@@ -41,7 +41,7 @@ app.post("/api/chat", async (req, res) => {
       body: JSON.stringify({
         model: MODEL,
         messages: chat,
-        max_tokens: 1400,
+        max_tokens: 2000,
         temperature: 0.6,
       }),
     });
