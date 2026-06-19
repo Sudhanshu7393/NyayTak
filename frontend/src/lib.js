@@ -38,10 +38,22 @@ function startVoice(speechLang, onText, onError) {
     return null;
   }
   let rec,
-    finalText = "",
     pauseTimer = null,
     done = false;
+  const finals = []; // har final result index ke hisaab se — repeat nahi hoga
   const PAUSE_MS = 2500; // chup hone ke baad itna ruk ke send hoga
+
+  const finish = () => {
+    if (done) return;
+    done = true;
+    if (pauseTimer) clearTimeout(pauseTimer);
+    const text = finals.join(" ").replace(/\s+/g, " ").trim();
+    try {
+      rec.stop();
+    } catch (_) {}
+    if (text) onText(text);
+  };
+
   try {
     rec = new SR();
     rec.lang = speechLang || "hi-IN";
@@ -49,28 +61,20 @@ function startVoice(speechLang, onText, onError) {
     rec.continuous = true;
     rec.maxAlternatives = 1;
     rec.onresult = (e) => {
-      let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
-        if (r.isFinal) finalText += r[0].transcript + " ";
-        else interim += r[0].transcript;
+        if (r.isFinal) finals[i] = r[0].transcript.trim(); // index pe rakho → dobara aaye to overwrite, judega nahi
       }
-      // jab tak bol raha hai (naya result aa raha), timer reset karo
       if (pauseTimer) clearTimeout(pauseTimer);
-      pauseTimer = setTimeout(() => {
-        if (done) return;
-        done = true;
-        const text = (finalText + interim).trim();
-        try {
-          rec.stop();
-        } catch (_) {}
-        if (text) onText(text);
-      }, PAUSE_MS);
+      pauseTimer = setTimeout(finish, PAUSE_MS);
     };
     rec.onerror = () => {
       if (pauseTimer) clearTimeout(pauseTimer);
       if (!done) onError && onError();
     };
+    rec.onend = () => {
+      finish();
+    }; // engine khud band ho to bhi jo bola tha woh bhej do
     rec.start();
   } catch (_) {
     onError && onError();
