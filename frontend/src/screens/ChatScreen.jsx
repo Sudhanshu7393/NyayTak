@@ -877,9 +877,12 @@ function ChatScreen({
           <MicBtn
             speechLang={speechLang}
             t={t}
-            onText={() => {}}
+            onText={(txt) => {
+              // Do nothing here - let onAutoSend handle it
+            }}
             onAutoSend={(txt) => {
               if (txt.trim() && !loadingRef.current) {
+                console.log("Voice input:", txt); // Debug
                 send(txt.trim(), true);
               }
             }}

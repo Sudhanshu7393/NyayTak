@@ -1,5 +1,5 @@
 /* API + voice + share helpers */
-const API_BASE = import.meta.env.VITE_API_BASE || ""; // empty = same origin (Vite proxy in dev)
+const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 export async function callClaude(body) {
   const res = await fetch(`${API_BASE}/api/chat`, {
@@ -22,13 +22,14 @@ export async function callClaude(body) {
 
 function cleanMd(s) {
   return (s || "")
-    .replace(/\*\*(.*?)\*\*/g, "$1") // **bold**
-    .replace(/__(.*?)__/g, "$1") // __bold__
-    .replace(/^\s{0,3}#{1,6}\s+/gm, "") // # headers
-    .replace(/^\s*[*\-–]\s+/gm, "• ") // *, -, – line bullets → •
-    .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1$2") // remaining *italic*
-    .replace(/`{1,3}/g, ""); // backticks
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/^\s*[*\-–]\s+/gm, "• ")
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1$2")
+    .replace(/`{1,3}/g, "");
 }
+
 function startVoice(speechLang, onText, onError) {
   const SR =
     typeof window !== "undefined" &&
@@ -85,34 +86,6 @@ function startVoice(speechLang, onText, onError) {
   }
 }
 
-  try {
-    rec = new SR();
-    rec.lang = speechLang || "hi-IN";
-    rec.interimResults = true;
-    rec.continuous = true;
-    rec.maxAlternatives = 1;
-    rec.onresult = (e) => {
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) finals[i] = r[0].transcript.trim(); // index pe rakho → dobara aaye to overwrite, judega nahi
-      }
-      if (pauseTimer) clearTimeout(pauseTimer);
-      pauseTimer = setTimeout(finish, PAUSE_MS);
-    };
-    rec.onerror = () => {
-      if (pauseTimer) clearTimeout(pauseTimer);
-      if (!done) onError && onError();
-    };
-    rec.onend = () => {
-      finish();
-    }; // engine khud band ho to bhi jo bola tha woh bhej do
-    rec.start();
-  } catch (_) {
-    onError && onError();
-    return null;
-  }
-  return rec;
-
 function pickVoice(synth, lang) {
   const voices = synth.getVoices() || [];
   if (!voices.length) return null;
@@ -128,6 +101,7 @@ function pickVoice(synth, lang) {
     null
   );
 }
+
 function speak(text, speechLang, onEnd) {
   try {
     const synth = window.speechSynthesis;
@@ -145,7 +119,7 @@ function speak(text, speechLang, onEnd) {
       onEnd && onEnd();
       return false;
     }
-    const hasDeva = /[\u0900-\u097F]/.test(clean); // Devanagari → Hindi voice; Latin → Indian-English
+    const hasDeva = /[\u0900-\u097F]/.test(clean);
     const lang = hasDeva ? "hi-IN" : speechLang || "en-IN";
     let started = false;
     const go = () => {
@@ -168,22 +142,22 @@ function speak(text, speechLang, onEnd) {
         synth.onvoiceschanged = go;
       } catch (_) {}
       setTimeout(go, 300);
-    } // voices load async on some devices
+    }
     return true;
   } catch (_) {
     onEnd && onEnd();
     return false;
   }
 }
+
 async function shareText(text, copiedMsg) {
   if (navigator.share) {
-    // native app share sheet (mobile / HTTPS)
     try {
       await navigator.share({ title: "NyayTak", text });
       return;
     } catch (e) {
       if (e && e.name === "AbortError") return;
-    } // user cancelled → stop; other errors → fall through
+    }
   }
   try {
     await navigator.clipboard.writeText(text);
@@ -191,7 +165,6 @@ async function shareText(text, copiedMsg) {
     return;
   } catch (_) {}
   try {
-    // legacy copy fallback
     const ta = document.createElement("textarea");
     ta.value = text;
     ta.style.position = "fixed";
@@ -206,7 +179,7 @@ async function shareText(text, copiedMsg) {
   } catch (_) {}
   try {
     window.prompt("Copy:", text);
-  } catch (_) {} // last resort
+  } catch (_) {}
 }
 
 export { cleanMd, startVoice, pickVoice, speak, shareText };
