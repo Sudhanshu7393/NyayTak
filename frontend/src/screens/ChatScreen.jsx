@@ -101,6 +101,8 @@ function ChatScreen({
   const scrollRef = useRef(null);
   const startedRef = useRef(false);
   const histRef = useRef([]);
+  const loadingRef = useRef(false); // Prevent duplicate submissions
+
   const catEn = cat.tr.en.t;
   const langPrompt = LANGS.find((l) => l.code === lang).prompt;
   const speechLang = LANGS.find((l) => l.code === lang).speech;
@@ -141,10 +143,15 @@ function ChatScreen({
       tick();
     });
   }
+
   async function ask(history) {
+    // Guard: prevent duplicate submissions
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     setLoading(true);
     setErrored(false);
     histRef.current = history;
+
     try {
       const raw =
         cleanMd(
@@ -166,37 +173,50 @@ function ChatScreen({
       }
       setFollowUps(fus);
       setLoading(false);
+      loadingRef.current = false;
       await streamIn(answer || t.noAnswer);
     } catch (_) {
       setLoading(false);
+      loadingRef.current = false;
       setMessages((m) => [...m, { role: "assistant", text: t.networkErr }]);
       setErrored(true);
       scrollDown();
     }
   }
+
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
     const first = [{ role: "user", text: scenario }];
     setMessages(first);
     ask(first);
-    scrollDown(); // eslint-disable-next-line
+    scrollDown();
   }, []);
+
   function send(text, viaVoice) {
+    // Guard: prevent duplicate from stale closures
+    if (loadingRef.current) {
+      console.warn("⏸️ Request in progress, ignoring duplicate send");
+      return;
+    }
+
     const v = (text ?? input).trim();
-    if (!v || loading || streaming) return;
+    if (!v) return;
+
     const next = [...messages, { role: "user", text: v, voice: !!viaVoice }];
     setMessages(next);
     setInput("");
     scrollDown();
     ask(next);
   }
+
   function editVoiceMsg(i) {
     const msg = messages[i];
     if (!msg) return;
     setInput(msg.text);
     setMessages((m) => m.slice(0, i));
   }
+
   async function copyVoiceMsg(i, text) {
     try {
       await navigator.clipboard.writeText(text);
@@ -204,11 +224,13 @@ function ChatScreen({
       setTimeout(() => setCopiedMsg(-1), 1500);
     } catch (_) {}
   }
+
   function retryVoiceMsg(i) {
     const upto = messages.slice(0, i + 1);
     setMessages(upto);
     ask(upto);
   }
+
   function retry() {
     setMessages((m) => {
       const c = [...m];
@@ -217,6 +239,7 @@ function ChatScreen({
     });
     ask(histRef.current);
   }
+
   async function runTool(kind) {
     setTool({ kind, loading: true, text: "" });
     setToolText("");
@@ -240,6 +263,7 @@ function ChatScreen({
       setToolText(t.networkErr);
     }
   }
+
   function downloadTool() {
     const blob = new Blob([toolText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -249,6 +273,7 @@ function ChatScreen({
     a.click();
     URL.revokeObjectURL(url);
   }
+
   async function copyTool() {
     try {
       await navigator.clipboard.writeText(toolText);
@@ -256,6 +281,7 @@ function ChatScreen({
       setTimeout(() => setCopied(false), 1600);
     } catch (_) {}
   }
+
   function toggleSpeak(i, text) {
     if (speaking === i) {
       window.speechSynthesis && window.speechSynthesis.cancel();
@@ -854,7 +880,9 @@ function ChatScreen({
             t={t}
             onText={() => {}}
             onAutoSend={(txt) => {
-              if (txt.trim()) send(txt.trim(), true);
+              if (txt.trim() && !loadingRef.current) {
+                send(txt.trim(), true);
+              }
             }}
             accent="#f0a500"
           />
