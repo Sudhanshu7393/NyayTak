@@ -40,15 +40,14 @@ function startVoice(speechLang, onText, onError) {
   let rec,
     pauseTimer = null,
     done = false,
-    textSent = false; 
-
+    textSent = false;
   const finals = [];
   const PAUSE_MS = 2500;
 
   const finish = () => {
-    if (done || textSent) return; // Check textSent
+    if (done || textSent) return;
     done = true;
-    textSent = true; // Mark as sent
+    textSent = true;
     if (pauseTimer) clearTimeout(pauseTimer);
     const text = finals.join(" ").replace(/\s+/g, " ").trim();
     try {
@@ -57,7 +56,33 @@ function startVoice(speechLang, onText, onError) {
     if (text) onText(text);
   };
 
-  // Rest same...
+  try {
+    rec = new SR();
+    rec.lang = speechLang || "hi-IN";
+    rec.interimResults = true;
+    rec.continuous = true;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) finals[i] = r[0].transcript.trim();
+      }
+      if (pauseTimer) clearTimeout(pauseTimer);
+      pauseTimer = setTimeout(finish, PAUSE_MS);
+    };
+    rec.onerror = () => {
+      if (pauseTimer) clearTimeout(pauseTimer);
+      if (!done) onError && onError();
+    };
+    rec.onend = () => {
+      finish();
+    };
+    rec.start();
+    return rec;
+  } catch (_) {
+    onError && onError();
+    return null;
+  }
 }
 
   try {
