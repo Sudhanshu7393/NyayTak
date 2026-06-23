@@ -1248,29 +1248,3 @@ In ${langPrompt} give exactly:
 3) One recommended next step
 Under 12 lines total. No preamble.`,
   })[kind];
-
-export {
-  FONT_HEAD,
-  FONT_BODY,
-  LANGS,
-  CHAT_LANGS,
-  STATES,
-  HELP,
-  CAT_HELP,
-  LAWS,
-  INDIA_CODE,
-  PORTALS,
-  CAT_PORTAL,
-  stateSearchUrl,
-  CRISIS,
-  CRISIS_WORDS,
-  isCrisis,
-  ICONS,
-  UI,
-  CATEGORIES,
-  GENERAL_CAT,
-  findCat,
-  POPULAR,
-  buildPrompt,
-  toolPrompt,
-};
