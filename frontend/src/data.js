@@ -1229,3 +1229,48 @@ export {
   buildPrompt,
   toolPrompt,
 };
+const toolPrompt = (kind, catEn, scenario, langPrompt, state) =>
+  ({
+    complaint: `You are NyayTak's complaint/notice draft generator for India.
+Generate a FORMAL draft the user can fill and submit. Category: "${catEn}". Issue: "${scenario}". State: ${state}.
+Write the ENTIRE draft in ${langPrompt}. Structure: To (correct authority for ${state}), Subject, body of facts with [____] placeholders, the relief requested, relevant law & section, and Date/Place/Signature placeholders.
+End with one line: this is a template — get it verified by a lawyer before filing. Return ONLY the draft, no preamble.`,
+
+    docs: `List the key documents and evidence the user should gather for: "${catEn}" - "${scenario}". 
+Reply as a short checklist (max 8 bullets, each starting with •) in ${langPrompt}. 
+Include: proof documents, communication records, photos/videos, witness details, official certificates needed.
+No preamble, no explanation.`,
+
+    strength: `Assess this case's strength for: "${catEn}" - "${scenario}".
+In ${langPrompt} give exactly: 
+1) Strength — Strong/Medium/Weak with one-line reason
+2) Missing evidence to collect (2-3 bullets)
+3) One recommended next step
+Under 12 lines total. No preamble.`,
+  })[kind];
+
+export {
+  FONT_HEAD,
+  FONT_BODY,
+  LANGS,
+  CHAT_LANGS,
+  STATES,
+  HELP,
+  CAT_HELP,
+  LAWS,
+  INDIA_CODE,
+  PORTALS,
+  CAT_PORTAL,
+  stateSearchUrl,
+  CRISIS,
+  CRISIS_WORDS,
+  isCrisis,
+  ICONS,
+  UI,
+  CATEGORIES,
+  GENERAL_CAT,
+  findCat,
+  POPULAR,
+  buildPrompt,
+  toolPrompt,
+};
