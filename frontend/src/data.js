@@ -1227,4 +1227,5 @@ export {
   findCat,
   POPULAR,
   buildPrompt,
+  toolPrompt,
 };
