@@ -39,13 +39,16 @@ function startVoice(speechLang, onText, onError) {
   }
   let rec,
     pauseTimer = null,
-    done = false;
-  const finals = []; // har final result index ke hisaab se — repeat nahi hoga
-  const PAUSE_MS = 2500; // chup hone ke baad itna ruk ke send hoga
+    done = false,
+    textSent = false; 
+
+  const finals = [];
+  const PAUSE_MS = 2500;
 
   const finish = () => {
-    if (done) return;
+    if (done || textSent) return; // Check textSent
     done = true;
+    textSent = true; // Mark as sent
     if (pauseTimer) clearTimeout(pauseTimer);
     const text = finals.join(" ").replace(/\s+/g, " ").trim();
     try {
@@ -53,6 +56,9 @@ function startVoice(speechLang, onText, onError) {
     } catch (_) {}
     if (text) onText(text);
   };
+
+  // Rest same...
+}
 
   try {
     rec = new SR();
@@ -81,7 +87,7 @@ function startVoice(speechLang, onText, onError) {
     return null;
   }
   return rec;
-}
+
 function pickVoice(synth, lang) {
   const voices = synth.getVoices() || [];
   if (!voices.length) return null;
