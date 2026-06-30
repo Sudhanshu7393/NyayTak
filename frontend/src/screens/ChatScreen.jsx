@@ -151,103 +151,68 @@ function ChatScreen({
     });
   }
 
-  async function ask(history) {
-    // Guard: prevent duplicate submissions
-    async function handleDocumentUpload(e) {
-      const file = e.target.files?.[0];
-      if (!file) return;
+async function ask(history) {
+  // Guard: prevent duplicate submissions
+  if (loadingRef.current) return;
+  loadingRef.current = true;
+  setLoading(true);
+  setErrored(false);
+  histRef.current = history;
 
-      setUploadingDoc(true);
-      try {
-        const analysis = await analyzeDocument(
-          file,
-          catEn,
-          scenario,
-          langPrompt,
-        );
-
-        const docMsg = `[📄 Document: ${file.name}]\n\n${analysis}`;
-        const next = [...messages, { role: "user", text: docMsg, isDoc: true }];
-        setMessages(next);
-        scrollDown();
-
-        await ask([...next, { role: "assistant", text: "Document analyzed." }]);
-      } catch (err) {
-        alert("Document analysis failed: " + String(err));
-      } finally {
-        setUploadingDoc(false);
-        if (docInputRef.current) docInputRef.current.value = "";
-      }
+  try {
+    const raw =
+      cleanMd(
+        await callClaude({
+          system: buildPrompt(catEn, scenario, langPrompt, state),
+          messages: history.map((m) => ({ role: m.role, content: m.text })),
+        }),
+      ) || t.noAnswer;
+    let answer = raw,
+      fus = [];
+    const parts = raw.split("###FU###");
+    if (parts.length > 1) {
+      answer = parts[0].trim();
+      fus = parts[1]
+        .split(/\||\n/)
+        .map((s) => s.trim().replace(/^[•\-\d.\)\s]+/, ""))
+        .filter((s) => s.length > 1)
+        .slice(0, 4);
     }
-    if (loadingRef.current) return;
-    loadingRef.current = true;
-    setLoading(true);
-    setErrored(false);
-    histRef.current = history;
-
-    try {
-      const raw =
-        cleanMd(
-          await callClaude({
-            system: buildPrompt(catEn, scenario, langPrompt, state),
-            messages: history.map((m) => ({ role: m.role, content: m.text })),
-          }),
-        ) || t.noAnswer;
-      let answer = raw,
-        fus = [];
-      const parts = raw.split("###FU###");
-      if (parts.length > 1) {
-        answer = parts[0].trim();
-        fus = parts[1]
-          .split(/\||\n/)
-          .map((s) => s.trim().replace(/^[•\-\d.\)\s]+/, ""))
-          .filter((s) => s.length > 1)
-          .slice(0, 4);
-      }
-      async function handleDocumentUpload(e) {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setUploadingDoc(true);
-        try {
-          const analysis = await analyzeDocument(
-            file,
-            catEn,
-            scenario,
-            langPrompt,
-          );
-
-          const docMsg = `[📄 Document: ${file.name}]\n\n${analysis}`;
-          const next = [
-            ...messages,
-            { role: "user", text: docMsg, isDoc: true },
-          ];
-          setMessages(next);
-          scrollDown();
-
-          await ask([
-            ...next,
-            { role: "assistant", text: "Document analyzed." },
-          ]);
-        } catch (err) {
-          alert("Document analysis failed: " + String(err));
-        } finally {
-          setUploadingDoc(false);
-          if (docInputRef.current) docInputRef.current.value = "";
-        }
-      }
-      setFollowUps(fus);
-      setLoading(false);
-      loadingRef.current = false;
-      await streamIn(answer || t.noAnswer);
-    } catch (_) {
-      setLoading(false);
-      loadingRef.current = false;
-      setMessages((m) => [...m, { role: "assistant", text: t.networkErr }]);
-      setErrored(true);
-      scrollDown();
-    }
+    setFollowUps(fus);
+    setLoading(false);
+    loadingRef.current = false;
+    await streamIn(answer || t.noAnswer);
+  } catch (_) {
+    setLoading(false);
+    loadingRef.current = false;
+    setMessages((m) => [...m, { role: "assistant", text: t.networkErr }]);
+    setErrored(true);
+    scrollDown();
   }
+}
+
+// ← यहाँ add कर (ask के बाहर):
+async function handleDocumentUpload(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  setUploadingDoc(true);
+  try {
+    const analysis = await analyzeDocument(file, catEn, scenario, langPrompt);
+
+    const docMsg = `[📄 Document: ${file.name}]\n\n${analysis}`;
+    const next = [...messages, { role: "user", text: docMsg, isDoc: true }];
+    setMessages(next);
+    scrollDown();
+
+    await ask([...next, { role: "assistant", text: "Document analyzed." }]);
+  } catch (err) {
+    alert("Document analysis failed: " + String(err));
+  } finally {
+    setUploadingDoc(false);
+    if (docInputRef.current) docInputRef.current.value = "";
+  }
+}
 
   useEffect(() => {
     if (startedRef.current) return;
