@@ -153,6 +153,32 @@ function ChatScreen({
 
   async function ask(history) {
     // Guard: prevent duplicate submissions
+    async function handleDocumentUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setUploadingDoc(true);
+      try {
+        const analysis = await analyzeDocument(
+          file,
+          catEn,
+          scenario,
+          langPrompt,
+        );
+
+        const docMsg = `[📄 Document: ${file.name}]\n\n${analysis}`;
+        const next = [...messages, { role: "user", text: docMsg, isDoc: true }];
+        setMessages(next);
+        scrollDown();
+
+        await ask([...next, { role: "assistant", text: "Document analyzed." }]);
+      } catch (err) {
+        alert("Document analysis failed: " + String(err));
+      } finally {
+        setUploadingDoc(false);
+        if (docInputRef.current) docInputRef.current.value = "";
+      }
+    }
     if (loadingRef.current) return;
     loadingRef.current = true;
     setLoading(true);
