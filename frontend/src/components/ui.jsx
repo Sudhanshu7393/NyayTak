@@ -726,7 +726,10 @@ function AnswerBody({ text }) {
             </div>
           );
         }
+
         const s = SEC_STYLE[bl.key];
+        if (!s) return null; // Safety guard
+
         return (
           <div
             key={i}
@@ -738,14 +741,15 @@ function AnswerBody({ text }) {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
-                padding: "8px 14px",
+                padding: "9px 15px",
                 borderRadius: 12,
                 backgroundColor: s.b,
                 border: `2px solid ${s.c}`,
                 color: s.c,
                 fontWeight: 800,
-                fontSize: "calc(14px * var(--fs))",
+                fontSize: "calc(13px * var(--fs))",
                 width: "fit-content",
+                letterSpacing: "0.5px",
               }}
             >
               <span style={{ fontSize: "calc(16px * var(--fs))" }}>
@@ -758,7 +762,7 @@ function AnswerBody({ text }) {
             {bl.body.length > 0 && (
               <div
                 style={{
-                  paddingLeft: 8,
+                  paddingLeft: 12,
                   display: "flex",
                   flexDirection: "column",
                   gap: 6,
@@ -774,6 +778,7 @@ function AnswerBody({ text }) {
                         gap: 10,
                         lineHeight: 1.6,
                         color: "var(--text)",
+                        fontSize: "calc(13px * var(--fs))",
                       }}
                     >
                       {isB && (
