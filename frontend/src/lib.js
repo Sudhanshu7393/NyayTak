@@ -1,4 +1,4 @@
-/* API + voice + share helpers */
+/* API + voice + share + document helpers */
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 export async function callClaude(body) {
@@ -12,6 +12,27 @@ export async function callClaude(body) {
     }),
   });
   if (!res.ok) throw new Error("API error " + res.status);
+  const data = await res.json();
+  return (data.content || [])
+    .filter((b) => b.type === "text")
+    .map((b) => b.text)
+    .join("\n")
+    .trim();
+}
+
+export async function analyzeDocument(file, caseType, scenario, lang) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("caseType", caseType);
+  formData.append("scenario", scenario);
+  formData.append("lang", lang);
+
+  const res = await fetch(`${API_BASE}/api/analyze-document`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error("Document analysis failed: " + res.status);
   const data = await res.json();
   return (data.content || [])
     .filter((b) => b.type === "text")

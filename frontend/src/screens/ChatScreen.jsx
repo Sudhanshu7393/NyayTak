@@ -56,7 +56,14 @@ import {
   FONT_HEAD,
   FONT_BODY,
 } from "../data.js";
-import { callClaude, cleanMd, speak, shareText } from "../lib.js";
+import {
+  callClaude,
+  analyzeDocument,
+  cleanMd,
+  speak,
+  shareText,
+} from "../lib.js";
+import { FileUp } from "lucide-react";
 import {
   JaliSVG,
   BackBtn,
@@ -101,7 +108,8 @@ function ChatScreen({
   const startedRef = useRef(false);
   const histRef = useRef([]);
   const loadingRef = useRef(false); // Prevent duplicate submissions
-
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const docInputRef = useRef(null);
   const catEn = cat.tr.en.t;
   const langPrompt = LANGS.find((l) => l.code === lang).prompt;
   const speechLang = LANGS.find((l) => l.code === lang).speech;
@@ -169,6 +177,38 @@ function ChatScreen({
           .map((s) => s.trim().replace(/^[•\-\d.\)\s]+/, ""))
           .filter((s) => s.length > 1)
           .slice(0, 4);
+      }
+      async function handleDocumentUpload(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingDoc(true);
+        try {
+          const analysis = await analyzeDocument(
+            file,
+            catEn,
+            scenario,
+            langPrompt,
+          );
+
+          const docMsg = `[📄 Document: ${file.name}]\n\n${analysis}`;
+          const next = [
+            ...messages,
+            { role: "user", text: docMsg, isDoc: true },
+          ];
+          setMessages(next);
+          scrollDown();
+
+          await ask([
+            ...next,
+            { role: "assistant", text: "Document analyzed." },
+          ]);
+        } catch (err) {
+          alert("Document analysis failed: " + String(err));
+        } finally {
+          setUploadingDoc(false);
+          if (docInputRef.current) docInputRef.current.value = "";
+        }
       }
       setFollowUps(fus);
       setLoading(false);
@@ -874,6 +914,40 @@ function ChatScreen({
               lineHeight: 1.4,
             }}
           />
+          <input
+            ref={docInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.txt"
+            onChange={handleDocumentUpload}
+            style={{ display: "none" }}
+            disabled={uploadingDoc || loading || streaming}
+          />
+          <button
+            onClick={() => docInputRef.current?.click()}
+            aria-label="Upload document"
+            title="Upload case document"
+            disabled={uploadingDoc || loading || streaming}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              flexShrink: 0,
+              cursor:
+                uploadingDoc || loading || streaming
+                  ? "not-allowed"
+                  : "pointer",
+              border: `1px solid ${uploadingDoc ? "rgba(240,165,0,0.4)" : "var(--border)"}`,
+              background: uploadingDoc
+                ? "rgba(240,165,0,0.15)"
+                : "var(--surface)",
+              color: uploadingDoc ? "#f0a500" : "var(--text-mid)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <FileUp size={18} />
+          </button>
           <MicBtn
             speechLang={speechLang}
             t={t}
