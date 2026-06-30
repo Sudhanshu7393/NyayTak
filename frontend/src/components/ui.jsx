@@ -692,6 +692,7 @@ function AnswerBody({ text }) {
   const lines = (text || "").split("\n");
   const blocks = [];
   let cur = null;
+
   lines.forEach((ln) => {
     const k = matchSec(ln);
     if (k) {
@@ -712,43 +713,57 @@ function AnswerBody({ text }) {
       else blocks.push({ key: null, body: [ln.trim()] });
     }
   });
-  if (!blocks.some((b) => b.key)) return <span>{text}</span>; // plain (e.g. welcome) → render as-is
+
+  if (!blocks.some((b) => b.key)) return <span>{text}</span>;
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {blocks.map((bl, i) => {
-        if (!bl.key)
+        if (!bl.key) {
           return (
-            <div key={i} style={{ lineHeight: 1.55 }}>
+            <div key={i} style={{ lineHeight: 1.6, color: "var(--text)" }}>
               {bl.body.join(" ")}
             </div>
           );
+        }
         const s = SEC_STYLE[bl.key];
         return (
-          <div key={i}>
+          <div
+            key={i}
+            style={{ display: "flex", flexDirection: "column", gap: 8 }}
+          >
+            {/* Header Badge */}
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
-                padding: "6px 13px",
-                borderRadius: 10,
-                background: s.b,
-                border: `1.5px solid ${s.c}`,
+                gap: 8,
+                padding: "8px 14px",
+                borderRadius: 12,
+                backgroundColor: s.b,
+                border: `2px solid ${s.c}`,
                 color: s.c,
-                fontWeight: 700,
-                fontSize: "calc(13px * var(--fs))",
-                letterSpacing: "0.3px",
-                marginBottom: 8,
+                fontWeight: 800,
+                fontSize: "calc(14px * var(--fs))",
                 width: "fit-content",
               }}
             >
-              <span style={{ fontSize: "calc(15px * var(--fs))" }}>
+              <span style={{ fontSize: "calc(16px * var(--fs))" }}>
                 {bl.key}
               </span>
               <span>{bl.label}</span>
             </div>
+
+            {/* Body Content */}
             {bl.body.length > 0 && (
-              <div style={{ marginTop: 5, paddingLeft: 3 }}>
+              <div
+                style={{
+                  paddingLeft: 8,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                }}
+              >
                 {bl.body.map((l, j) => {
                   const isB = l.startsWith("•");
                   return (
@@ -756,13 +771,17 @@ function AnswerBody({ text }) {
                       key={j}
                       style={{
                         display: "flex",
-                        gap: 7,
-                        lineHeight: 1.5,
-                        marginTop: j === 0 ? 0 : 3,
+                        gap: 10,
+                        lineHeight: 1.6,
+                        color: "var(--text)",
                       }}
                     >
                       {isB && (
-                        <span style={{ color: s.c, flexShrink: 0 }}>•</span>
+                        <span
+                          style={{ color: s.c, fontWeight: 700, flexShrink: 0 }}
+                        >
+                          •
+                        </span>
                       )}
                       <span>{isB ? l.replace(/^•\s*/, "") : l}</span>
                     </div>
