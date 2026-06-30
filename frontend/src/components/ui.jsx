@@ -725,23 +725,28 @@ function AnswerBody({ text }) {
         const s = SEC_STYLE[bl.key];
         return (
           <div key={i}>
-            <span
+            <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 5,
-                padding: "3px 11px",
-                borderRadius: 8,
+                gap: 6,
+                padding: "6px 13px",
+                borderRadius: 10,
                 background: s.b,
-                border: `1px solid ${s.c}55`,
+                border: `1.5px solid ${s.c}`,
                 color: s.c,
-                fontWeight: 800,
-                fontSize: "calc(12.5px * var(--fs))",
-                letterSpacing: "0.2px",
+                fontWeight: 700,
+                fontSize: "calc(13px * var(--fs))",
+                letterSpacing: "0.3px",
+                marginBottom: 8,
+                width: "fit-content",
               }}
             >
-              {bl.key} {bl.label}
-            </span>
+              <span style={{ fontSize: "calc(15px * var(--fs))" }}>
+                {bl.key}
+              </span>
+              <span>{bl.label}</span>
+            </div>
             {bl.body.length > 0 && (
               <div style={{ marginTop: 5, paddingLeft: 3 }}>
                 {bl.body.map((l, j) => {
