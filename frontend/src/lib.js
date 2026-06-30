@@ -97,7 +97,7 @@ function startVoice(speechLang, onText, onError) {
       if (!done) onError && onError();
     };
     rec.onend = () => {
-      finish();
+      if (!done) finish();
     };
     rec.start();
     return rec;
