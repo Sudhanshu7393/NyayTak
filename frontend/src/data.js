@@ -1158,8 +1158,8 @@ const POPULAR = [
 
 /* ══ PROMPTS ══ */
 
-const buildPrompt = (catEn, scenario, langPrompt, state) =>
-  `You are NyayTak — India's AI legal awareness assistant.
+const buildPrompt = (catEn, scenario, langPrompt, state) => {
+  return `You are NyayTak — India's AI legal awareness assistant.
 SITUATION: category "${catEn}" → issue: "${scenario}". User's state: ${state}.
 
 LANGUAGE ENFORCEMENT (CRITICAL):
@@ -1202,9 +1202,7 @@ Example (Hinglish): ###FU### Complaint kaise likhun? | Kitne din chalega? | Vaki
 Example (Hindi): ###FU### शिकायत कैसे लिखूं? | कितने दिन चलेगा? | वकील ज़रूरी?
 
 LAWS: BNS 2023, BNSS 2023, IT Act, DPDP Act, Consumer Protection 2019, RERA, RTI, DVA 2005, POCSO, Labour Laws, Property Laws, Constitution.`;
-
-  return systemPrompt;
-;
+};
 
 export {
   FONT_HEAD,
