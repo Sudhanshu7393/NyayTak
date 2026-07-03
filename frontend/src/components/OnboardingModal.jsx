@@ -122,8 +122,8 @@ export default function OnboardingModal({ onStart, onSkip }) {
           >
             <option value="">Select a category...</option>
             {CATEGORIES.map((cat) => (
-              <option key={cat.en} value={cat.en}>
-                {cat.icon} {cat.label}
+              <option key={cat.id} value={cat.id}>
+                {cat.tr.hinglish.t}
               </option>
             ))}
           </select>
