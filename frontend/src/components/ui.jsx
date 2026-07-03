@@ -38,6 +38,7 @@ import {
   RotateCw,
   Send,
   Sparkles,
+  FileUp,
 } from "lucide-react";
 import { FONT_HEAD, FONT_BODY, LANGS, STATES } from "../data.js";
 import { startVoice } from "../lib.js";
@@ -86,6 +87,7 @@ const JaliSVG = ({ opacity = 0.2 }) => (
     <rect width="100%" height="100%" fill="url(#jali)" />
   </svg>
 );
+
 const EmblemSVG = () => (
   <svg width="96" height="96" viewBox="0 0 100 100" fill="none">
     <circle
@@ -166,6 +168,7 @@ const Disclaimer = ({ t }) => (
     {t.disclaimer}
   </div>
 );
+
 function IconBtn({ children, onClick, label, active, disabled }) {
   return (
     <button
@@ -192,6 +195,7 @@ function IconBtn({ children, onClick, label, active, disabled }) {
     </button>
   );
 }
+
 const BackBtn = ({ onClick }) => (
   <IconBtn onClick={onClick} label="Back">
     <ArrowLeft size={17} />
@@ -279,6 +283,7 @@ function LangSelect({ lang, setLang }) {
     </div>
   );
 }
+
 function SettingsBtn({
   t,
   theme,
@@ -437,6 +442,7 @@ function SettingsBtn({
     </div>
   );
 }
+
 function MicBtn({ speechLang, t, onText, onAutoSend, accent = "#f0a500" }) {
   const [listening, setListening] = useState(false);
   const recRef = useRef(null);
@@ -485,6 +491,7 @@ function MicBtn({ speechLang, t, onText, onAutoSend, accent = "#f0a500" }) {
     </button>
   );
 }
+
 function Stepper({ step, t }) {
   const steps = [t.step1, t.step2, t.step3];
   return (
@@ -612,9 +619,10 @@ function PanelShell({ title, icon, onClose, children }) {
     </div>
   );
 }
+
 function HelplineRow({ label, num, t, highlight }) {
   return (
-    <a
+    
       href={`tel:${num}`}
       style={{
         display: "flex",
@@ -679,7 +687,9 @@ const SEC_STYLE = {
   "⚠️": { c: "#fb7185", b: "rgba(251,113,133,0.14)" },
   "🫂": { c: "#fb7185", b: "rgba(251,113,133,0.14)" },
 };
+
 const SEC_KEYS = Object.keys(SEC_STYLE);
+
 const matchSec = (ln) => {
   const t = ln.trimStart();
   return (
@@ -688,8 +698,16 @@ const matchSec = (ln) => {
     ) || null
   );
 };
+
 function AnswerBody({ text }) {
-  const lines = (text || "").split("\n");
+  // Clean artifacts like "9+", code blocks, etc
+  const cleanedText = (text || "")
+    .replace(/\d+\+/g, "") // Remove "9+", "10+" patterns
+    .replace(/```[\s\S]*?```/g, "") // Remove code blocks
+    .replace(/\*\*.*?\*\*/g, (match) => match.replace(/\*\*/g, "")) // Remove bold markdown
+    .trim();
+
+  const lines = cleanedText.split("\n").filter((l) => l.trim());
   const blocks = [];
   let cur = null;
 
@@ -714,58 +732,58 @@ function AnswerBody({ text }) {
     }
   });
 
-  if (!blocks.some((b) => b.key)) return <span>{text}</span>;
+  if (!blocks.some((b) => b.key)) return <span>{cleanedText}</span>;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {blocks.map((bl, i) => {
         if (!bl.key) {
           return (
-            <div key={i} style={{ lineHeight: 1.6, color: "var(--text)" }}>
+            <div
+              key={i}
+              style={{
+                lineHeight: 1.65,
+                color: "var(--text)",
+                fontSize: "calc(13.5px * var(--fs))",
+              }}
+            >
               {bl.body.join(" ")}
             </div>
           );
         }
 
         const s = SEC_STYLE[bl.key];
-        if (!s) return null; // Safety guard
+        if (!s) return null;
 
         return (
-          <div
-            key={i}
-            style={{ display: "flex", flexDirection: "column", gap: 8 }}
-          >
-            {/* Header Badge */}
+          <div key={i}>
             <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "9px 15px",
-                borderRadius: 12,
+                display: "inline-block",
+                padding: "10px 16px",
+                borderRadius: 14,
                 backgroundColor: s.b,
                 border: `2px solid ${s.c}`,
                 color: s.c,
                 fontWeight: 800,
                 fontSize: "calc(13px * var(--fs))",
-                width: "fit-content",
-                letterSpacing: "0.5px",
+                letterSpacing: "0.3px",
+                marginBottom: 10,
               }}
             >
-              <span style={{ fontSize: "calc(16px * var(--fs))" }}>
+              <span style={{ marginRight: 6, fontSize: "calc(17px * var(--fs))" }}>
                 {bl.key}
               </span>
-              <span>{bl.label}</span>
+              {bl.label}
             </div>
 
-            {/* Body Content */}
             {bl.body.length > 0 && (
               <div
                 style={{
-                  paddingLeft: 12,
+                  paddingLeft: 10,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 6,
+                  gap: 8,
                 }}
               >
                 {bl.body.map((l, j) => {
@@ -776,14 +794,19 @@ function AnswerBody({ text }) {
                       style={{
                         display: "flex",
                         gap: 10,
-                        lineHeight: 1.6,
+                        lineHeight: 1.65,
                         color: "var(--text)",
                         fontSize: "calc(13px * var(--fs))",
                       }}
                     >
                       {isB && (
                         <span
-                          style={{ color: s.c, fontWeight: 700, flexShrink: 0 }}
+                          style={{
+                            color: s.c,
+                            fontWeight: 800,
+                            flexShrink: 0,
+                            marginTop: 2,
+                          }}
                         >
                           •
                         </span>
