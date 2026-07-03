@@ -54,6 +54,7 @@ import {
   LangSelect,
   SettingsBtn,
 } from "../components/ui.jsx";
+import OnboardingModal from "../components/OnboardingModal.jsx";
 
 function Landing({
   onStart,
@@ -66,13 +67,26 @@ function Landing({
   settings,
 }) {
   const [v, setV] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+
   useEffect(() => {
     setTimeout(() => setV(true), 60);
   }, []);
+
   const a = (d) =>
     v
       ? { opacity: 1, animation: `nsFadeUp 0.5s ease ${d}s both` }
       : { opacity: 0 };
+
+  const handleOnboardingStart = (category, state) => {
+    setShowOnboarding(false);
+    onQuick(category, 0);
+  };
+
+  const handleOnboardingSkip = () => {
+    setShowOnboarding(false);
+  };
+
   return (
     <div
       style={{
@@ -83,6 +97,13 @@ function Landing({
         overflow: "hidden",
       }}
     >
+      {showOnboarding && (
+        <OnboardingModal
+          onStart={handleOnboardingStart}
+          onSkip={handleOnboardingSkip}
+        />
+      )}
+
       <div
         style={{
           position: "absolute",
