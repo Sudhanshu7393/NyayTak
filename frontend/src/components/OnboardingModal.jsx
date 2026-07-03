@@ -7,11 +7,6 @@ export default function OnboardingModal({ onStart, onSkip }) {
   const [state, setState] = useState("");
   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
-    const shown = localStorage.getItem("onboarding_shown");
-    if (shown) setVisible(false);
-  }, []);
-
   const handleStart = () => {
     if (!category || !state) {
       alert("Please select both");
