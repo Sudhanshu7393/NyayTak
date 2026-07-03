@@ -118,6 +118,7 @@ export default function OnboardingModal({ onStart, onSkip }) {
               fontFamily: "inherit",
               cursor: "pointer",
               outline: "none",
+              backgroundColor: "#0a0e1a",
             }}
           >
             <option value="">Select a category...</option>
@@ -154,6 +155,7 @@ export default function OnboardingModal({ onStart, onSkip }) {
               fontFamily: "inherit",
               cursor: "pointer",
               outline: "none",
+              backgroundColor: "#0a0e1a",
             }}
           >
             <option value="">Select a state...</option>
