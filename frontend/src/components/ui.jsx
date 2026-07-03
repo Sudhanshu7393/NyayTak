@@ -622,7 +622,7 @@ function PanelShell({ title, icon, onClose, children }) {
 
 function HelplineRow({ label, num, t, highlight }) {
   return (
-    
+    <a
       href={`tel:${num}`}
       style={{
         display: "flex",
