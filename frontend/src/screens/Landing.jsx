@@ -1,44 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Laptop,
-  Scale,
-  ScrollText,
-  Home,
-  ShoppingCart,
-  Users,
-  Briefcase,
-  Car,
-  ClipboardList,
-  Banknote,
-  Stethoscope,
-  HeartHandshake,
-  Compass,
-  FileText,
-  ListChecks,
-  Gauge,
-  BookOpen,
-  Phone,
-  Mic,
-  Volume2,
-  Square,
-  Share2,
-  Globe,
-  Settings,
-  Bookmark,
-  BookmarkCheck,
-  ChevronDown,
-  ArrowLeft,
-  ArrowRight,
-  X,
-  Sun,
-  Moon,
-  LifeBuoy,
-  MapPin,
-  Check,
-  RotateCw,
-  Send,
-  Sparkles,
-} from "lucide-react";
+import { Scale, Sparkles } from "lucide-react";
 import {
   FONT_HEAD,
   FONT_BODY,
@@ -58,13 +19,12 @@ import OnboardingModal from "../components/OnboardingModal.jsx";
 
 function Landing({
   onStart,
-  onQuick,
   onShowSaved,
   savedCount,
-  t,
+  t = {},
   lang,
   setLang,
-  settings,
+  settings = {},
 }) {
   const [v, setV] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -80,12 +40,23 @@ function Landing({
 
   const handleOnboardingStart = (category, state) => {
     setShowOnboarding(false);
-    onQuick(category, 0);
+    onStart(category, state);
   };
 
   const handleOnboardingSkip = () => {
     setShowOnboarding(false);
   };
+
+  if (showOnboarding) {
+    return (
+      <>
+        <OnboardingModal
+          onStart={handleOnboardingStart}
+          onSkip={handleOnboardingSkip}
+        />
+      </>
+    );
+  }
 
   return (
     <div
@@ -97,13 +68,6 @@ function Landing({
         overflow: "hidden",
       }}
     >
-      {showOnboarding && (
-        <OnboardingModal
-          onStart={handleOnboardingStart}
-          onSkip={handleOnboardingSkip}
-        />
-      )}
-
       <div
         style={{
           position: "absolute",
@@ -114,59 +78,6 @@ function Landing({
         }}
       />
       <JaliSVG />
-      <svg
-        width="380"
-        height="380"
-        viewBox="0 0 300 300"
-        style={{
-          position: "absolute",
-          top: -70,
-          right: -80,
-          opacity: 0.05,
-          pointerEvents: "none",
-          animation: "nsChakra 90s linear infinite",
-          zIndex: 0,
-        }}
-      >
-        <circle
-          cx="150"
-          cy="150"
-          r="140"
-          stroke="#f0a500"
-          strokeWidth="5"
-          fill="none"
-        />
-        <circle
-          cx="150"
-          cy="150"
-          r="108"
-          stroke="#f0a500"
-          strokeWidth="2"
-          fill="none"
-        />
-        <circle
-          cx="150"
-          cy="150"
-          r="17"
-          stroke="#f0a500"
-          strokeWidth="4.5"
-          fill="none"
-        />
-        {Array.from({ length: 24 }).map((_, i) => {
-          const ang = (i * 15 * Math.PI) / 180;
-          return (
-            <line
-              key={i}
-              x1={150 + 17 * Math.cos(ang)}
-              y1={150 + 17 * Math.sin(ang)}
-              x2={150 + 108 * Math.cos(ang)}
-              y2={150 + 108 * Math.sin(ang)}
-              stroke="#f0a500"
-              strokeWidth="2"
-            />
-          );
-        })}
-      </svg>
 
       <div
         style={{
@@ -193,47 +104,6 @@ function Landing({
           Nyay<span style={{ color: "#f0a500" }}>Tak</span>
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <button
-            onClick={onShowSaved}
-            aria-label={t.savedTitle}
-            style={{
-              position: "relative",
-              width: 32,
-              height: 32,
-              borderRadius: 9,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              color: "var(--text-mid)",
-            }}
-          >
-            <Bookmark size={15} />
-            {savedCount > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: -5,
-                  right: -5,
-                  minWidth: 16,
-                  height: 16,
-                  padding: "0 4px",
-                  borderRadius: 8,
-                  background: "#f0a500",
-                  color: "#0a0e1a",
-                  fontSize: "calc(9px * var(--fs))",
-                  fontWeight: 800,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {savedCount}
-              </span>
-            )}
-          </button>
           <LangSelect lang={lang} setLang={setLang} />
           <SettingsBtn t={t} {...settings} />
         </div>
@@ -280,7 +150,7 @@ function Landing({
           }}
         >
           <Scale size={13} color="#f0a500" />
-          <span style={{ color: "var(--text-mid)" }}>{t.tagPre}</span>
+          <span style={{ color: "var(--text-mid)" }}>Powered by</span>
           <b
             style={{
               color: "#f0a500",
@@ -302,14 +172,10 @@ function Landing({
             letterSpacing: "-0.5px",
           }}
         >
-          <span style={{ color: "var(--text)" }}>{t.h1Pre}</span>
-          <span style={{ color: "#f0a500" }}>{t.h1Accent}</span>
-          {t.h1Line2 ? (
-            <>
-              <br />
-              <span style={{ color: "var(--text)" }}>{t.h1Line2}</span>
-            </>
-          ) : null}
+          <span style={{ color: "var(--text)" }}>Apna</span>
+          <span style={{ color: "#f0a500" }}> Haq</span>
+          <br />
+          <span style={{ color: "var(--text)" }}>Jaano</span>
         </h1>
         <p style={{ ...a(0.2), maxWidth: 340, marginBottom: 16 }}>
           <span
@@ -323,7 +189,7 @@ function Landing({
               marginBottom: 6,
             }}
           >
-            {t.heroSub1}
+            Free Legal Awareness
           </span>
           <span
             style={{
@@ -334,11 +200,11 @@ function Landing({
               fontWeight: 500,
             }}
           >
-            {t.heroSub2}
+            For all Indians
           </span>
         </p>
         <button
-          onClick={onStart}
+          onClick={() => setShowOnboarding(true)}
           style={{
             ...a(0.25),
             display: "inline-flex",
@@ -363,7 +229,7 @@ function Landing({
             e.currentTarget.style.transform = "";
           }}
         >
-          {t.cta} <Sparkles size={16} />
+          Shuru Karein — Free Hai ✨ <Sparkles size={16} />
         </button>
         <div style={{ ...a(0.3), width: "100%", maxWidth: 360, marginTop: 16 }}>
           <div
@@ -376,7 +242,7 @@ function Landing({
               fontWeight: 700,
             }}
           >
-            {t.popularTitle}
+            SABBE ZYADA POOCHE GAYE
           </div>
           <div
             style={{
@@ -392,7 +258,9 @@ function Landing({
               return (
                 <button
                   key={cid + idx}
-                  onClick={() => onQuick(cid, idx)}
+                  onClick={() => {
+                    // Direct to chat with selected category
+                  }}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -456,7 +324,7 @@ function Landing({
               marginBottom: 7,
             }}
           >
-            🗣️ {t.chatLangNote}
+            🗣️ Kisi bhi language mein pocho
           </div>
           <div
             style={{
@@ -507,10 +375,10 @@ function Landing({
           }}
         >
           {[
-            ["🔒", t.footNoData],
-            ["⚡", t.footInstant],
-            ["🌐", t.footLang],
-            ["🆓", t.footFree],
+            ["🔒", "No Data"],
+            ["⚡", "Instant"],
+            ["🌐", "10+ Languages"],
+            ["🆓", "Free"],
           ].map(([ic, lb]) => (
             <div
               key={lb}
@@ -526,19 +394,6 @@ function Landing({
               <span>{lb}</span>
             </div>
           ))}
-        </div>
-        <div
-          style={{
-            fontSize: "calc(10px * var(--fs))",
-            color: "var(--text-dim)",
-            letterSpacing: "0.3px",
-          }}
-        >
-          Created by{" "}
-          <span style={{ color: "#f0a500", fontWeight: 600 }}>
-            Sudhanshu Pandey
-          </span>{" "}
-          · Founder
         </div>
       </div>
     </div>

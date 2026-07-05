@@ -1,171 +1,180 @@
 import { useState, useEffect } from "react";
-import { UI, GENERAL_CAT, findCat, FONT_BODY } from "./data.js";
+import { FONT_BODY, UI } from "./data.js";
+import { Disclaimer } from "./components/ui.jsx";
 import Landing from "./screens/Landing.jsx";
 import CategorySelect from "./screens/CategorySelect.jsx";
 import ScenarioSelect from "./screens/ScenarioSelect.jsx";
 import ChatScreen from "./screens/ChatScreen.jsx";
-import SavedPanel from "./screens/SavedPanel.jsx";
 
-export default function NyayTak() {
+export default function App() {
   const [screen, setScreen] = useState("landing");
-  const [cat, setCat] = useState(null);
-  const [scenario, setScenario] = useState(null);
-  const [scenarioIdx, setScenarioIdx] = useState(-1);
-  const [custom, setCustom] = useState(false);
+  const [catEn, setCatEn] = useState("");
+  const [scenario, setScenario] = useState("");
   const [lang, setLang] = useState("hinglish");
   const [theme, setTheme] = useState("dark");
   const [fontScale, setFontScale] = useState(1);
-  const [state, setState] = useState("All India");
+  const [state, setState] = useState("Delhi");
   const [saved, setSaved] = useState([]);
-  const [showSaved, setShowSaved] = useState(false);
 
-  const t = UI[lang];
-  const settings = {
-    theme,
-    setTheme,
-    fontScale,
-    setFontScale,
-    state,
-    setState,
-  };
-
-  // ── History stack for back button ──
-  const screenStack = ["landing", "category", "scenario", "chat"];
-
-  // Update URL & history when screen changes
   useEffect(() => {
-    const path =
-      screen === "landing"
-        ? "/"
-        : screen === "category"
-          ? "/?s=category"
-          : screen === "scenario"
-            ? `/?s=scenario&cat=${cat?.id || ""}`
-            : screen === "chat"
-              ? `/?s=chat&cat=${cat?.id || ""}`
-              : "/";
+    const root = document.documentElement;
+    root.style.setProperty("--fs", fontScale);
+    document.body.style.background = theme === "dark" ? "#0a0e1a" : "#f5f3ef";
+    document.body.style.color = theme === "dark" ? "#e0e0e0" : "#1a1a1a";
+  }, [fontScale, theme]);
 
-    // Push state so back button works
-    window.history.pushState({ screen, cat, scenario, scenarioIdx }, "", path);
-  }, [screen, cat, scenario, scenarioIdx]);
-
-  // Handle physical back button on mobile/browser
   useEffect(() => {
-    const handlePopState = (e) => {
-      const state = e.state;
-      if (state) {
-        setScreen(state.screen);
-        if (state.cat) setCat(state.cat);
-        if (state.scenario) setScenario(state.scenario);
-        if (state.scenarioIdx !== undefined) setScenarioIdx(state.scenarioIdx);
-      } else {
-        // Initial back from landing = stay on landing
-        setScreen("landing");
+    window.history.pushState({ screen }, "");
+    const handler = (e) => {
+      if (e.state?.screen) {
+        setScreen(e.state.screen);
       }
     };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
   }, []);
 
-  const toggleSave = (item) =>
-    setSaved((s) =>
-      s.some((x) => x.key === item.key)
-        ? s.filter((x) => x.key !== item.key)
-        : [item, ...s],
-    );
-  const removeSave = (key) => setSaved((s) => s.filter((x) => x.key !== key));
-  const goChat = (c, scn, idx) => {
-    setCat(c);
-    setScenario(scn);
-    setScenarioIdx(idx);
-    setCustom(idx === -1);
+  const t = UI[lang] || UI.hinglish;
+
+  const handleOnboardingStart = (category, state_param) => {
+    setCatEn(category);
+    setState(state_param);
+    setScreen("scenario");
+    window.history.pushState({ screen: "scenario" }, "");
+  };
+
+  const onCatSelect = (cid) => {
+    setCatEn(cid);
+    setScreen("scenario");
+    window.history.pushState({ screen: "scenario" }, "");
+  };
+
+  const onScenarioSelect = (idx) => {
+    setScenario(idx);
     setScreen("chat");
+    window.history.pushState({ screen: "chat" }, "");
+  };
+
+  const onBack = () => {
+    if (screen === "chat") {
+      setScreen("scenario");
+      window.history.pushState({ screen: "scenario" }, "");
+    } else if (screen === "scenario") {
+      setScreen("landing");
+      window.history.pushState({ screen: "landing" }, "");
+    } else if (screen === "landing") {
+      // Already on landing
+    }
   };
 
   return (
     <div
-      className={`ns-app ns-${theme}`}
-      style={{ fontFamily: FONT_BODY, "--fs": fontScale }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        background: theme === "dark" ? "#0a0e1a" : "#f5f3ef",
+        color: theme === "dark" ? "#e0e0e0" : "#1a1a1a",
+        fontFamily: FONT_BODY,
+        overflow: "hidden",
+      }}
     >
-      <div className="ns-frame">
-        <div
-          key={screen}
-          className="ns-screen"
-          style={{ animation: "nsScreen 0.32s ease both" }}
-        >
-          {screen === "landing" && (
-            <Landing
-              t={t}
-              lang={lang}
-              setLang={setLang}
-              settings={settings}
-              savedCount={saved.length}
-              onShowSaved={() => setShowSaved(true)}
-              onStart={() => setScreen("category")}
-              onQuick={(cid, idx) => {
-                const c = findCat(cid);
-                goChat(c, c.tr[lang].sc[idx], idx);
-              }}
-            />
-          )}
-          {screen === "category" && (
-            <CategorySelect
-              t={t}
-              lang={lang}
-              setLang={setLang}
-              settings={settings}
-              onSelect={(c) => {
-                setCat(c);
-                setScreen("scenario");
-              }}
-              onGeneral={() => {
-                setCat(GENERAL_CAT);
-                setScreen("scenario");
-              }}
-              onBack={() => setScreen("landing")}
-            />
-          )}
-          {screen === "scenario" && (
-            <ScenarioSelect
-              t={t}
-              lang={lang}
-              setLang={setLang}
-              settings={settings}
-              fontScale={fontScale}
-              cat={cat}
-              onSelect={(s, idx) => goChat(cat, s, idx)}
-              onBack={() => setScreen("category")}
-            />
-          )}
-          {screen === "chat" && (
-            <ChatScreen
-              t={t}
-              lang={lang}
-              setLang={setLang}
-              settings={settings}
-              fontScale={fontScale}
-              state={state}
-              cat={cat}
-              scenario={scenario}
-              scenarioIdx={scenarioIdx}
-              custom={custom}
-              saved={saved}
-              onToggleSave={toggleSave}
-              onShowSaved={() => setShowSaved(true)}
-              onBack={() => setScreen("scenario")}
-            />
-          )}
-        </div>
-        {showSaved && (
-          <SavedPanel
-            saved={saved}
-            onClose={() => setShowSaved(false)}
-            onRemove={removeSave}
-            t={t}
-          />
-        )}
-      </div>
+      <style>{`
+        :root {
+          --fs: ${fontScale};
+          --bg: ${theme === "dark" ? "#0a0e1a" : "#f5f3ef"};
+          --bg2: ${theme === "dark" ? "#0f1419" : "#ede8e1"};
+          --surface: ${theme === "dark" ? "#16192b" : "#f0ede6"};
+          --panel: ${theme === "dark" ? "#1a1f2e" : "#ede8e1"};
+          --modal-bg: ${theme === "dark" ? "#1a1f2e" : "#f5f3ef"};
+          --text: ${theme === "dark" ? "#e8e8e8" : "#1a1a1a"};
+          --text-mid: ${theme === "dark" ? "#a0a0a0" : "#666666"};
+          --text-dim: ${theme === "dark" ? "#707070" : "#999999"};
+          --border: ${theme === "dark" ? "#2a3142" : "#d9d4cc"};
+          --border-soft: ${theme === "dark" ? "#252c3a" : "#e5dfd7"};
+          --overlay: ${theme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)"};
+          --hero-glow: ${theme === "dark" ? "rgba(240,165,0,0.08)" : "rgba(240,165,0,0.05)"};
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+        @keyframes nsFadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes nsFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes nsPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        @keyframes nsChakra {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
+      {screen === "landing" && (
+        <Landing
+          onStart={handleOnboardingStart}
+          onShowSaved={() => {}}
+          savedCount={saved.length}
+          t={t}
+          lang={lang}
+          setLang={setLang}
+          settings={{
+            theme,
+            setTheme,
+            fontScale,
+            setFontScale,
+            state,
+            setState,
+          }}
+        />
+      )}
+
+      {screen === "scenario" && catEn && (
+        <ScenarioSelect
+          catEn={catEn}
+          onSelect={onScenarioSelect}
+          onBack={onBack}
+          t={t}
+          lang={lang}
+          setLang={setLang}
+          settings={{
+            theme,
+            setTheme,
+            fontScale,
+            setFontScale,
+            state,
+            setState,
+          }}
+        />
+      )}
+
+      {screen === "chat" && catEn && (
+        <ChatScreen
+          catEn={catEn}
+          scenario={scenario}
+          langPrompt={lang}
+          onBack={onBack}
+          onSave={() => {}}
+          t={t}
+          lang={lang}
+          setLang={setLang}
+          settings={{
+            theme,
+            setTheme,
+            fontScale,
+            setFontScale,
+            state,
+            setState,
+          }}
+        />
+      )}
+
+      <Disclaimer t={t} />
     </div>
   );
 }
