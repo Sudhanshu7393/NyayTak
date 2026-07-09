@@ -71,6 +71,9 @@ function Landing({
       >
         <span
           style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
             fontFamily: FONT_HEAD,
             fontSize: "calc(22px * var(--fs))",
             fontWeight: 700,
@@ -78,7 +81,19 @@ function Landing({
             whiteSpace: "nowrap",
           }}
         >
-          Nyay<span style={{ color: "#f0a500" }}>Tak</span>
+          <img
+            src="/logo.jpg"
+            alt=""
+            style={{
+              width: "calc(22px * var(--fs))",
+              height: "calc(22px * var(--fs))",
+              borderRadius: 4,
+              objectFit: "cover",
+            }}
+          />
+          <span>
+            Nyay<span style={{ color: "#f0a500" }}>Tak</span>
+          </span>
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <LangSelect lang={lang} setLang={setLang} />
@@ -150,12 +165,13 @@ function Landing({
             src="/logo.jpg"
             alt="NyayTak Logo"
             style={{
-              width: 90,
-              height: 90,
-              borderRadius: 20,
-              border: "1px solid var(--border)",
-              boxShadow: "0 6px 20px rgba(0, 0, 0, 0.3)",
+              width: 120,
+              height: 120,
+              borderRadius: 12,
+              border: "none",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
               marginBottom: 14,
+              objectFit: "contain",
               animation: "nsFloat 4s ease-in-out infinite",
             }}
           />
