@@ -20,7 +20,6 @@ import OnboardingModal from "../components/OnboardingModal.jsx";
 function Landing({
   onStart,
   onShowSaved,
-  onPopularClick,
   savedCount,
   t = {},
   lang,
@@ -210,57 +209,7 @@ function Landing({
         >
           Shuru Karein — Free Hai ✨ <Sparkles size={16} />
         </button>
-        <div style={{ ...a(0.3), width: "100%", maxWidth: 360, marginTop: 16 }}>
-          <div
-            style={{
-              fontSize: "calc(10.5px * var(--fs))",
-              color: "var(--text-dim)",
-              textTransform: "uppercase",
-              letterSpacing: "1px",
-              marginBottom: 9,
-              fontWeight: 700,
-            }}
-          >
-            SABBE ZYADA POOCHE GAYE
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 7,
-              justifyContent: "center",
-            }}
-          >
-            {POPULAR.map(([cid, idx]) => {
-              const c = findCat(cid);
-              const I = ICONS[cid];
-              return (
-                <button
-                  key={cid + idx}
-                  onClick={() => {
-                    onPopularClick && onPopularClick(cid, idx);
-                  }}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "8px 13px",
-                    borderRadius: 20,
-                    cursor: "pointer",
-                    fontFamily: FONT_BODY,
-                    fontSize: "calc(12px * var(--fs))",
-                    color: "var(--text-mid)",
-                    background: c.card,
-                    border: `1px solid ${c.border}`,
-                  }}
-                >
-                  <I size={13} color={c.color} />
-                  {c.tr[lang].sc[idx]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+
         <div
           style={{
             ...a(0.34),

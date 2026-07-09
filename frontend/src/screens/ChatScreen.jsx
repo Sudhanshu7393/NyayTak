@@ -435,7 +435,6 @@ async function handleDocumentUpload(e) {
           </div>
           <div style={{ fontSize: "calc(10px * var(--fs))", color: cat.color }}>
             {cat.tr[lang].t}
-            {state !== "All India" ? ` · ${state}` : ""}
           </div>
         </div>
         <button
@@ -1325,74 +1324,7 @@ async function handleDocumentUpload(e) {
               </span>
             </a>
           ))}
-          {state !== "All India" && (
-            <>
-              <div
-                style={{
-                  marginTop: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: "calc(11px * var(--fs))",
-                  color: "var(--text-dim)",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  fontWeight: 700,
-                  marginBottom: 3,
-                }}
-              >
-                <MapPin size={11} />
-                {state} — {t.statePortals}
-              </div>
-              <div
-                style={{
-                  fontSize: "calc(10px * var(--fs))",
-                  color: "var(--text-dim)",
-                  marginBottom: 9,
-                }}
-              >
-                {t.stateSearchNote}
-              </div>
-              {[
-                ["RERA", `${state} RERA authority official portal`],
-                ["e-FIR / Police", `${state} police online e-FIR portal`],
-                [
-                  "Legal Services (SLSA)",
-                  `${state} State Legal Services Authority`,
-                ],
-              ].map(([lbl, q]) => (
-                <a
-                  key={lbl}
-                  href={stateSearchUrl(q)}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "10px 13px",
-                    borderRadius: 11,
-                    marginBottom: 7,
-                    textDecoration: "none",
-                    background: "var(--surface2)",
-                    border: "1px dashed var(--border)",
-                  }}
-                >
-                  <MapPin size={15} color="#f0a500" />
-                  <span
-                    style={{
-                      flex: 1,
-                      fontSize: "calc(12.5px * var(--fs))",
-                      color: "var(--text)",
-                    }}
-                  >
-                    {state} {lbl}
-                  </span>
-                  <ArrowRight size={13} color="#f0a500" />
-                </a>
-              ))}
-            </>
-          )}
+
         </PanelShell>
       )}
     </div>

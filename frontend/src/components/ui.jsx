@@ -290,8 +290,6 @@ function SettingsBtn({
   setTheme,
   fontScale,
   setFontScale,
-  state,
-  setState,
 }) {
   const [open, setOpen] = useState(false);
   const sizes = [
@@ -401,41 +399,6 @@ function SettingsBtn({
                 </button>
               ))}
             </div>
-            <div
-              style={{
-                fontSize: "calc(11px * var(--fs))",
-                color: "var(--text-dim)",
-                marginBottom: 6,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <MapPin size={12} />
-              {t.stateLbl}
-            </div>
-            <select
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "9px 10px",
-                borderRadius: 10,
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                color: "var(--text)",
-                fontSize: "max(16px, calc(12.5px * var(--fs)))",
-                fontFamily: "inherit",
-                outline: "none",
-              }}
-            >
-              {STATES.map((s) => (
-                <option key={s} value={s} style={{ color: "#111" }}>
-                  {s}
-                </option>
-              ))}
-            </select>
           </div>
         </>
       )}

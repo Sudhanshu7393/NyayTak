@@ -14,7 +14,7 @@ export default function App() {
   const [lang, setLang] = useState("hinglish");
   const [theme, setTheme] = useState("dark");
   const [fontScale, setFontScale] = useState(1);
-  const [state, setState] = useState("Delhi");
+
   const [saved, setSaved] = useState(() => {
     try {
       const stored = localStorage.getItem("nyaytak_saved");
@@ -68,12 +68,7 @@ export default function App() {
     });
   };
 
-  const handlePopularClick = (category, scenarioIdx) => {
-    setCatEn(category);
-    setScenario(scenarioIdx);
-    setScreen("chat");
-    window.history.pushState({ screen: "chat" }, "");
-  };
+
 
   const onCatSelect = (cid) => {
     setCatEn(cid);
@@ -149,7 +144,6 @@ export default function App() {
             window.history.pushState({ screen: "category" }, "");
           }}
           onShowSaved={() => setShowSavedPanel(true)}
-          onPopularClick={handlePopularClick}
           savedCount={saved.length}
           t={t}
           lang={lang}
@@ -159,8 +153,6 @@ export default function App() {
             setTheme,
             fontScale,
             setFontScale,
-            state,
-            setState,
           }}
         />
       )}
@@ -183,8 +175,6 @@ export default function App() {
             setTheme,
             fontScale,
             setFontScale,
-            state,
-            setState,
           }}
         />
       )}
@@ -207,11 +197,8 @@ export default function App() {
               setTheme,
               fontScale,
               setFontScale,
-              state,
-              setState,
             }}
             fontScale={fontScale}
-            state={state}
             saved={saved}
             onToggleSave={onToggleSave}
             onShowSaved={() => setShowSavedPanel(true)}
