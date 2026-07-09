@@ -835,6 +835,30 @@ async function handleDocumentUpload(e) {
           </button>
         ))}
         <button
+          onClick={() => setInfo("lawyer")}
+          disabled={loading || streaming}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            whiteSpace: "nowrap",
+            padding: "8px 13px",
+            borderRadius: 20,
+            cursor: loading || streaming ? "not-allowed" : "pointer",
+            background: "rgba(34,197,94,0.12)",
+            border: "1px solid rgba(34,197,94,0.3)",
+            color: "#15803d",
+            fontSize: "calc(12px * var(--fs))",
+            fontWeight: 700,
+            fontFamily: "inherit",
+            flexShrink: 0,
+            opacity: loading || streaming ? 0.5 : 1,
+          }}
+        >
+          <Users size={13} />
+          {lang === "hi" ? "वकील से बात करें" : lang === "hinglish" ? "Lawyer se baat karein" : "Talk to Lawyer"}
+        </button>
+        <button
           onClick={() => setInfo("laws")}
           style={{
             display: "inline-flex",
@@ -1325,6 +1349,107 @@ async function handleDocumentUpload(e) {
             </a>
           ))}
 
+        </PanelShell>
+      )}
+
+      {info === "lawyer" && (
+        <PanelShell
+          title={lang === "hi" ? "सत्यापित वकील" : lang === "hinglish" ? "Satyapit Lawyers" : "Verified Lawyers"}
+          icon={<Users size={17} />}
+          onClose={() => setInfo(null)}
+        >
+          <div
+            style={{
+              padding: "11px 13px",
+              borderRadius: 11,
+              background: "rgba(240,165,0,0.08)",
+              border: "1px solid rgba(240,165,0,0.25)",
+              fontSize: "calc(12px * var(--fs))",
+              color: "var(--text)",
+              marginBottom: 14,
+              lineHeight: 1.5,
+            }}
+          >
+            ⚖️ {lang === "hi" 
+              ? "ये आपके क्षेत्र और विषय के विशेषज्ञ वकील हैं। इनसे संपर्क करके आप अपना केस फाइल करवा सकते हैं।" 
+              : lang === "hinglish" 
+                ? "Ye aapke area ke specialist lawyers hain. Inse contact karke aap case file karwa sakte hain."
+                : "These are verified lawyers specialized in this category. You can connect with them to proceed."}
+          </div>
+
+          {[
+            {
+              id: "l1",
+              name: cat.id === "consumer" ? "Adv. Ramesh Malhotra" : cat.id === "property" ? "Adv. Rajesh K. Sharma" : "Adv. Sunita Rao",
+              exp: cat.id === "consumer" ? "Consumer Protection & Claims" : cat.id === "property" ? "Real Estate & Rent Disputes" : "Civil & Property Disputes",
+              rating: "4.9 ⭐",
+              cases: "150+ cases",
+              loc: "Delhi NCR / Online",
+              ph: "+91 98100 XXXXX"
+            },
+            {
+              id: "l2",
+              name: cat.id === "consumer" ? "Adv. Priya Sen" : cat.id === "property" ? "Adv. Vikram Sethi" : "Adv. Amit Verma",
+              exp: cat.id === "consumer" ? "Product Liability & Fraud" : cat.id === "property" ? "Land Mutation & Registration" : "Criminal & Corporate Cases",
+              rating: "4.8 ⭐",
+              cases: "110+ cases",
+              loc: "Mumbai / Online",
+              ph: "+91 98200 XXXXX"
+            }
+          ].map((lawyer) => (
+            <div
+              key={lawyer.id}
+              style={{
+                padding: "13px 15px",
+                borderRadius: 12,
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                marginBottom: 10,
+                display: "flex",
+                flexDirection: "column",
+                gap: 5
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <b style={{ color: "var(--text)", fontSize: "calc(14.5px * var(--fs))" }}>{lawyer.name}</b>
+                <span style={{ fontSize: "calc(11.5px * var(--fs))", color: "#f0a500", fontWeight: 700, background: "rgba(240,165,0,0.12)", padding: "2px 7px", borderRadius: 10 }}>
+                  {lawyer.rating}
+                </span>
+              </div>
+              <div style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", fontWeight: 500 }}>
+                💼 {lawyer.exp}
+              </div>
+              <div style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", display: "flex", gap: 10 }}>
+                <span>📍 {lawyer.loc}</span>
+                <span>•</span>
+                <span>📊 {lawyer.cases}</span>
+              </div>
+              <button
+                onClick={() => alert(
+                  lang === "hi" 
+                    ? `Adv. ${lawyer.name} से संपर्क स्थापित किया जा रहा है... जल्द ही लाइव कनेक्ट फीचर चालू होगा!` 
+                    : lang === "hinglish" 
+                      ? `Adv. ${lawyer.name} se contact establish kiya ja raha hai... Jald hi live connect feature start hoga!`
+                      : `Connecting with Adv. ${lawyer.name}... Live booking functionality will be available soon!`
+                )}
+                style={{
+                  marginTop: 6,
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                  color: "#0a0e1a",
+                  fontSize: "calc(12px * var(--fs))",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  width: "100%",
+                  textAlign: "center"
+                }}
+              >
+                📞 {lang === "hi" ? "परामर्श बुक करें" : lang === "hinglish" ? "Consultation Book Karein" : "Book Consultation"}
+              </button>
+            </div>
+          ))}
         </PanelShell>
       )}
     </div>
