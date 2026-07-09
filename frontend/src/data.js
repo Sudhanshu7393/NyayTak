@@ -13,6 +13,7 @@ import {
   HeartHandshake,
   Compass,
 } from "lucide-react";
+import { translationDict } from "./translations.js";
 
 const FONT_HEAD = "'Cormorant Garamond','Tiro Devanagari Hindi',serif";
 const FONT_BODY = "'DM Sans','Mukta','Noto Sans Devanagari',sans-serif";
@@ -22,6 +23,17 @@ const LANGS = [
   { code: "hinglish", name: "Hinglish", prompt: "Hinglish", speech: "en-IN" },
   { code: "hi", name: "हिन्दी", prompt: "Hindi", speech: "hi-IN" },
   { code: "en", name: "English", prompt: "English", speech: "en-IN" },
+  { code: "bn", name: "বাংলা", prompt: "Bengali", speech: "bn-IN" },
+  { code: "mr", name: "मराठी", prompt: "Marathi", speech: "mr-IN" },
+  { code: "te", name: "తెలుగు", prompt: "Telugu", speech: "te-IN" },
+  { code: "ta", name: "தமிழ்", prompt: "Tamil", speech: "ta-IN" },
+  { code: "gu", name: "ગુજરાતી", prompt: "Gujarati", speech: "gu-IN" },
+  { code: "kn", name: "ಕನ್ನಡ", prompt: "Kannada", speech: "kn-IN" },
+  { code: "ml", name: "മലയാളം", prompt: "Malayalam", speech: "ml-IN" },
+  { code: "pa", name: "ਪੰਜਾਬੀ", prompt: "Punjabi", speech: "pa-IN" },
+  { code: "or", name: "ଓଡ଼ିଆ", prompt: "Odia", speech: "or-IN" },
+  { code: "ur", name: "اردو", prompt: "Urdu", speech: "ur-IN" },
+  { code: "as", name: "অসমীয়া", prompt: "Assamese", speech: "as-IN" },
 ];
 
 /* Chat-supported languages (display only — chat AI replies in these) */
@@ -1203,6 +1215,58 @@ Example (Hindi): ###FU### शिकायत कैसे लिखूं? | क
 
 LAWS: BNS 2023, BNSS 2023, IT Act, DPDP Act, Consumer Protection 2019, RERA, RTI, DVA 2005, POCSO, Labour Laws, Property Laws, Constitution.`;
 };
+
+// Merge dynamic translations into UI
+Object.keys(translationDict).forEach((lang) => {
+  UI[lang] = {
+    ...UI.en, // Use English UI strings as base fallback
+    ...translationDict[lang],
+    fu: UI.en.fu, // Keep original follow-up queries or use standard
+  };
+  
+  // Fill the UI translation follow-ups
+  if (lang === "bn") UI[lang].fu = ["কত সময় লাগবে?", "এটা কি ফ্রি?", "আর কি কি নথি লাগবে?", "অনলাইনে কিভাবে করব?"];
+  else if (lang === "mr") UI[lang].fu = ["किती वेळ लागेल?", "हे मोफत आहे का?", "आणखी कोणती कागदपत्रे लागतील?", "ऑनलाइन कसे करायचे?"];
+  else if (lang === "te") UI[lang].fu = ["ఎంత సమయం పడుతుంది?", "ఇది ఉచితమేనా?", "ఇంకా ఏ పత్రాలు కావాలి?", "ఆన్‌లైన్‌లో ఎలా చేయాలి?"];
+  else if (lang === "ta") UI[lang].fu = ["எவ்வளவு நேரம் ஆகும்?", "இது இலவசமா?", "வேறு என்ன ஆவணங்கள் வேண்டும்?", "ஆன்லைனில் எப்படி செய்வது?"];
+  else if (lang === "gu") UI[lang].fu = ["કેટલો સમય લાગશે?", "શું આ મફત છે?", "બીજા કયા દસ્તાવેજો જોઈશે?", "ઓનલાઇન કેવી રીતે કરવું?"];
+  else if (lang === "kn") UI[lang].fu = ["ಎಷ್ಟು সময় ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ?", "ಇದು ಉಚಿತವೇ?", "ಇನ್ನೂ ಯಾವ ದಾಖಲೆಗಳು ಬೇಕು?", "ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಹೇಗೆ ಮಾಡುವುದು?"];
+  else if (lang === "ml") UI[lang].fu = ["എത്ര സമയമെടുക്കും?", "ഇത് സൌജന്യമാണോ?", "മറ്റ് എന്തൊക്കെ രേഖകൾ വേണം?", "ഓൺലൈനിൽ എങ്ങനെ ചെയ്യും?"];
+  else if (lang === "pa") UI[lang].fu = ["ਕਿੰਨਾ ਸਮਾਂ ਲੱਗੇਗਾ?", "ਕੀ ਇਹ ਮੁਫ਼ਤ ਹੈ?", "ਹੋਰ ਕਿਹੜੇ ਦਸਤਾਵੇਜ਼ ਚਾਹੀਦੇ ਹਨ?", "ਆਨਲਾਈਨ ਕਿਵੇਂ ਕਰੀਏ?"];
+  else if (lang === "or") UI[lang].fu = ["କେତે ସମୟ ଲାଗିବ?", "ଏହା ମାଗଣା କି?", "ଆଉ କଣ ସବୁ ଦଲିଲ ଦରକାର?", "ଅନଲਾਈନରେ କେମିତି କରିବି?"];
+  else if (lang === "ur") UI[lang].fu = ["کتنا وقت لگے گا؟", "کیا یہ مفت ہے؟", "اور کون سے دستاویزات؟", "آن لائن کیسے کریں؟"];
+  else if (lang === "as") UI[lang].fu = ["কিমান সময় লাগিব?", "এইটো বিনামূলীয়া নেকি?", "আৰু কি কি নথিপত্ৰ লাগিব?", "অনলাইনত কেনেকৈ কৰিম?"];
+});
+
+// Merge dynamic translations into CATEGORIES
+CATEGORIES.forEach((cat) => {
+  Object.keys(translationDict).forEach((lang) => {
+    const data = translationDict[lang].cats[cat.id];
+    if (data) {
+      cat.tr[lang] = {
+        t: data[0],
+        s: data[1],
+        sc: cat.tr.en?.sc || [], // Keep the scenarios array from the English fallback to avoid crashes
+      };
+    } else {
+      cat.tr[lang] = cat.tr.en || cat.tr.hinglish; // fallback to English/Hinglish category labels if not in dict
+    }
+  });
+});
+
+// Merge dynamic translations into GENERAL_CAT
+Object.keys(translationDict).forEach((lang) => {
+  const data = translationDict[lang].cats.general;
+  if (data) {
+    GENERAL_CAT.tr[lang] = {
+      t: data[0],
+      s: data[1],
+      sc: []
+    };
+  } else {
+    GENERAL_CAT.tr[lang] = GENERAL_CAT.tr.en;
+  }
+});
 
 export {
   FONT_HEAD,
