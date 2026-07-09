@@ -11,7 +11,6 @@ import {
 } from "../data.js";
 import {
   JaliSVG,
-  EmblemSVG,
   LangSelect,
   SettingsBtn,
 } from "../components/ui.jsx";
@@ -147,15 +146,19 @@ function Landing({
             alignItems: "center",
           }}
         >
-          <div
+          <img
+            src="/logo.jpg"
+            alt="NyayTak Logo"
             style={{
-              marginBottom: 10,
-              transform: "scale(0.85)",
+              width: 90,
+              height: 90,
+              borderRadius: 20,
+              border: "1px solid var(--border)",
+              boxShadow: "0 6px 20px rgba(0, 0, 0, 0.3)",
+              marginBottom: 14,
               animation: "nsFloat 4s ease-in-out infinite",
             }}
-          >
-            <EmblemSVG />
-          </div>
+          />
 
           <div
             style={{
