@@ -107,7 +107,7 @@ function Landing({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           padding: "24px 20px",
           position: "relative",
           zIndex: 10,
@@ -159,6 +159,7 @@ function Landing({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            margin: "auto 0",
           }}
         >
           <img
