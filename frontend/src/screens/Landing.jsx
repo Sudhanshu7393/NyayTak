@@ -43,7 +43,7 @@ function Landing({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        overflow: "hidden",
+        overflowY: "auto",
       }}
     >
       <div
@@ -140,7 +140,7 @@ function Landing({
             backdropFilter: "blur(16px)",
             border: "1px solid var(--border)",
             borderRadius: 24,
-            padding: "28px 24px",
+            padding: "clamp(18px, 4vh, 28px) clamp(16px, 4vw, 24px)",
             boxShadow: "0 12px 40px rgba(0, 0, 0, 0.25)",
             display: "flex",
             flexDirection: "column",
@@ -160,28 +160,46 @@ function Landing({
           <div
             style={{
               display: "inline-flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: 7,
-              padding: "6px 16px",
-              borderRadius: "20px",
+              gap: 4,
               marginBottom: 16,
-              background: "rgba(240,165,0,0.12)",
-              border: "1px solid rgba(240,165,0,0.3)",
-              fontSize: "calc(11.5px * var(--fs))",
-              boxShadow: "0 2px 14px rgba(240,165,0,0.15)",
             }}
           >
-            <Scale size={13} color="#f0a500" />
-            <span style={{ color: "var(--text-mid)" }}>Powered by</span>
-            <b
+            <div
               style={{
-                color: "#f0a500",
-                fontWeight: 800,
-                letterSpacing: "0.2px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                padding: "6px 16px",
+                borderRadius: "20px",
+                background: "rgba(240,165,0,0.12)",
+                border: "1px solid rgba(240,165,0,0.3)",
+                fontSize: "calc(11.5px * var(--fs))",
+                boxShadow: "0 2px 14px rgba(240,165,0,0.15)",
               }}
             >
-              NyayTak
-            </b>
+              <Scale size={13} color="#f0a500" />
+              <span style={{ color: "var(--text-mid)" }}>Powered by</span>
+              <b
+                style={{
+                  color: "#f0a500",
+                  fontWeight: 800,
+                  letterSpacing: "0.2px",
+                }}
+              >
+                NyayTak
+              </b>
+            </div>
+            <div
+              style={{
+                fontSize: "calc(11px * var(--fs))",
+                color: "var(--text-dim)",
+                fontWeight: 600,
+              }}
+            >
+              Founder: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
+            </div>
           </div>
 
           <h1
@@ -346,7 +364,7 @@ function Landing({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 7,
+          gap: 6,
           flexShrink: 0,
         }}
       >
@@ -378,6 +396,17 @@ function Landing({
               <span>{lb}</span>
             </div>
           ))}
+        </div>
+        <div
+          style={{
+            fontSize: "calc(10.5px * var(--fs))",
+            color: "var(--text-dim)",
+            fontWeight: 500,
+            letterSpacing: "0.3px",
+            marginTop: 2,
+          }}
+        >
+          Founder: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
         </div>
       </div>
     </div>
