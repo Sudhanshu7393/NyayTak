@@ -96,8 +96,13 @@ export default function App() {
 
   const onBack = () => {
     if (screen === "chat") {
-      setScreen("scenario");
-      window.history.pushState({ screen: "scenario" }, "");
+      if (catEn === "general") {
+        setScreen("landing");
+        window.history.pushState({ screen: "landing" }, "");
+      } else {
+        setScreen("scenario");
+        window.history.pushState({ screen: "scenario" }, "");
+      }
     } else if (screen === "scenario") {
       setScreen("landing");
       window.history.pushState({ screen: "landing" }, "");
@@ -155,11 +160,15 @@ export default function App() {
       `}</style>
 
       {screen === "landing" && (
-        <Landing
-          onStart={handleOnboardingStart}
-          onShowSaved={() => setShowSavedPanel(true)}
-          onPopularClick={handlePopularClick}
-          savedCount={saved.length}
+        <CategorySelect
+          onSelect={(cat) => onCatSelect(cat.id)}
+          onGeneral={() => {
+            setCatEn("general");
+            setScenario("");
+            setScreen("chat");
+            window.history.pushState({ screen: "chat" }, "");
+          }}
+          onBack={onBack}
           t={t}
           lang={lang}
           setLang={setLang}

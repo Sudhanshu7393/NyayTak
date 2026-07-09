@@ -217,9 +217,22 @@ async function handleDocumentUpload(e) {
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    const first = [{ role: "user", text: scenario }];
-    setMessages(first);
-    ask(first);
+    if (cat.id === "general" && !scenario) {
+      setMessages([
+        {
+          role: "assistant",
+          text: lang === "hi"
+            ? "नमस्ते! कृपया अपनी कानूनी समस्या बताएं।"
+            : lang === "hinglish"
+              ? "Namaste! Apni legal problem/issue likhein, mai aapki help karunga."
+              : "Hello! Please describe your legal problem or issue. I'm here to help."
+        }
+      ]);
+    } else {
+      const first = [{ role: "user", text: scenario }];
+      setMessages(first);
+      ask(first);
+    }
     scrollDown();
   }, []);
 
