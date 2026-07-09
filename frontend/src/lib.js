@@ -51,7 +51,7 @@ function cleanMd(s) {
     .replace(/`{1,3}/g, "");
 }
 
-function startVoice(speechLang, onText, onError) {
+function startVoice(speechLang, onText, onError, onEnd) {
   const SR =
     typeof window !== "undefined" &&
     (window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -71,11 +71,12 @@ function startVoice(speechLang, onText, onError) {
     done = true;
     textSent = true;
     if (pauseTimer) clearTimeout(pauseTimer);
-    const text = finals.join(" ").replace(/\s+/g, " ").trim();
+    const text = finals.filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
     try {
       rec.stop();
     } catch (_) {}
     if (text) onText(text);
+    if (onEnd) onEnd();
   };
 
   try {
@@ -92,7 +93,12 @@ function startVoice(speechLang, onText, onError) {
       if (pauseTimer) clearTimeout(pauseTimer);
       pauseTimer = setTimeout(finish, PAUSE_MS);
     };
-    rec.onerror = () => {
+    rec.onerror = (event) => {
+      console.warn("Speech recognition error:", event?.error);
+      if (event?.error === "no-speech" || event?.error === "aborted") {
+        finish();
+        return;
+      }
       if (pauseTimer) clearTimeout(pauseTimer);
       if (!done) onError && onError();
     };

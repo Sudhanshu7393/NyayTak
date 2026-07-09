@@ -420,13 +420,15 @@ function MicBtn({ speechLang, t, onText, onAutoSend, accent = "#f0a500" }) {
       speechLang,
       (txt) => {
         onText(txt);
-        setListening(false);
         if (onAutoSend) onAutoSend(txt);
       },
       () => {
         setListening(false);
         alert(t.voiceUnsupported);
       },
+      () => {
+        setListening(false);
+      }
     );
     if (!recRef.current) setListening(false);
   };

@@ -93,190 +93,246 @@ function Landing({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "18px 22px 16px",
+          justifyContent: "center",
+          padding: "24px 20px",
           position: "relative",
           zIndex: 10,
           textAlign: "center",
           overflowY: "auto",
         }}
       >
+        {/* Floating background blobs for visual depth */}
         <div
           style={{
-            ...a(0.05),
-            marginBottom: 6,
-            transform: "scale(0.72)",
-            animation:
-              (a(0.05).animation || "") + ", nsFloat 4s ease-in-out infinite",
+            position: "absolute",
+            width: 140,
+            height: 140,
+            borderRadius: "50%",
+            background: "rgba(240, 165, 0, 0.12)",
+            filter: "blur(40px)",
+            top: "10%",
+            left: "15%",
+            zIndex: -1,
+            pointerEvents: "none",
           }}
-        >
-          <EmblemSVG />
-        </div>
+        />
         <div
           style={{
-            ...a(0.1),
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 7,
-            padding: "6px 15px",
-            borderRadius: "20px",
-            marginBottom: 12,
-            background: "rgba(240,165,0,0.1)",
-            border: "1px solid rgba(240,165,0,0.28)",
-            fontSize: "calc(11.5px * var(--fs))",
-            boxShadow: "0 2px 14px rgba(240,165,0,0.12)",
+            position: "absolute",
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            background: "rgba(240, 165, 0, 0.08)",
+            filter: "blur(50px)",
+            bottom: "15%",
+            right: "10%",
+            zIndex: -1,
+            pointerEvents: "none",
           }}
-        >
-          <Scale size={13} color="#f0a500" />
-          <span style={{ color: "var(--text-mid)" }}>Powered by</span>
-          <b
-            style={{
-              color: "#f0a500",
-              fontWeight: 800,
-              letterSpacing: "0.2px",
-            }}
-          >
-            NyayTak
-          </b>
-        </div>
-        <h1
-          style={{
-            ...a(0.15),
-            fontFamily: FONT_HEAD,
-            fontSize: "calc((clamp(34px,7vw,56px)) * var(--fs))",
-            fontWeight: 700,
-            lineHeight: 1.05,
-            marginBottom: 8,
-            letterSpacing: "-0.5px",
-          }}
-        >
-          <span style={{ color: "var(--text)" }}>Apna</span>
-          <span style={{ color: "#f0a500" }}> Haq</span>
-          <br />
-          <span style={{ color: "var(--text)" }}>Jaano</span>
-        </h1>
-        <p style={{ ...a(0.2), maxWidth: 340, marginBottom: 16 }}>
-          <span
-            style={{
-              display: "block",
-              fontFamily: FONT_HEAD,
-              fontSize: "calc(18px * var(--fs))",
-              color: "var(--text)",
-              fontWeight: 600,
-              lineHeight: 1.3,
-              marginBottom: 6,
-            }}
-          >
-            Free Legal Awareness
-          </span>
-          <span
-            style={{
-              display: "block",
-              fontSize: "calc(12px * var(--fs))",
-              color: "var(--text-dim)",
-              letterSpacing: "0.4px",
-              fontWeight: 500,
-            }}
-          >
-            For all Indians
-          </span>
-        </p>
-        <button
-          onClick={onStart}
-          style={{
-            ...a(0.25),
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "13px 36px",
-            borderRadius: 14,
-            border: "none",
-            cursor: "pointer",
-            background: "linear-gradient(135deg,#f0a500,#d4860a)",
-            color: "#0a0e1a",
-            fontSize: "calc(15px * var(--fs))",
-            fontWeight: 700,
-            fontFamily: FONT_BODY,
-            boxShadow: "0 4px 22px rgba(240,165,0,0.35)",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "";
-          }}
-        >
-          Shuru Karein — Free Hai ✨ <Sparkles size={16} />
-        </button>
+        />
 
         <div
           style={{
-            ...a(0.34),
+            ...a(0.05),
+            width: "100%",
+            maxWidth: 390,
+            background: "var(--surface)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid var(--border)",
+            borderRadius: 24,
+            padding: "28px 24px",
+            boxShadow: "0 12px 40px rgba(0, 0, 0, 0.25)",
             display: "flex",
-            flexWrap: "wrap",
-            gap: 6,
-            justifyContent: "center",
-            marginTop: 14,
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
-          {LANGS.map((l) => (
-            <button
-              key={l.code}
-              onClick={() => setLang(l.code)}
-              style={{
-                fontSize: "calc(11px * var(--fs))",
-                padding: "4px 12px",
-                borderRadius: "20px",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                background:
-                  l.code === lang
-                    ? "rgba(240,165,0,0.18)"
-                    : "rgba(240,165,0,0.07)",
-                border: `1px solid ${l.code === lang ? "rgba(240,165,0,0.5)" : "rgba(240,165,0,0.18)"}`,
-                color: l.code === lang ? "#f0a500" : "#b07c10",
-                fontWeight: l.code === lang ? 700 : 400,
-              }}
-            >
-              {l.name}
-            </button>
-          ))}
-        </div>
-        <div style={{ ...a(0.38), marginTop: 10, maxWidth: 330 }}>
           <div
             style={{
-              fontSize: "calc(10.5px * var(--fs))",
-              color: "var(--text-dim)",
-              lineHeight: 1.5,
-              marginBottom: 7,
+              marginBottom: 10,
+              transform: "scale(0.85)",
+              animation: "nsFloat 4s ease-in-out infinite",
             }}
           >
-            🗣️ Kisi bhi language mein pocho
+            <EmblemSVG />
           </div>
+
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              padding: "6px 16px",
+              borderRadius: "20px",
+              marginBottom: 16,
+              background: "rgba(240,165,0,0.12)",
+              border: "1px solid rgba(240,165,0,0.3)",
+              fontSize: "calc(11.5px * var(--fs))",
+              boxShadow: "0 2px 14px rgba(240,165,0,0.15)",
+            }}
+          >
+            <Scale size={13} color="#f0a500" />
+            <span style={{ color: "var(--text-mid)" }}>Powered by</span>
+            <b
+              style={{
+                color: "#f0a500",
+                fontWeight: 800,
+                letterSpacing: "0.2px",
+              }}
+            >
+              NyayTak
+            </b>
+          </div>
+
+          <h1
+            style={{
+              fontFamily: FONT_HEAD,
+              fontSize: "calc(42px * var(--fs))",
+              fontWeight: 800,
+              lineHeight: 1.1,
+              marginBottom: 10,
+              letterSpacing: "-0.5px",
+            }}
+          >
+            <span style={{ color: "var(--text)" }}>Apna</span>
+            <span style={{ color: "#f0a500" }}> Haq</span>
+            <br />
+            <span style={{ color: "var(--text)" }}>Jaano</span>
+          </h1>
+
+          <p style={{ maxWidth: 300, marginBottom: 22 }}>
+            <span
+              style={{
+                display: "block",
+                fontFamily: FONT_HEAD,
+                fontSize: "calc(18px * var(--fs))",
+                color: "var(--text)",
+                fontWeight: 600,
+                lineHeight: 1.3,
+                marginBottom: 6,
+              }}
+            >
+              Free Legal Awareness
+            </span>
+            <span
+              style={{
+                display: "block",
+                fontSize: "calc(12px * var(--fs))",
+                color: "var(--text-dim)",
+                letterSpacing: "0.4px",
+                fontWeight: 500,
+              }}
+            >
+              For all Indians
+            </span>
+          </p>
+
+          <button
+            onClick={onStart}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              width: "100%",
+              maxWidth: 290,
+              padding: "15px 36px",
+              borderRadius: 16,
+              border: "none",
+              cursor: "pointer",
+              background: "linear-gradient(135deg,#f0a500,#d4860a)",
+              color: "#0a0e1a",
+              fontSize: "calc(16px * var(--fs))",
+              fontWeight: 800,
+              fontFamily: FONT_BODY,
+              boxShadow: "0 8px 24px rgba(240,165,0,0.32)",
+              transition: "transform 0.2s, box-shadow 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 10px 28px rgba(240,165,0,0.45)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.boxShadow = "0 8px 24px rgba(240,165,0,0.32)";
+            }}
+          >
+            Shuru Karein — Free Hai ✨ <Sparkles size={16} />
+          </button>
+
           <div
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 5,
+              gap: 6,
               justifyContent: "center",
+              marginTop: 20,
+              borderTop: "1px solid var(--border-soft)",
+              paddingTop: 16,
+              width: "100%",
             }}
           >
-            {CHAT_LANGS.map((l) => (
-              <span
-                key={l}
+            {LANGS.map((l) => (
+              <button
+                key={l.code}
+                onClick={() => setLang(l.code)}
                 style={{
-                  fontSize: "calc(10px * var(--fs))",
-                  padding: "3px 9px",
-                  borderRadius: 20,
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
-                  color: "var(--text-mid)",
+                  fontSize: "calc(11.5px * var(--fs))",
+                  padding: "6px 14px",
+                  borderRadius: "20px",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  background:
+                    l.code === lang
+                      ? "rgba(240,165,0,0.18)"
+                      : "rgba(240,165,0,0.07)",
+                  border: `1px solid ${l.code === lang ? "rgba(240,165,0,0.5)" : "rgba(240,165,0,0.18)"}`,
+                  color: l.code === lang ? "#f0a500" : "var(--text-mid)",
+                  fontWeight: l.code === lang ? 700 : 500,
+                  transition: "all 0.15s",
                 }}
               >
-                {l}
-              </span>
+                {l.name}
+              </button>
             ))}
+          </div>
+
+          <div style={{ marginTop: 14, width: "100%" }}>
+            <div
+              style={{
+                fontSize: "calc(10.5px * var(--fs))",
+                color: "var(--text-dim)",
+                lineHeight: 1.5,
+                marginBottom: 8,
+                fontWeight: 600,
+              }}
+            >
+              🗣️ Kisi bhi language mein pocho
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 5,
+                justifyContent: "center",
+              }}
+            >
+              {CHAT_LANGS.map((l) => (
+                <span
+                  key={l}
+                  style={{
+                    fontSize: "calc(10px * var(--fs))",
+                    padding: "3px 9px",
+                    borderRadius: 20,
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid var(--border-soft)",
+                    color: "var(--text-mid)",
+                  }}
+                >
+                  {l}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
