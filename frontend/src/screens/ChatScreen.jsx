@@ -75,12 +75,7 @@ import {
   AnswerBody,
   Disclaimer,
 } from "../components/ui.jsx";
-
-const STATE_DISTRICTS = {
-  "Delhi": ["New Delhi", "North Delhi", "South Delhi"],
-  "Maharashtra": ["Mumbai", "Pune", "Nagpur"],
-  "Uttar Pradesh": ["Lucknow", "Noida", "Kanpur"]
-};
+import { STATE_DISTRICTS } from "../districts.js";
 
 const REAL_LAWYERS = {
   "Delhi|New Delhi": [
