@@ -28,8 +28,6 @@ function Landing({
   settings = {},
 }) {
   const [v, setV] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(true);
-
   useEffect(() => {
     setTimeout(() => setV(true), 60);
   }, []);
@@ -38,26 +36,6 @@ function Landing({
     v
       ? { opacity: 1, animation: `nsFadeUp 0.5s ease ${d}s both` }
       : { opacity: 0 };
-
-  const handleOnboardingStart = (category, state) => {
-    setShowOnboarding(false);
-    onStart(category, state);
-  };
-
-  const handleOnboardingSkip = () => {
-    setShowOnboarding(false);
-  };
-
-  if (showOnboarding) {
-    return (
-      <>
-        <OnboardingModal
-          onStart={handleOnboardingStart}
-          onSkip={handleOnboardingSkip}
-        />
-      </>
-    );
-  }
 
   return (
     <div
@@ -205,7 +183,7 @@ function Landing({
           </span>
         </p>
         <button
-          onClick={() => setShowOnboarding(true)}
+          onClick={onStart}
           style={{
             ...a(0.25),
             display: "inline-flex",

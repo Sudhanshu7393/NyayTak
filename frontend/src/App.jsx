@@ -75,35 +75,18 @@ export default function App() {
     window.history.pushState({ screen: "chat" }, "");
   };
 
-  const handleOnboardingStart = (category, state_param) => {
-    setCatEn(category);
-    setState(state_param);
-    setScreen("scenario");
-    window.history.pushState({ screen: "scenario" }, "");
-  };
-
   const onCatSelect = (cid) => {
     setCatEn(cid);
-    setScreen("scenario");
-    window.history.pushState({ screen: "scenario" }, "");
-  };
-
-  const onScenarioSelect = (idx) => {
-    setScenario(idx);
+    setScenario("");
     setScreen("chat");
     window.history.pushState({ screen: "chat" }, "");
   };
 
   const onBack = () => {
     if (screen === "chat") {
-      if (catEn === "general") {
-        setScreen("landing");
-        window.history.pushState({ screen: "landing" }, "");
-      } else {
-        setScreen("scenario");
-        window.history.pushState({ screen: "scenario" }, "");
-      }
-    } else if (screen === "scenario") {
+      setScreen("category");
+      window.history.pushState({ screen: "category" }, "");
+    } else if (screen === "category") {
       setScreen("landing");
       window.history.pushState({ screen: "landing" }, "");
     } else if (screen === "landing") {
@@ -160,15 +143,14 @@ export default function App() {
       `}</style>
 
       {screen === "landing" && (
-        <CategorySelect
-          onSelect={(cat) => onCatSelect(cat.id)}
-          onGeneral={() => {
-            setCatEn("general");
-            setScenario("");
-            setScreen("chat");
-            window.history.pushState({ screen: "chat" }, "");
+        <Landing
+          onStart={() => {
+            setScreen("category");
+            window.history.pushState({ screen: "category" }, "");
           }}
-          onBack={onBack}
+          onShowSaved={() => setShowSavedPanel(true)}
+          onPopularClick={handlePopularClick}
+          savedCount={saved.length}
           t={t}
           lang={lang}
           setLang={setLang}
@@ -183,10 +165,15 @@ export default function App() {
         />
       )}
 
-      {screen === "scenario" && catEn && (
-        <ScenarioSelect
-          catEn={catEn}
-          onSelect={onScenarioSelect}
+      {screen === "category" && (
+        <CategorySelect
+          onSelect={(cat) => onCatSelect(cat.id)}
+          onGeneral={() => {
+            setCatEn("general");
+            setScenario("");
+            setScreen("chat");
+            window.history.pushState({ screen: "chat" }, "");
+          }}
           onBack={onBack}
           t={t}
           lang={lang}
