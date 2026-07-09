@@ -226,7 +226,7 @@ function Landing({
               }}
             >
               <Scale size={13} color="#f0a500" />
-              <span style={{ color: "var(--text-mid)" }}>Powered by</span>
+              <span style={{ color: "var(--text-mid)" }}>{t.tagPre}</span>
               <b
                 style={{
                   color: "#f0a500",
@@ -244,7 +244,7 @@ function Landing({
                 fontWeight: 600,
               }}
             >
-              Founder: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
+              {lang === "hi" ? "संस्थापक" : "Founder"}: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
             </div>
           </div>
 
@@ -258,10 +258,14 @@ function Landing({
               letterSpacing: "-0.5px",
             }}
           >
-            <span style={{ color: "var(--text)" }}>Apna</span>
-            <span style={{ color: "#f0a500" }}> Haq</span>
-            <br />
-            <span style={{ color: "var(--text)" }}>Jaano</span>
+            <span style={{ color: "var(--text)" }}>{t.h1Pre}</span>
+            <span style={{ color: "#f0a500" }}>{t.h1Accent}</span>
+            {t.h1Line2 && (
+              <>
+                <br />
+                <span style={{ color: "var(--text)" }}>{t.h1Line2}</span>
+              </>
+            )}
           </h1>
 
           <p style={{ maxWidth: 300, marginBottom: 22 }}>
@@ -269,14 +273,14 @@ function Landing({
               style={{
                 display: "block",
                 fontFamily: FONT_HEAD,
-                fontSize: "calc(18px * var(--fs))",
+                fontSize: "calc(17px * var(--fs))",
                 color: "var(--text)",
                 fontWeight: 600,
                 lineHeight: 1.3,
                 marginBottom: 6,
               }}
             >
-              Free Legal Awareness
+              {t.heroSub1}
             </span>
             <span
               style={{
@@ -287,7 +291,7 @@ function Landing({
                 fontWeight: 500,
               }}
             >
-              For all Indians
+              {t.heroSub2}
             </span>
           </p>
 
@@ -321,7 +325,7 @@ function Landing({
               e.currentTarget.style.boxShadow = "0 8px 24px rgba(240,165,0,0.32)";
             }}
           >
-            Shuru Karein — Free Hai ✨ <Sparkles size={16} />
+            {t.cta} ✨ <Sparkles size={16} />
           </button>
 
           <div
@@ -371,7 +375,7 @@ function Landing({
                 fontWeight: 600,
               }}
             >
-              🗣️ Kisi bhi language mein pocho
+              🗣️ {t.chatLangNote}
             </div>
             <div
               style={{
@@ -423,10 +427,10 @@ function Landing({
           }}
         >
           {[
-            ["🔒", "No Data"],
-            ["⚡", "Instant"],
-            ["🌐", "10+ Languages"],
-            ["🆓", "Free"],
+            ["🔒", t.footNoData],
+            ["⚡", t.footInstant],
+            ["🌐", t.footLang],
+            ["🆓", t.footFree],
           ].map(([ic, lb]) => (
             <div
               key={lb}
@@ -452,7 +456,7 @@ function Landing({
             marginTop: 2,
           }}
         >
-          Founder: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
+          {lang === "hi" ? "संस्थापक" : "Founder"}: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
         </div>
       </div>
     </div>
