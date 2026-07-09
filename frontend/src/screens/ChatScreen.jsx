@@ -163,7 +163,7 @@ async function ask(history) {
     const raw =
       cleanMd(
         await callClaude({
-          system: buildPrompt(catEn, scenario, langPrompt, state),
+          system: buildPrompt(catEn, scenario, langPrompt),
           messages: history.map((m) => ({ role: m.role, content: m.text })),
         }),
       ) || t.noAnswer;
@@ -294,7 +294,7 @@ async function handleDocumentUpload(e) {
             messages: [
               {
                 role: "user",
-                content: toolPrompt(kind, catEn, scenario, langPrompt, state),
+                content: toolPrompt(kind, catEn, scenario, langPrompt),
               },
             ],
           }),
