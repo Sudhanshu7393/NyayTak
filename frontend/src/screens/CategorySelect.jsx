@@ -33,7 +33,6 @@ function CategorySelect({ onSelect, onGeneral, onBack, t, lang, setLang, setting
           <ArrowRight size={17} color="#f0a500"/>
         </button>
       </div>
-      <Disclaimer t={t}/>
     </div>
   );
 }

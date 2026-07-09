@@ -76,6 +76,57 @@ import {
   Disclaimer,
 } from "../components/ui.jsx";
 
+const STATE_DISTRICTS = {
+  "Delhi": ["New Delhi", "North Delhi", "South Delhi"],
+  "Maharashtra": ["Mumbai", "Pune", "Nagpur"],
+  "Uttar Pradesh": ["Lucknow", "Noida", "Kanpur"]
+};
+
+const REAL_LAWYERS = {
+  "Delhi|New Delhi": [
+    {
+      id: "rl1",
+      name: "Adv. Harish Salve",
+      exp: "Constitutional & Civil Disputes",
+      rating: "5.0 ⭐",
+      cases: "500+ Landmark Cases",
+      loc: "New Delhi (Supreme Court)",
+      ph: "+91 98110 XXXXX"
+    },
+    {
+      id: "rl2",
+      name: "Adv. Mukul Rohatgi",
+      exp: "Corporate & Criminal Litigation",
+      rating: "4.9 ⭐",
+      cases: "450+ Landmark Cases",
+      loc: "New Delhi",
+      ph: "+91 98100 XXXXX"
+    }
+  ],
+  "Maharashtra|Mumbai": [
+    {
+      id: "rl3",
+      name: "Adv. Mahesh Jethmalani",
+      exp: "Criminal Defense & Property Disputes",
+      rating: "4.9 ⭐",
+      cases: "380+ Cases",
+      loc: "Mumbai High Court",
+      ph: "+91 98220 XXXXX"
+    }
+  ],
+  "Uttar Pradesh|Lucknow": [
+    {
+      id: "rl4",
+      name: "Adv. Sudhanshu Kumar",
+      exp: "Consumer Protection & Cyber Law",
+      rating: "4.8 ⭐",
+      cases: "120+ Cases",
+      loc: "Lucknow High Court Bench",
+      ph: "+91 99350 XXXXX"
+    }
+  ]
+};
+
 function ChatScreen({
   cat,
   scenario,
@@ -111,6 +162,8 @@ function ChatScreen({
   });
   const [followUps, setFollowUps] = useState([]);
   const [copiedMsg, setCopiedMsg] = useState(-1);
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
   const scrollRef = useRef(null);
   const startedRef = useRef(false);
   const histRef = useRef([]);
@@ -1032,7 +1085,6 @@ async function handleDocumentUpload(e) {
           </button>
         </div>
       </div>
-      <Disclaimer t={t} />
 
       {tool && (
         <PanelShell
@@ -1392,7 +1444,11 @@ async function handleDocumentUpload(e) {
         <PanelShell
           title={lang === "hi" ? "सत्यापित वकील" : lang === "hinglish" ? "Satyapit Lawyers" : "Verified Lawyers"}
           icon={<Users size={17} />}
-          onClose={() => setInfo(null)}
+          onClose={() => {
+            setInfo(null);
+            setSelectedState("");
+            setSelectedDistrict("");
+          }}
         >
           <div
             style={{
@@ -1407,85 +1463,156 @@ async function handleDocumentUpload(e) {
             }}
           >
             ⚖️ {lang === "hi" 
-              ? "ये आपके क्षेत्र और विषय के विशेषज्ञ वकील हैं। इनसे संपर्क करके आप अपना केस फाइल करवा सकते हैं।" 
+              ? "कृपया अपने राज्य और जिले का चयन करें ताकि हम आपके स्थानीय विशेषज्ञ वकीलों से आपका संपर्क करा सकें।" 
               : lang === "hinglish" 
-                ? "Ye aapke area ke specialist lawyers hain. Inse contact karke aap case file karwa sakte hain."
-                : "These are verified lawyers specialized in this category. You can connect with them to proceed."}
+                ? "Please apna State aur District select karein taaki hum local specialist lawyers se connect karwa sakein."
+                : "Please select your State and District to view verified local specialist advocates near you."}
           </div>
 
-          {[
-            {
-              id: "l1",
-              name: cat.id === "consumer" ? "Adv. Ramesh Malhotra" : cat.id === "property" ? "Adv. Rajesh K. Sharma" : "Adv. Sunita Rao",
-              exp: cat.id === "consumer" ? "Consumer Protection & Claims" : cat.id === "property" ? "Real Estate & Rent Disputes" : "Civil & Property Disputes",
-              rating: "4.9 ⭐",
-              cases: "150+ cases",
-              loc: "Delhi NCR / Online",
-              ph: "+91 98100 XXXXX"
-            },
-            {
-              id: "l2",
-              name: cat.id === "consumer" ? "Adv. Priya Sen" : cat.id === "property" ? "Adv. Vikram Sethi" : "Adv. Amit Verma",
-              exp: cat.id === "consumer" ? "Product Liability & Fraud" : cat.id === "property" ? "Land Mutation & Registration" : "Criminal & Corporate Cases",
-              rating: "4.8 ⭐",
-              cases: "110+ cases",
-              loc: "Mumbai / Online",
-              ph: "+91 98200 XXXXX"
-            }
-          ].map((lawyer) => (
-            <div
-              key={lawyer.id}
-              style={{
-                padding: "13px 15px",
-                borderRadius: 12,
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                marginBottom: 10,
-                display: "flex",
-                flexDirection: "column",
-                gap: 5
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <b style={{ color: "var(--text)", fontSize: "calc(14.5px * var(--fs))" }}>{lawyer.name}</b>
-                <span style={{ fontSize: "calc(11.5px * var(--fs))", color: "#f0a500", fontWeight: 700, background: "rgba(240,165,0,0.12)", padding: "2px 7px", borderRadius: 10 }}>
-                  {lawyer.rating}
-                </span>
-              </div>
-              <div style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", fontWeight: 500 }}>
-                💼 {lawyer.exp}
-              </div>
-              <div style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", display: "flex", gap: 10 }}>
-                <span>📍 {lawyer.loc}</span>
-                <span>•</span>
-                <span>📊 {lawyer.cases}</span>
-              </div>
-              <button
-                onClick={() => alert(
-                  lang === "hi" 
-                    ? `Adv. ${lawyer.name} से संपर्क स्थापित किया जा रहा है... जल्द ही लाइव कनेक्ट फीचर चालू होगा!` 
-                    : lang === "hinglish" 
-                      ? `Adv. ${lawyer.name} se contact establish kiya ja raha hai... Jald hi live connect feature start hoga!`
-                      : `Connecting with Adv. ${lawyer.name}... Live booking functionality will be available soon!`
-                )}
+          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                {lang === "hi" ? "राज्य (State)" : "State"}
+              </label>
+              <select
+                value={selectedState}
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
+                  setSelectedDistrict("");
+                }}
                 style={{
-                  marginTop: 6,
-                  padding: "8px 12px",
+                  padding: "9px 12px",
                   borderRadius: 8,
-                  border: "none",
-                  background: "linear-gradient(135deg,#f0a500,#d4860a)",
-                  color: "#0a0e1a",
-                  fontSize: "calc(12px * var(--fs))",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  width: "100%",
-                  textAlign: "center"
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(12.5px * var(--fs))",
                 }}
               >
-                📞 {lang === "hi" ? "परामर्श बुक करें" : lang === "hinglish" ? "Consultation Book Karein" : "Book Consultation"}
-              </button>
+                <option value="">{lang === "hi" ? "-- चुनें --" : "-- Select --"}</option>
+                {Object.keys(STATE_DISTRICTS).map((st) => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
             </div>
-          ))}
+
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                {lang === "hi" ? "जिला (District)" : "District"}
+              </label>
+              <select
+                disabled={!selectedState}
+                value={selectedDistrict}
+                onChange={(e) => setSelectedDistrict(e.target.value)}
+                style={{
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(12.5px * var(--fs))",
+                  opacity: selectedState ? 1 : 0.6,
+                }}
+              >
+                <option value="">{lang === "hi" ? "-- चुनें --" : "-- Select --"}</option>
+                {(STATE_DISTRICTS[selectedState] || []).map((dst) => (
+                  <option key={dst} value={dst}>{dst}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {(() => {
+            if (!selectedState || !selectedDistrict) {
+              return (
+                <div style={{ textAlign: "center", padding: "30px 10px", color: "var(--text-dim)", fontSize: "calc(12.5px * var(--fs))" }}>
+                  📍 {lang === "hi" ? "सूची देखने के लिए कृपया राज्य और जिला चुनें।" : "Please select State and District to load directory."}
+                </div>
+              );
+            }
+
+            const key = `${selectedState}|${selectedDistrict}`;
+            const lawyersList = REAL_LAWYERS[key] || [];
+
+            if (lawyersList.length === 0) {
+              return (
+                <div
+                  style={{
+                    padding: "24px 16px",
+                    borderRadius: 12,
+                    background: "rgba(239,68,68,0.05)",
+                    border: "1px dashed rgba(239,68,68,0.22)",
+                    textAlign: "center",
+                    color: "var(--text-mid)",
+                    fontSize: "calc(13px * var(--fs))",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  🚧 <b>{lang === "hi" ? "इस फ़ंक्शन पर काम चल रहा है" : "Working on this function"}</b>
+                  <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", marginTop: 4 }}>
+                    {lang === "hi" 
+                      ? "आपके चुने गए जिले में वकीलों को ऑनबोर्ड किया जा रहा है। जल्द ही यह सेवा शुरू होगी!" 
+                      : "Verified lawyers are being onboarded in your selected district. Coming soon!"}
+                  </p>
+                </div>
+              );
+            }
+
+            return lawyersList.map((lawyer) => (
+              <div
+                key={lawyer.id}
+                style={{
+                  padding: "13px 15px",
+                  borderRadius: 12,
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  marginBottom: 10,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 5
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <b style={{ color: "var(--text)", fontSize: "calc(14.5px * var(--fs))" }}>{lawyer.name}</b>
+                  <span style={{ fontSize: "calc(11.5px * var(--fs))", color: "#f0a500", fontWeight: 700, background: "rgba(240,165,0,0.12)", padding: "2px 7px", borderRadius: 10 }}>
+                    {lawyer.rating}
+                  </span>
+                </div>
+                <div style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", fontWeight: 500 }}>
+                  💼 {lawyer.exp}
+                </div>
+                <div style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", display: "flex", gap: 10 }}>
+                  <span>📍 {lawyer.loc}</span>
+                  <span>•</span>
+                  <span>📊 {lawyer.cases}</span>
+                </div>
+                <button
+                  onClick={() => alert(
+                    lang === "hi" 
+                      ? `Adv. ${lawyer.name} से संपर्क स्थापित किया जा रहा है...` 
+                      : `Connecting with Adv. ${lawyer.name}...`
+                  )}
+                  style={{
+                    marginTop: 8,
+                    padding: "9px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                    color: "#0a0e1a",
+                    fontSize: "calc(12px * var(--fs))",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    width: "100%",
+                    textAlign: "center"
+                  }}
+                >
+                  📞 {lang === "hi" ? "परामर्श बुक करें" : "Book Consultation"}
+                </button>
+              </div>
+            ));
+          })()}
         </PanelShell>
       )}
 
