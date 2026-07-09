@@ -159,6 +159,13 @@ function ChatScreen({
   const [copiedMsg, setCopiedMsg] = useState(-1);
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [bookingLawyer, setBookingLawyer] = useState(null);
+  const [bookingStep, setBookingStep] = useState(0);
+  const [bookingDetails, setBookingDetails] = useState({
+    date: "",
+    time: "",
+    phone: "",
+  });
   const scrollRef = useRef(null);
   const startedRef = useRef(false);
   const histRef = useRef([]);
@@ -1443,171 +1450,431 @@ async function handleDocumentUpload(e) {
             setInfo(null);
             setSelectedState("");
             setSelectedDistrict("");
+            setBookingLawyer(null);
+            setBookingStep(0);
+            setBookingDetails({ date: "", time: "", phone: "" });
           }}
         >
-          <div
-            style={{
-              padding: "11px 13px",
-              borderRadius: 11,
-              background: "rgba(240,165,0,0.08)",
-              border: "1px solid rgba(240,165,0,0.25)",
-              fontSize: "calc(12px * var(--fs))",
-              color: "var(--text)",
-              marginBottom: 14,
-              lineHeight: 1.5,
-            }}
-          >
-            ⚖️ {lang === "hi" 
-              ? "कृपया अपने राज्य और जिले का चयन करें ताकि हम आपके स्थानीय विशेषज्ञ वकीलों से आपका संपर्क करा सकें।" 
-              : lang === "hinglish" 
-                ? "Please apna State aur District select karein taaki hum local specialist lawyers se connect karwa sakein."
-                : "Please select your State and District to view verified local specialist advocates near you."}
-          </div>
-
-          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
-                {lang === "hi" ? "राज्य (State)" : "State"}
-              </label>
-              <select
-                value={selectedState}
-                onChange={(e) => {
-                  setSelectedState(e.target.value);
-                  setSelectedDistrict("");
-                }}
-                style={{
-                  padding: "9px 12px",
-                  borderRadius: 8,
-                  border: "1px solid var(--border)",
-                  background: "var(--surface)",
-                  color: "var(--text)",
-                  fontFamily: "inherit",
-                  fontSize: "calc(12.5px * var(--fs))",
-                }}
-              >
-                <option value="">{lang === "hi" ? "-- चुनें --" : "-- Select --"}</option>
-                {Object.keys(STATE_DISTRICTS).map((st) => (
-                  <option key={st} value={st}>{st}</option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
-                {lang === "hi" ? "जिला (District)" : "District"}
-              </label>
-              <select
-                disabled={!selectedState}
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-                style={{
-                  padding: "9px 12px",
-                  borderRadius: 8,
-                  border: "1px solid var(--border)",
-                  background: "var(--surface)",
-                  color: "var(--text)",
-                  fontFamily: "inherit",
-                  fontSize: "calc(12.5px * var(--fs))",
-                  opacity: selectedState ? 1 : 0.6,
-                }}
-              >
-                <option value="">{lang === "hi" ? "-- चुनें --" : "-- Select --"}</option>
-                {(STATE_DISTRICTS[selectedState] || []).map((dst) => (
-                  <option key={dst} value={dst}>{dst}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {(() => {
-            if (!selectedState || !selectedDistrict) {
-              return (
-                <div style={{ textAlign: "center", padding: "30px 10px", color: "var(--text-dim)", fontSize: "calc(12.5px * var(--fs))" }}>
-                  📍 {lang === "hi" ? "सूची देखने के लिए कृपया राज्य और जिला चुनें।" : "Please select State and District to load directory."}
-                </div>
-              );
-            }
-
-            const key = `${selectedState}|${selectedDistrict}`;
-            const lawyersList = REAL_LAWYERS[key] || [];
-
-            if (lawyersList.length === 0) {
-              return (
-                <div
-                  style={{
-                    padding: "24px 16px",
-                    borderRadius: 12,
-                    background: "rgba(239,68,68,0.05)",
-                    border: "1px dashed rgba(239,68,68,0.22)",
-                    textAlign: "center",
-                    color: "var(--text-mid)",
-                    fontSize: "calc(13px * var(--fs))",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  🚧 <b>{lang === "hi" ? "इस फ़ंक्शन पर काम चल रहा है" : "Working on this function"}</b>
-                  <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", marginTop: 4 }}>
-                    {lang === "hi" 
-                      ? "आपके चुने गए जिले में वकीलों को ऑनबोर्ड किया जा रहा है। जल्द ही यह सेवा शुरू होगी!" 
-                      : "Verified lawyers are being onboarded in your selected district. Coming soon!"}
-                  </p>
-                </div>
-              );
-            }
-
-            return lawyersList.map((lawyer) => (
+          {bookingStep === 0 ? (
+            <>
               <div
-                key={lawyer.id}
                 style={{
-                  padding: "13px 15px",
+                  padding: "11px 13px",
+                  borderRadius: 11,
+                  background: "rgba(240,165,0,0.08)",
+                  border: "1px solid rgba(240,165,0,0.25)",
+                  fontSize: "calc(12px * var(--fs))",
+                  color: "var(--text)",
+                  marginBottom: 14,
+                  lineHeight: 1.5,
+                }}
+              >
+                ⚖️ {lang === "hi" 
+                  ? "कृपया अपने राज्य और जिले का चयन करें ताकि हम आपके स्थानीय विशेषज्ञ वकीलों से आपका संपर्क करा सकें।" 
+                  : lang === "hinglish" 
+                    ? "Please apna State aur District select karein taaki hum local specialist lawyers se connect karwa sakein."
+                    : "Please select your State and District to view verified local specialist advocates near you."}
+              </div>
+
+              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                    {lang === "hi" ? "राज्य (State)" : "State"}
+                  </label>
+                  <select
+                    value={selectedState}
+                    onChange={(e) => {
+                      setSelectedState(e.target.value);
+                      setSelectedDistrict("");
+                    }}
+                    style={{
+                      padding: "9px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                      color: "var(--text)",
+                      fontFamily: "inherit",
+                      fontSize: "calc(12.5px * var(--fs))",
+                    }}
+                  >
+                    <option value="">{lang === "hi" ? "-- चुनें --" : "-- Select --"}</option>
+                    {Object.keys(STATE_DISTRICTS).map((st) => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                    {lang === "hi" ? "जिला (District)" : "District"}
+                  </label>
+                  <select
+                    disabled={!selectedState}
+                    value={selectedDistrict}
+                    onChange={(e) => setSelectedDistrict(e.target.value)}
+                    style={{
+                      padding: "9px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                      color: "var(--text)",
+                      fontFamily: "inherit",
+                      fontSize: "calc(12.5px * var(--fs))",
+                      opacity: selectedState ? 1 : 0.6,
+                    }}
+                  >
+                    <option value="">{lang === "hi" ? "-- चुनें --" : "-- Select --"}</option>
+                    {(STATE_DISTRICTS[selectedState] || []).map((dst) => (
+                      <option key={dst} value={dst}>{dst}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {(() => {
+                if (!selectedState || !selectedDistrict) {
+                  return (
+                    <div style={{ textAlign: "center", padding: "30px 10px", color: "var(--text-dim)", fontSize: "calc(12.5px * var(--fs))" }}>
+                      📍 {lang === "hi" ? "सूची देखने के लिए कृपया राज्य और जिला चुनें।" : "Please select State and District to load directory."}
+                    </div>
+                  );
+                }
+
+                const key = `${selectedState}|${selectedDistrict}`;
+                const lawyersList = REAL_LAWYERS[key] || [];
+
+                if (lawyersList.length === 0) {
+                  return (
+                    <div
+                      style={{
+                        padding: "24px 16px",
+                        borderRadius: 12,
+                        background: "rgba(239,68,68,0.05)",
+                        border: "1px dashed rgba(239,68,68,0.22)",
+                        textAlign: "center",
+                        color: "var(--text-mid)",
+                        fontSize: "calc(13px * var(--fs))",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      🚧 <b>{lang === "hi" ? "इस फ़ंक्शन पर काम चल रहा है" : "Working on this function"}</b>
+                      <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", marginTop: 4 }}>
+                        {lang === "hi" 
+                          ? "आपके चुने गए जिले में वकीलों को ऑनबोर्ड किया जा रहा है। जल्द ही यह सेवा शुरू होगी!" 
+                          : "Verified lawyers are being onboarded in your selected district. Coming soon!"}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return lawyersList.map((lawyer) => (
+                  <div
+                    key={lawyer.id}
+                    style={{
+                      padding: "13px 15px",
+                      borderRadius: 12,
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      marginBottom: 10,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 5
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <b style={{ color: "var(--text)", fontSize: "calc(14.5px * var(--fs))" }}>{lawyer.name}</b>
+                      <span style={{ fontSize: "calc(11.5px * var(--fs))", color: "#f0a500", fontWeight: 700, background: "rgba(240,165,0,0.12)", padding: "2px 7px", borderRadius: 10 }}>
+                        {lawyer.rating}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", fontWeight: 500 }}>
+                      💼 {lawyer.exp}
+                    </div>
+                    <div style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", display: "flex", gap: 10 }}>
+                      <span>📍 {lawyer.loc}</span>
+                      <span>•</span>
+                      <span>📊 {lawyer.cases}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setBookingLawyer(lawyer);
+                        setBookingStep(1);
+                      }}
+                      style={{
+                        marginTop: 8,
+                        padding: "9px",
+                        borderRadius: 8,
+                        border: "none",
+                        background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                        color: "#0a0e1a",
+                        fontSize: "calc(12px * var(--fs))",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        width: "100%",
+                        textAlign: "center"
+                      }}
+                    >
+                      📞 {lang === "hi" ? "परामर्श बुक करें" : "Book Consultation"}
+                    </button>
+                  </div>
+                ));
+              })()}
+            </>
+          ) : bookingStep === 1 && bookingLawyer ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div
+                style={{
+                  padding: "12px",
                   borderRadius: 12,
                   background: "var(--surface)",
                   border: "1px solid var(--border)",
-                  marginBottom: 10,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 5
+                  gap: 4,
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <b style={{ color: "var(--text)", fontSize: "calc(14.5px * var(--fs))" }}>{lawyer.name}</b>
-                  <span style={{ fontSize: "calc(11.5px * var(--fs))", color: "#f0a500", fontWeight: 700, background: "rgba(240,165,0,0.12)", padding: "2px 7px", borderRadius: 10 }}>
-                    {lawyer.rating}
-                  </span>
+                <div style={{ fontSize: "calc(11px * var(--fs))", color: "var(--text-dim)", fontWeight: 700, textTransform: "uppercase" }}>
+                  {lang === "hi" ? "चयनित वकील" : "Selected Advocate"}
                 </div>
-                <div style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", fontWeight: 500 }}>
-                  💼 {lawyer.exp}
+                <b style={{ fontSize: "calc(16px * var(--fs))", color: "#f0a500" }}>{bookingLawyer.name}</b>
+                <span style={{ fontSize: "calc(12.5px * var(--fs))", color: "var(--text-mid)" }}>{bookingLawyer.exp}</span>
+                <div style={{ borderTop: "1px solid var(--border-soft)", marginTop: 8, paddingTop: 8, display: "flex", justifyContent: "space-between", fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)" }}>
+                  <span>{lang === "hi" ? "परामर्श शुल्क:" : "Consultation Fee:"}</span>
+                  <b style={{ color: "#22c55e" }}>{lang === "hi" ? "मुफ़्त (₹0)" : "FREE (₹0)"}</b>
                 </div>
-                <div style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", display: "flex", gap: 10 }}>
-                  <span>📍 {lawyer.loc}</span>
-                  <span>•</span>
-                  <span>📊 {lawyer.cases}</span>
-                </div>
-                <button
-                  onClick={() => alert(
-                    lang === "hi" 
-                      ? `Adv. ${lawyer.name} से संपर्क स्थापित किया जा रहा है...` 
-                      : `Connecting with Adv. ${lawyer.name}...`
-                  )}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <label style={{ fontSize: "calc(12.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                  📅 {lang === "hi" ? "तारीख चुनें" : "Select Date"}
+                </label>
+                <input
+                  type="date"
+                  min={new Date().toISOString().split("T")[0]}
+                  value={bookingDetails.date}
+                  onChange={(e) => setBookingDetails(prev => ({ ...prev, date: e.target.value }))}
                   style={{
-                    marginTop: 8,
-                    padding: "9px",
+                    padding: "10px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                    background: "var(--surface)",
+                    color: "var(--text)",
+                    fontFamily: "inherit",
+                    fontSize: "calc(13px * var(--fs))",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <label style={{ fontSize: "calc(12.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                  ⏰ {lang === "hi" ? "समय स्लॉट चुनें" : "Select Time Slot"}
+                </label>
+                <select
+                  value={bookingDetails.time}
+                  onChange={(e) => setBookingDetails(prev => ({ ...prev, time: e.target.value }))}
+                  style={{
+                    padding: "10px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                    background: "var(--surface)",
+                    color: "var(--text)",
+                    fontFamily: "inherit",
+                    fontSize: "calc(13px * var(--fs))",
+                  }}
+                >
+                  <option value="">{lang === "hi" ? "-- स्लॉट चुनें --" : "-- Select Slot --"}</option>
+                  <option value="10:00 AM - 10:30 AM">10:00 AM - 10:30 AM</option>
+                  <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM</option>
+                  <option value="02:00 PM - 02:30 PM">02:00 PM - 02:30 PM</option>
+                  <option value="04:30 PM - 05:00 PM">04:30 PM - 05:00 PM</option>
+                </select>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <label style={{ fontSize: "calc(12.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                  📱 {lang === "hi" ? "मोबाइल नंबर दर्ज करें" : "Enter Mobile Number"}
+                </label>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  placeholder="e.g. 9876543210"
+                  value={bookingDetails.phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setBookingDetails(prev => ({ ...prev, phone: val }));
+                  }}
+                  style={{
+                    padding: "10px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                    background: "var(--surface)",
+                    color: "var(--text)",
+                    fontFamily: "inherit",
+                    fontSize: "calc(13px * var(--fs))",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                <button
+                  onClick={() => setBookingStep(0)}
+                  style={{
+                    flex: 1,
+                    padding: "11px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                    background: "transparent",
+                    color: "var(--text-mid)",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: "calc(13px * var(--fs))",
+                  }}
+                >
+                  {lang === "hi" ? "पीछे जाएं" : "Back"}
+                </button>
+                <button
+                  onClick={() => {
+                    if (!bookingDetails.date) {
+                      alert(lang === "hi" ? "कृपया तारीख चुनें!" : "Please select a date!");
+                      return;
+                    }
+                    if (!bookingDetails.time) {
+                      alert(lang === "hi" ? "कृपया समय स्लॉट चुनें!" : "Please select a time slot!");
+                      return;
+                    }
+                    if (bookingDetails.phone.length !== 10) {
+                      alert(lang === "hi" ? "कृपया एक मान्य 10-अंकीय मोबाइल नंबर दर्ज करें!" : "Please enter a valid 10-digit mobile number!");
+                      return;
+                    }
+                    setBookingStep(2);
+                  }}
+                  style={{
+                    flex: 2,
+                    padding: "11px",
                     borderRadius: 8,
                     border: "none",
                     background: "linear-gradient(135deg,#f0a500,#d4860a)",
                     color: "#0a0e1a",
-                    fontSize: "calc(12px * var(--fs))",
-                    fontWeight: 700,
                     cursor: "pointer",
-                    width: "100%",
-                    textAlign: "center"
+                    fontWeight: 700,
+                    fontSize: "calc(13px * var(--fs))",
                   }}
                 >
-                  📞 {lang === "hi" ? "परामर्श बुक करें" : "Book Consultation"}
+                  {lang === "hi" ? "अपॉइंटमेंट बुक करें 🤝" : "Book Appointment 🤝"}
                 </button>
               </div>
-            ));
-          })()}
+            </div>
+          ) : (
+            bookingStep === 2 && bookingLawyer && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  gap: 14,
+                  padding: "10px 5px",
+                }}
+              >
+                <div
+                  style={{
+                    width: 54,
+                    height: 54,
+                    borderRadius: "50%",
+                    background: "rgba(34,197,94,0.15)",
+                    border: "2px solid #22c55e",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 24,
+                    animation: "nsFloat 3s ease-in-out infinite",
+                  }}
+                >
+                  ✅
+                </div>
+
+                <div>
+                  <h3 style={{ color: "#22c55e", fontSize: "calc(17px * var(--fs))", fontWeight: 700, marginBottom: 4 }}>
+                    {lang === "hi" ? "बुक हो गया!" : "Booking Confirmed!"}
+                  </h3>
+                  <p style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-dim)" }}>
+                    {lang === "hi" ? "आपका परामर्श सफलतापूर्वक शेड्यूल हो गया है।" : "Your consultation has been successfully scheduled."}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: 12,
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    alignItems: "stretch",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "calc(12.5px * var(--fs))" }}>
+                    <span style={{ color: "var(--text-dim)" }}>{lang === "hi" ? "वकील:" : "Advocate:"}</span>
+                    <b style={{ color: "var(--text)" }}>{bookingLawyer.name}</b>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "calc(12.5px * var(--fs))" }}>
+                    <span style={{ color: "var(--text-dim)" }}>{lang === "hi" ? "तारीख व समय:" : "Date & Time:"}</span>
+                    <b style={{ color: "var(--text)" }}>{bookingDetails.date} ({bookingDetails.time.split(" ")[0]})</b>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "calc(12.5px * var(--fs))" }}>
+                    <span style={{ color: "var(--text-dim)" }}>{lang === "hi" ? "मोबाइल नंबर:" : "Mobile Number:"}</span>
+                    <b style={{ color: "var(--text)" }}>+91 {bookingDetails.phone}</b>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "calc(12.5px * var(--fs))", borderTop: "1px solid var(--border-soft)", paddingTop: 8, marginTop: 4 }}>
+                    <span style={{ color: "var(--text-dim)" }}>{lang === "hi" ? "बुकिंग आईडी:" : "Booking ID:"}</span>
+                    <b style={{ color: "#f0a500", fontFamily: "monospace" }}>{`NT-BOOK-${Math.floor(100000 + Math.random() * 900000)}`}</b>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "calc(11.5px * var(--fs))",
+                    color: "var(--text-mid)",
+                    lineHeight: 1.5,
+                    background: "rgba(240,165,0,0.06)",
+                    border: "1px solid rgba(240,165,0,0.18)",
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    marginTop: 4,
+                  }}
+                >
+                  📞 {lang === "hi" 
+                    ? `${bookingLawyer.name} आपको शेड्यूल समय पर +91 ${bookingDetails.phone} पर कॉल करेंगे।` 
+                    : `${bookingLawyer.name} will call you back on +91 ${bookingDetails.phone} at the scheduled time.`}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setBookingLawyer(null);
+                    setBookingStep(0);
+                    setBookingDetails({ date: "", time: "", phone: "" });
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "11px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                    color: "#0a0e1a",
+                    cursor: "pointer",
+                    fontWeight: 700,
+                    fontSize: "calc(13px * var(--fs))",
+                    marginTop: 10,
+                  }}
+                >
+                  {lang === "hi" ? "सूची पर वापस जाएं" : "Back to Directory"}
+                </button>
+              </div>
+            )
+          )}
         </PanelShell>
       )}
 
