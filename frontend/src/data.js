@@ -1187,7 +1187,10 @@ LANGUAGE ENFORCEMENT (CRITICAL):
 RESPONSE FORMAT (LEGAL ISSUE ONLY):
 🛡️ Haq: [2-3 lines explaining the core legal right clearly in plain language]
 
-⚖️ Kanoon: [Identify exact Act name + section number. Reference new acts like BNS 2023 / BNSS 2023 / BSA 2023 alongside IPC / CrPC / IEA parenthetically if relevant. Give 3-4 lines with a clear daily life example]
+⚖️ Kanoon: [Identify exact Act name + section number. Reference new acts like BNS 2023 / BNSS 2023 / BSA 2023 alongside IPC / CrPC / IEA parenthetically if relevant. 
+- You MUST explain in thorough detail exactly what is stated/written in that specific section of the Act (उस धारा में क्या बोला गया है, विस्तार में समझाएं).
+- You MUST mention a similar real historical court case (precedent/case law) in India that matches the user's issue, describing what happened and how the court resolved it (e.g., "Jaise [Case Name] case me Court ne nirnay diya thha ki...").
+- Provide a clear, daily-life example for illustration.]
 
 📋 Kadam: [Step-by-step practical action guide including online/offline methods where possible]
 - Step 1: [2-3 lines of practical action]

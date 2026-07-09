@@ -217,15 +217,20 @@ async function handleDocumentUpload(e) {
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    if (cat.id === "general" && !scenario) {
+    if (!scenario) {
+      const catTitle = cat.tr[lang]?.t || cat.tr.en.t;
+      let text = "";
+      if (lang === "hi") {
+        text = `नमस्ते! मैं आपका न्यायतक (NyayTak) सहायक हूँ। आपने **"${catTitle}"** विषय चुना है।\n\nकृपया अपनी समस्या विस्तार से लिखें (जैसे: क्या हुआ था, कब हुआ, और आप क्या राहत या समाधान चाहते हैं?)। मैं नए कानूनों (BNS/BNSS 2023) के अनुसार आपकी पूरी सहायता करूँगा।`;
+      } else if (lang === "hinglish") {
+        text = `Namaste! Main aapka NyayTak assistant hoon. Aapne **"${catTitle}"** topic chuna hai.\n\nPlease apni problem details me likhein (jaise kya hua, kab hua, aur aap kya relief/solution chahte hain). Main new laws (BNS/BNSS 2023) ke according aapki help karunga.`;
+      } else {
+        text = `Namaste! I am your NyayTak assistant. You have selected **"${catTitle}"**.\n\nPlease describe your legal problem in detail (such as what happened, when it happened, and what remedy or solution you seek). I will assist you in accordance with the latest Indian laws (BNS/BNSS 2023).`;
+      }
       setMessages([
         {
           role: "assistant",
-          text: lang === "hi"
-            ? "नमस्ते! कृपया अपनी कानूनी समस्या बताएं।"
-            : lang === "hinglish"
-              ? "Namaste! Apni legal problem/issue likhein, mai aapki help karunga."
-              : "Hello! Please describe your legal problem or issue. I'm here to help."
+          text
         }
       ]);
     } else {
