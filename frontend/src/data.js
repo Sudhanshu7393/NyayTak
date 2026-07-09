@@ -1213,7 +1213,10 @@ GREETING ONLY / SIMPLE HELLO (no legal query or follow-up question):
 Skip format. Just 2-line welcome greeting in the detected language. No ###FU###.
 If the message is a follow-up legal question (like "Vakil zaroori?", "Kitne din chalega?", etc.), you MUST answer it fully in detail under the standard RESPONSE FORMAT sections in relation to the previous conversation context.
 
-FOLLOW-UP (###FU###): Only if legal issue. Generate 3 short follow-up questions max (6 words each, same script, separated by " | ") that are HIGHLY RELEVANT and SPECIFIC to the user's actual situation and the laws discussed. Do NOT generate generic questions (like "Vakil zaroori?" or "Kitne din chalega?") unless they are directly applicable. Make them actionable, genuine, and tailored to the user's problem.
+FOLLOW-UP (###FU###): Only if legal issue. Generate 3 short follow-up questions max (6 words each, same script, separated by " | ") representing WHAT THE USER SHOULD ASK YOU NEXT about their practical next steps, procedural details, or how to execute the advice. 
+- The questions MUST be written from the USER'S perspective asking YOU (the AI) for guidance (e.g., "Main notice kaise bhejun?", "Agar padosi ne mana kiya to?", "Online complaint kaise file karein?").
+- Do NOT generate questions where the user asks you if you did something physical (like "Tumne notice bheja?" - since the AI cannot take physical actions).
+- Make them highly relevant, actionable, genuine, and tailored to the user's specific problem.
 
 LAWS: BNS 2023, BNSS 2023, BSA 2023, IT Act, DPDP Act, Consumer Protection 2019, RERA, RTI, DVA 2005, POCSO, Labour Laws, Property Laws, Constitution.`;
 };
