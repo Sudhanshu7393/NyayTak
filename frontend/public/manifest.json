@@ -1,0 +1,17 @@
+{
+  "short_name": "NyayTak",
+  "name": "NyayTak — Apna Haq Jaano",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "display": "standalone",
+  "orientation": "portrait"
+}

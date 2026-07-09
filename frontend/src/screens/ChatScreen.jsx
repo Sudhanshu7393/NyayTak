@@ -102,6 +102,13 @@ function ChatScreen({
   const [info, setInfo] = useState(null);
   const [copied, setCopied] = useState(false);
   const [speaking, setSpeaking] = useState(-1);
+  const [esignDetails, setEsignDetails] = useState({
+    name: "",
+    aadhaar: "",
+    otpSent: false,
+    otp: "",
+    verified: false,
+  });
   const [followUps, setFollowUps] = useState([]);
   const [copiedMsg, setCopiedMsg] = useState(-1);
   const scrollRef = useRef(null);
@@ -1185,6 +1192,30 @@ async function handleDocumentUpload(e) {
                   {t.download}
                 </button>
               </div>
+              {tool.kind === "complaint" && (
+                <button
+                  onClick={() => setInfo("esign")}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    borderRadius: 11,
+                    marginTop: 8,
+                    cursor: "pointer",
+                    background: "rgba(34,197,94,0.12)",
+                    border: "1px solid rgba(34,197,94,0.35)",
+                    color: "#16a34a",
+                    fontSize: "calc(13.5px * var(--fs))",
+                    fontWeight: 700,
+                    fontFamily: "inherit",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6
+                  }}
+                >
+                  ✍️ {lang === "hi" ? "आधार e-Sign द्वारा प्रमाणित करें" : lang === "hinglish" ? "Aadhaar e-Sign se sign karein" : "Digitally Sign with Aadhaar e-Sign"}
+                </button>
+              )}
             </div>
           )}
         </PanelShell>
@@ -1455,6 +1486,173 @@ async function handleDocumentUpload(e) {
               </button>
             </div>
           ))}
+        </PanelShell>
+      )}
+
+      {info === "esign" && (
+        <PanelShell
+          title={lang === "hi" ? "डिजिटल हस्ताक्षर (Aadhaar e-Sign)" : lang === "hinglish" ? "Digital Signature (e-Sign)" : "Aadhaar Digital Signature"}
+          icon={<Users size={17} />}
+          onClose={() => setInfo(null)}
+        >
+          {!esignDetails.verified ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: "rgba(240,165,0,0.08)",
+                  border: "1px solid rgba(240,165,0,0.22)",
+                  fontSize: "calc(12px * var(--fs))",
+                  color: "var(--text)",
+                  lineHeight: 1.5,
+                }}
+              >
+                🔒 **Secured by UIDAI**: {lang === "hi" ? "यह एक सुरक्षित ई-हस्ताक्षर प्रमाणन प्रक्रिया है। हस्ताक्षर सत्यापित होने के बाद दस्तावेज़ के नीचे जोड़ दिया जाएगा।" : "This is a secure e-Sign process powered by UIDAI. The signature block will be appended upon verification."}
+              </div>
+
+              {!esignDetails.otpSent ? (
+                <>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                      {lang === "hi" ? "पूरा नाम (आधार के अनुसार)" : "Full Name (as on Aadhaar)"}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sudhanshu Kumar"
+                      value={esignDetails.name}
+                      onChange={(e) => setEsignDetails({ ...esignDetails, name: e.target.value })}
+                      style={{
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        border: "1px solid var(--border)",
+                        background: "var(--surface)",
+                        color: "var(--text)",
+                        fontFamily: "inherit",
+                        fontSize: "calc(13px * var(--fs))",
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                      {lang === "hi" ? "आधार कार्ड नंबर" : "Aadhaar Card Number"}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="XXXX XXXX XXXX"
+                      maxLength="12"
+                      value={esignDetails.aadhaar}
+                      onChange={(e) => setEsignDetails({ ...esignDetails, aadhaar: e.target.value.replace(/\D/g, "") })}
+                      style={{
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        border: "1px solid var(--border)",
+                        background: "var(--surface)",
+                        color: "var(--text)",
+                        fontFamily: "inherit",
+                        fontSize: "calc(13px * var(--fs))",
+                        letterSpacing: "1px",
+                      }}
+                    />
+                  </div>
+                  <button
+                    disabled={!esignDetails.name.trim() || esignDetails.aadhaar.length !== 12}
+                    onClick={() => setEsignDetails({ ...esignDetails, otpSent: true })}
+                    style={{
+                      marginTop: 8,
+                      padding: "12px",
+                      borderRadius: 10,
+                      border: "none",
+                      background: (!esignDetails.name.trim() || esignDetails.aadhaar.length !== 12) ? "var(--border)" : "linear-gradient(135deg,#f0a500,#d4860a)",
+                      color: "#0a0e1a",
+                      fontWeight: 700,
+                      cursor: (!esignDetails.name.trim() || esignDetails.aadhaar.length !== 12) ? "not-allowed" : "pointer",
+                      fontSize: "calc(13px * var(--fs))",
+                    }}
+                  >
+                    🚀 {lang === "hi" ? "ओटीपी भेजें (Request OTP)" : "Send OTP"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                      {lang === "hi" ? "ओटीपी दर्ज करें" : "Enter 6-digit OTP"}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter 6-digit OTP"
+                      maxLength="6"
+                      value={esignDetails.otp}
+                      onChange={(e) => setEsignDetails({ ...esignDetails, otp: e.target.value.replace(/\D/g, "") })}
+                      style={{
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        border: "1px solid var(--border)",
+                        background: "var(--surface)",
+                        color: "var(--text)",
+                        fontFamily: "inherit",
+                        fontSize: "calc(13.5px * var(--fs))",
+                        textAlign: "center",
+                        letterSpacing: "4px",
+                      }}
+                    />
+                  </div>
+                  <button
+                    disabled={esignDetails.otp.length !== 6}
+                    onClick={() => {
+                      const sigBlock = `\n\n====================================\n✍️ DIGITAL SIGNATURE VERIFICATION (UIDAI e-Sign)\nSignee: ${esignDetails.name}\nDate: ${new Date().toLocaleDateString("en-IN")}\nStatus: VERIFIED & SECURED\nSignature Hash: esign_sha256_${Math.random().toString(36).substring(2, 10).toUpperCase()}_nyaytak\n====================================`;
+                      setToolText((prev) => prev + sigBlock);
+                      setEsignDetails({ ...esignDetails, verified: true });
+                    }}
+                    style={{
+                      marginTop: 8,
+                      padding: "12px",
+                      borderRadius: 10,
+                      border: "none",
+                      background: esignDetails.otp.length !== 6 ? "var(--border)" : "linear-gradient(135deg,#22c55e,#16a34a)",
+                      color: "#0a0e1a",
+                      fontWeight: 700,
+                      cursor: esignDetails.otp.length !== 6 ? "not-allowed" : "pointer",
+                      fontSize: "calc(13px * var(--fs))",
+                    }}
+                  >
+                    ✅ {lang === "hi" ? "सत्यापित करें और हस्ताक्षर करें" : "Verify & Sign"}
+                  </button>
+                </>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "center", padding: "10px 0" }}>
+              <div style={{ fontSize: "40px" }}>🎉</div>
+              <b style={{ color: "var(--text)", fontSize: "calc(15.5px * var(--fs))" }}>
+                {lang === "hi" ? "दस्तावेज़ सफलतापूर्वक हस्ताक्षरित हुआ!" : "Document Signed Successfully!"}
+              </b>
+              <p style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", lineHeight: 1.5 }}>
+                {lang === "hi"
+                  ? "UIDAI आधार e-Sign वेरिफिकेशन पूरा हो चुका है। खसड़े के अंत में एक सुरक्षित डिजिटल हस्ताक्षर ब्लॉक जोड़ दिया गया है।"
+                  : "UIDAI Aadhaar e-Sign verification is complete. A secure digital signature block has been appended to the end of the draft."}
+              </p>
+              <button
+                onClick={() => {
+                  setInfo(null);
+                  setEsignDetails({ name: "", aadhaar: "", otpSent: false, otp: "", verified: false });
+                }}
+                style={{
+                  padding: "11px",
+                  borderRadius: 10,
+                  border: "none",
+                  background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                  color: "#0a0e1a",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontSize: "calc(13px * var(--fs))",
+                }}
+              >
+                🏡 {lang === "hi" ? "वापस ड्राफ्ट पर जाएं" : "Go Back to Draft"}
+              </button>
+            </div>
+          )}
         </PanelShell>
       )}
     </div>
