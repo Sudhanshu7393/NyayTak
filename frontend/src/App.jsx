@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { FONT_BODY, UI } from "./data.js";
+import { FONT_BODY, UI, CATEGORIES, findCat } from "./data.js";
 import { Disclaimer } from "./components/ui.jsx";
 import Landing from "./screens/Landing.jsx";
 import CategorySelect from "./screens/CategorySelect.jsx";
 import ScenarioSelect from "./screens/ScenarioSelect.jsx";
 import ChatScreen from "./screens/ChatScreen.jsx";
+import SavedPanel from "./screens/SavedPanel.jsx";
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
@@ -14,7 +15,15 @@ export default function App() {
   const [theme, setTheme] = useState("dark");
   const [fontScale, setFontScale] = useState(1);
   const [state, setState] = useState("Delhi");
-  const [saved, setSaved] = useState([]);
+  const [saved, setSaved] = useState(() => {
+    try {
+      const stored = localStorage.getItem("nyaytak_saved");
+      return stored ? JSON.parse(stored) : [];
+    } catch (_) {
+      return [];
+    }
+  });
+  const [showSavedPanel, setShowSavedPanel] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -35,6 +44,36 @@ export default function App() {
   }, []);
 
   const t = UI[lang] || UI.hinglish;
+
+  const onToggleSave = (item) => {
+    setSaved((prev) => {
+      const exists = prev.some((s) => s.key === item.key);
+      const updated = exists
+        ? prev.filter((s) => s.key !== item.key)
+        : [...prev, item];
+      try {
+        localStorage.setItem("nyaytak_saved", JSON.stringify(updated));
+      } catch (_) {}
+      return updated;
+    });
+  };
+
+  const onRemoveSaved = (key) => {
+    setSaved((prev) => {
+      const updated = prev.filter((s) => s.key !== key);
+      try {
+        localStorage.setItem("nyaytak_saved", JSON.stringify(updated));
+      } catch (_) {}
+      return updated;
+    });
+  };
+
+  const handlePopularClick = (category, scenarioIdx) => {
+    setCatEn(category);
+    setScenario(scenarioIdx);
+    setScreen("chat");
+    window.history.pushState({ screen: "chat" }, "");
+  };
 
   const handleOnboardingStart = (category, state_param) => {
     setCatEn(category);
@@ -118,7 +157,8 @@ export default function App() {
       {screen === "landing" && (
         <Landing
           onStart={handleOnboardingStart}
-          onShowSaved={() => {}}
+          onShowSaved={() => setShowSavedPanel(true)}
+          onPopularClick={handlePopularClick}
           savedCount={saved.length}
           t={t}
           lang={lang}
@@ -153,28 +193,46 @@ export default function App() {
         />
       )}
 
-      {screen === "chat" && catEn && (
-        <ChatScreen
-          catEn={catEn}
-          scenario={scenario}
-          langPrompt={lang}
-          onBack={onBack}
-          onSave={() => {}}
-          t={t}
-          lang={lang}
-          setLang={setLang}
-          settings={{
-            theme,
-            setTheme,
-            fontScale,
-            setFontScale,
-            state,
-            setState,
-          }}
-        />
-      )}
+      {screen === "chat" && catEn && (() => {
+        const selectedCat = findCat(catEn);
+        const scenarioText = selectedCat.tr[lang]?.sc[scenario] || "";
+        return (
+          <ChatScreen
+            cat={selectedCat}
+            scenario={scenarioText}
+            scenarioIdx={scenario}
+            custom={false}
+            onBack={onBack}
+            t={t}
+            lang={lang}
+            setLang={setLang}
+            settings={{
+              theme,
+              setTheme,
+              fontScale,
+              setFontScale,
+              state,
+              setState,
+            }}
+            fontScale={fontScale}
+            state={state}
+            saved={saved}
+            onToggleSave={onToggleSave}
+            onShowSaved={() => setShowSavedPanel(true)}
+          />
+        );
+      })()}
 
       <Disclaimer t={t} />
+
+      {showSavedPanel && (
+        <SavedPanel
+          saved={saved}
+          onClose={() => setShowSavedPanel(false)}
+          onRemove={onRemoveSaved}
+          t={t}
+        />
+      )}
     </div>
   );
 }

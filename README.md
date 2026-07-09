@@ -27,11 +27,11 @@ nyaytak/
 ```bash
 cd backend
 npm install
-cp .env.example .env          # then open .env and paste your Anthropic API key
+cp .env.example .env          # then open .env and paste your Groq API key
 npm start                      # runs on http://localhost:8787
 ```
 
-Get an API key from https://console.anthropic.com → **API Keys**.
+Get an API key from https://console.groq.com.
 
 ## 2) Frontend setup
 
@@ -47,13 +47,13 @@ The frontend calls `/api/chat`, which Vite proxies to the backend in dev — so 
 ## How it works
 
 - The browser sends the chat/tool request to **your backend** (`/api/chat`).
-- The backend adds the secret API key and forwards it to Anthropic, then returns the reply.
+- The backend adds the secret API key and forwards it to Groq (Llama 3.3 model), then returns the reply.
 - This is the secure pattern — never put the API key directly in frontend code.
 
 ## Production deploy
 
 - **Frontend** → Vercel / Netlify (static build: `npm run build` → `dist/`).
-- **Backend** → Render / Railway / a small VPS (set `ANTHROPIC_API_KEY` as an env var).
+- **Backend** → Render / Railway / a small VPS (set `GROQ_API_KEY` as an env var).
 - Set `VITE_API_BASE` in the frontend `.env` to your deployed backend URL
   (e.g. `https://nyaytak-api.onrender.com`).
 

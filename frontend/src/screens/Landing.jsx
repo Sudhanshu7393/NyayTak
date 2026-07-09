@@ -20,6 +20,7 @@ import OnboardingModal from "../components/OnboardingModal.jsx";
 function Landing({
   onStart,
   onShowSaved,
+  onPopularClick,
   savedCount,
   t = {},
   lang,
@@ -259,7 +260,7 @@ function Landing({
                 <button
                   key={cid + idx}
                   onClick={() => {
-                    // Direct to chat with selected category
+                    onPopularClick && onPopularClick(cid, idx);
                   }}
                   style={{
                     display: "inline-flex",
