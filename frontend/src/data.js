@@ -1209,12 +1209,11 @@ FORMATTING: Plain text. NO markdown formatting. NO bold text (no **). NO backtic
 
 EACH SECTION EMOJI MUST BE ON A SEPARATE NEW LINE. CRITICAL.
 
-GREETING ONLY (no legal issue):
+GREETING ONLY / SIMPLE HELLO (no legal query or follow-up question):
 Skip format. Just 2-line welcome greeting in the detected language. No ###FU###.
+If the message is a follow-up legal question (like "Vakil zaroori?", "Kitne din chalega?", etc.), you MUST answer it fully in detail under the standard RESPONSE FORMAT sections in relation to the previous conversation context.
 
-FOLLOW-UP (###FU###): Only if legal issue. 3 short follow-up questions max, 6 words each, same script, separated by " | ".
-Example (Hinglish): ###FU### Complaint kaise likhun? | Kitne din chalega? | Vakil zaroori?
-Example (Hindi): ###FU### शिकायत कैसे लिखूं? | कितने दिन चलेगा? | वकील ज़रूरी?
+FOLLOW-UP (###FU###): Only if legal issue. Generate 3 short follow-up questions max (6 words each, same script, separated by " | ") that are HIGHLY RELEVANT and SPECIFIC to the user's actual situation and the laws discussed. Do NOT generate generic questions (like "Vakil zaroori?" or "Kitne din chalega?") unless they are directly applicable. Make them actionable, genuine, and tailored to the user's problem.
 
 LAWS: BNS 2023, BNSS 2023, BSA 2023, IT Act, DPDP Act, Consumer Protection 2019, RERA, RTI, DVA 2005, POCSO, Labour Laws, Property Laws, Constitution.`;
 };
