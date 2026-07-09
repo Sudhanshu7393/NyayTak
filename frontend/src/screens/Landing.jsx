@@ -24,6 +24,7 @@ function Landing({
   lang,
   setLang,
   settings = {},
+  onInstallClick,
 }) {
   const [v, setV] = useState(false);
   useEffect(() => {
@@ -39,9 +40,11 @@ function Landing({
     <div
       style={{
         position: "relative",
+        minHeight: "100%",
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        justifyContent: "flex-start",
+        padding: "clamp(12px, 3vh, 24px) 16px",
         overflowY: "auto",
       }}
     >
@@ -50,33 +53,35 @@ function Landing({
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse 75% 55% at 50% -5%, var(--hero-glow) 0%, transparent 60%), linear-gradient(180deg,var(--bg2),var(--bg))",
+            "radial-gradient(ellipse 65% 35% at 50% 0%, var(--hero-glow) 0%, transparent 60%), linear-gradient(180deg, var(--bg2), var(--bg))",
           zIndex: 0,
         }}
       />
-      <JaliSVG />
+      <JaliSVG opacity={0.16} />
 
+      {/* Landing Header */}
       <div
         style={{
-          position: "relative",
-          zIndex: 40,
-          padding: "13px 16px",
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          maxWidth: 440,
+          margin: "0 auto 12px",
+          position: "relative",
+          zIndex: 20,
+          paddingBottom: 8,
           borderBottom: "1px solid var(--border-soft)",
-          gap: 8,
-          flexShrink: 0,
         }}
       >
         <span
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
             fontFamily: FONT_HEAD,
-            fontSize: "calc(22px * var(--fs))",
-            fontWeight: 700,
+            fontSize: "calc(19px * var(--fs))",
+            fontWeight: 800,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
             color: "var(--text)",
             whiteSpace: "nowrap",
           }}
@@ -96,6 +101,27 @@ function Landing({
           </span>
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <button
+            onClick={onInstallClick}
+            style={{
+              padding: "7px 9px",
+              borderRadius: 9,
+              border: "1px solid var(--border)",
+              background: "rgba(240,165,0,0.12)",
+              color: "#f0a500",
+              fontSize: "calc(11.5px * var(--fs))",
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              fontFamily: "inherit"
+            }}
+            title={lang === "hi" ? "ऐप इंस्टॉल करें" : "Install App"}
+          >
+            <span>📲</span>
+            <span>{lang === "hi" ? "इंस्टॉल" : "Install"}</span>
+          </button>
           <LangSelect lang={lang} setLang={setLang} />
           <SettingsBtn t={t} {...settings} />
         </div>

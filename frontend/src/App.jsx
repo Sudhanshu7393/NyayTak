@@ -26,6 +26,7 @@ export default function App() {
   const [showSavedPanel, setShowSavedPanel] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallPopup, setShowInstallPopup] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -62,6 +63,18 @@ export default function App() {
     console.log(`User response to install: ${outcome}`);
     setInstallPrompt(null);
     setShowInstallPopup(false);
+  };
+
+  const handleInstallRequest = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      console.log(`User response to install: ${outcome}`);
+      setInstallPrompt(null);
+      setShowInstallPopup(false);
+    } else {
+      setShowInstallGuide(true);
+    }
   };
 
   const t = UI[lang] || UI.hinglish;
@@ -175,6 +188,7 @@ export default function App() {
             fontScale,
             setFontScale,
           }}
+          onInstallClick={handleInstallRequest}
         />
       )}
 
@@ -309,6 +323,117 @@ export default function App() {
               }}
             >
               {lang === "hi" ? "बाद में" : "Later"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showInstallGuide && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "var(--overlay)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            zIndex: 10000,
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 420,
+              background: "var(--modal-bg)",
+              border: "1px solid var(--border)",
+              borderRadius: 24,
+              padding: 24,
+              boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
+              position: "relative",
+              textAlign: "center",
+              animation: "nsFadeUp 0.3s ease both",
+            }}
+          >
+            <button
+              onClick={() => setShowInstallGuide(false)}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                background: "transparent",
+                border: "none",
+                color: "var(--text-mid)",
+                fontSize: 20,
+                cursor: "pointer",
+              }}
+            >
+              ✕
+            </button>
+            <div style={{ fontSize: 44, marginBottom: 12 }}>📲</div>
+            <h3 style={{ fontSize: "calc(16px * var(--fs))", color: "var(--text)", fontWeight: 700, marginBottom: 8 }}>
+              {lang === "hi" ? "ऐप इंस्टॉल करने का तरीका" : "How to Install App"}
+            </h3>
+            <p style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-dim)", marginBottom: 20, lineHeight: 1.5 }}>
+              {lang === "hi" 
+                ? "NyayTak को सीधे अपने फोन की होम स्क्रीन पर एक नेटिव ऐप की तरह जोड़ें।" 
+                : "Add NyayTak directly to your device home screen as a native application."}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left", marginBottom: 20 }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <span style={{ background: "#f0a500", color: "#0a0e1a", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>1</span>
+                <div>
+                  <b style={{ color: "var(--text)", fontSize: "calc(12.5px * var(--fs))" }}>
+                    {lang === "hi" ? "Android (Chrome / Edge)" : "Android (Chrome / Edge)"}
+                  </b>
+                  <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", marginTop: 2 }}>
+                    {lang === "hi" ? "ऊपर दाईं ओर 3 डॉट्स (⋮) पर क्लिक करें और 'Add to Home screen' या 'Install App' चुनें।" : "Tap 3 dots (⋮) in Chrome and select 'Add to Home screen' or 'Install App'."}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <span style={{ background: "#f0a500", color: "#0a0e1a", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>2</span>
+                <div>
+                  <b style={{ color: "var(--text)", fontSize: "calc(12.5px * var(--fs))" }}>
+                    {lang === "hi" ? "iPhone / iOS (Safari)" : "iPhone / iOS (Safari)"}
+                  </b>
+                  <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", marginTop: 2 }}>
+                    {lang === "hi" ? "सफारी में नीचे 'Share' 📤 बटन दबाएं और 'Add to Home Screen' चुनें।" : "Tap 'Share' 📤 button in Safari and choose 'Add to Home Screen'."}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <span style={{ background: "#f0a500", color: "#0a0e1a", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>3</span>
+                <div>
+                  <b style={{ color: "var(--text)", fontSize: "calc(12.5px * var(--fs))" }}>
+                    {lang === "hi" ? "कंप्यूटर / PC (Chrome)" : "Computer / PC (Chrome)"}
+                  </b>
+                  <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", marginTop: 2 }}>
+                    {lang === "hi" ? "URL एड्रेस बार में बने छोटे 'Install' कंप्यूटर आइकॉन पर क्लिक करें।" : "Click the 'Install' monitor icon at the right edge of address bar."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowInstallGuide(false)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: 12,
+                border: "none",
+                background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                color: "#0a0e1a",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontSize: "calc(13px * var(--fs))",
+              }}
+            >
+              👍 {lang === "hi" ? "ठीक है, समझ गया" : "Okay, Got it"}
             </button>
           </div>
         </div>
