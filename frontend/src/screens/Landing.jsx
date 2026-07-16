@@ -237,15 +237,6 @@ function Landing({
                 NyayTak
               </b>
             </div>
-            <div
-              style={{
-                fontSize: "calc(11px * var(--fs))",
-                color: "var(--text-dim)",
-                fontWeight: 600,
-              }}
-            >
-              {lang === "hi" ? "संस्थापक" : "Founder"}: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
-            </div>
           </div>
 
           <h1
