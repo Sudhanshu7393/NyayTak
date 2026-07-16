@@ -27,6 +27,10 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallPopup, setShowInstallPopup] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
 
   useEffect(() => {
     const root = document.documentElement;
@@ -49,12 +53,33 @@ export default function App() {
   useEffect(() => {
     const handlePrompt = (e) => {
       e.preventDefault();
-      setInstallPrompt(e);
-      setShowInstallPopup(true);
+      // Only show install popup if not already running as installed app
+      if (!isInstalled) {
+        setInstallPrompt(e);
+        setShowInstallPopup(true);
+      }
     };
     window.addEventListener("beforeinstallprompt", handlePrompt);
-    return () => window.removeEventListener("beforeinstallprompt", handlePrompt);
-  }, []);
+
+    const handleInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+      setShowInstallPopup(false);
+    };
+    window.addEventListener("appinstalled", handleInstalled);
+
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const handleMediaChange = (e) => {
+      if (e.matches) setIsInstalled(true);
+    };
+    mediaQuery.addEventListener('change', handleMediaChange);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handlePrompt);
+      window.removeEventListener("appinstalled", handleInstalled);
+      mediaQuery.removeEventListener('change', handleMediaChange);
+    };
+  }, [isInstalled]);
 
   const handleInstallClick = async () => {
     if (!installPrompt) return;
@@ -78,6 +103,7 @@ export default function App() {
   };
 
   const t = UI[lang] || UI.hinglish;
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   const onToggleSave = (item) => {
     setSaved((prev) => {
@@ -189,6 +215,7 @@ export default function App() {
             setFontScale,
           }}
           onInstallClick={handleInstallRequest}
+          isInstalled={isInstalled}
         />
       )}
 
@@ -256,10 +283,11 @@ export default function App() {
         <div
           style={{
             position: "fixed",
-            bottom: 24,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "calc(100% - 32px)",
+            bottom: isMobile ? 16 : 24,
+            left: isMobile ? 16 : "50%",
+            right: isMobile ? 16 : "auto",
+            transform: isMobile ? "none" : "translateX(-50%)",
+            width: isMobile ? "auto" : "calc(100% - 32px)",
             maxWidth: 390,
             background: "rgba(22, 25, 43, 0.85)",
             backdropFilter: "blur(16px)",
@@ -410,11 +438,33 @@ export default function App() {
                 <span style={{ background: "#f0a500", color: "#0a0e1a", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>3</span>
                 <div>
                   <b style={{ color: "var(--text)", fontSize: "calc(12.5px * var(--fs))" }}>
-                    {lang === "hi" ? "कंप्यूटर / PC (Chrome)" : "Computer / PC (Chrome)"}
+                    {lang === "hi" ? "कंप्यूटर / PC (Chrome/Edge)" : "Computer / PC (Chrome/Edge)"}
                   </b>
-                  <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", marginTop: 2 }}>
-                    {lang === "hi" ? "URL एड्रेस बार में बने छोटे 'Install' कंप्यूटर आइकॉन पर क्लिक करें।" : "Click the 'Install' monitor icon at the right edge of address bar."}
+                  <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", marginTop: 2, marginBottom: 6 }}>
+                    {lang === "hi" ? "URL एड्रेस बार में दाईं ओर बने छोटे 'Install' कंप्यूटर आइकॉन या '+' बटन पर क्लिक करें:" : "Click the 'Install' computer icon or '+' button at the right edge of address bar:"}
                   </p>
+                  <div
+                    style={{
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      padding: "6px 12px",
+                      borderRadius: 10,
+                      fontFamily: "monospace",
+                      fontSize: "calc(11.5px * var(--fs))",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      color: "var(--text-dim)",
+                      maxWidth: "100%",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <span style={{ color: "#22c55e" }}>🔒</span>
+                    <span style={{ color: "var(--text-mid)", textDecoration: "underline" }}>nyaytak.online</span>
+                    <span style={{ marginLeft: "auto", background: "rgba(240,165,0,0.18)", border: "1px solid #f0a500", color: "#f0a500", padding: "1px 5px", borderRadius: 4, fontSize: "calc(9px * var(--fs))", fontWeight: "bold", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                      🖥️ Install
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

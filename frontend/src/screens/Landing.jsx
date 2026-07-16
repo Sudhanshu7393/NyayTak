@@ -21,6 +21,7 @@ function Landing({
   setLang,
   settings = {},
   onInstallClick,
+  isInstalled,
 }) {
   const [v, setV] = useState(false);
   useEffect(() => {
@@ -97,27 +98,29 @@ function Landing({
           </span>
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <button
-            onClick={onInstallClick}
-            style={{
-              padding: "7px 9px",
-              borderRadius: 9,
-              border: "1px solid var(--border)",
-              background: "rgba(240,165,0,0.12)",
-              color: "#f0a500",
-              fontSize: "calc(11.5px * var(--fs))",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              fontFamily: "inherit",
-            }}
-            title={lang === "hi" ? "ऐप इंस्टॉल करें" : "Install App"}
-          >
-            <span>📲</span>
-            <span>{lang === "hi" ? "इंस्टॉल" : "Install"}</span>
-          </button>
+          {!isInstalled && (
+            <button
+              onClick={onInstallClick}
+              style={{
+                padding: "7px 9px",
+                borderRadius: 9,
+                border: "1px solid var(--border)",
+                background: "rgba(240,165,0,0.12)",
+                color: "#f0a500",
+                fontSize: "calc(11.5px * var(--fs))",
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                fontFamily: "inherit",
+              }}
+              title={lang === "hi" ? "ऐप इंस्टॉल करें" : "Install App"}
+            >
+              <span>📲</span>
+              <span>{lang === "hi" ? "इंस्टॉल" : "Install"}</span>
+            </button>
+          )}
           <LangSelect lang={lang} setLang={setLang} />
           <SettingsBtn t={t} {...settings} />
         </div>

@@ -15,5 +15,5 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  // Pass through directly to network to avoid asset mismatch bugs
+  e.respondWith(fetch(e.request));
 });
