@@ -1964,6 +1964,26 @@ async function handleDocumentUpload(e) {
                 </>
               ) : (
                 <>
+                  <div
+                    style={{
+                      padding: "10px 12px",
+                      background: "rgba(34,197,94,0.12)",
+                      border: "1px solid rgba(34,197,94,0.22)",
+                      borderRadius: 10,
+                      fontSize: "calc(12px * var(--fs))",
+                      color: "#22c55e",
+                      fontWeight: 600,
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                    }}
+                  >
+                    <span>📲 {lang === "hi" ? "डेमो ओटीपी भेजा गया!" : "Demo OTP Sent!"}</span>
+                    <span style={{ fontSize: "calc(13.5px * var(--fs))", letterSpacing: "1px", color: "var(--text)" }}>
+                      OTP: <b>123456</b>
+                    </span>
+                  </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
                       {lang === "hi" ? "ओटीपी दर्ज करें" : "Enter 6-digit OTP"}

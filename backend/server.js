@@ -123,7 +123,7 @@ app.post("/api/chat", async (req, res) => {
   const { system, messages = [] } = req.body;
 
   const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
-  const cases = lastUserMsg ? await searchCaseLaw(lastUserMsg.content) : [];
+  const cases = (system && lastUserMsg) ? await searchCaseLaw(lastUserMsg.content) : [];
 
   if (cases.length)
     console.log(
