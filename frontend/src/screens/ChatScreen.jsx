@@ -226,7 +226,7 @@ async function ask(history) {
       cleanMd(
         await callClaude({
           system: buildPrompt(catEn, scenario, langPrompt),
-          messages: history.map((m) => ({ role: m.role, content: m.text })),
+          messages: history.slice(-6).map((m) => ({ role: m.role, content: m.text })),
         }),
       ) || t.noAnswer;
     let answer = raw,

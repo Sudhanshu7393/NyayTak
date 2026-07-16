@@ -9,11 +9,7 @@ import {
   findCat,
   POPULAR,
 } from "../data.js";
-import {
-  JaliSVG,
-  LangSelect,
-  SettingsBtn,
-} from "../components/ui.jsx";
+import { JaliSVG, LangSelect, SettingsBtn } from "../components/ui.jsx";
 import OnboardingModal from "../components/OnboardingModal.jsx";
 
 function Landing({
@@ -115,7 +111,7 @@ function Landing({
               display: "flex",
               alignItems: "center",
               gap: 4,
-              fontFamily: "inherit"
+              fontFamily: "inherit",
             }}
             title={lang === "hi" ? "ऐप इंस्टॉल करें" : "Install App"}
           >
@@ -309,11 +305,13 @@ function Landing({
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 10px 28px rgba(240,165,0,0.45)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 28px rgba(240,165,0,0.45)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "";
-              e.currentTarget.style.boxShadow = "0 8px 24px rgba(240,165,0,0.32)";
+              e.currentTarget.style.boxShadow =
+                "0 8px 24px rgba(240,165,0,0.32)";
             }}
           >
             {t.cta} ✨ <Sparkles size={16} />
@@ -447,7 +445,10 @@ function Landing({
             marginTop: 2,
           }}
         >
-          {lang === "hi" ? "संस्थापक" : "Founder"}: <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
+          {lang === "hi" ? "संस्थापक" : "Founder"}:{" "}
+          <span style={{ color: "#f0a500", fontWeight: 700 }}>
+            Sudhanshu Pandey
+          </span>
         </div>
       </div>
     </div>
