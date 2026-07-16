@@ -148,12 +148,14 @@ function ChatScreen({
   const [info, setInfo] = useState(null);
   const [copied, setCopied] = useState(false);
   const [speaking, setSpeaking] = useState(-1);
-  const [esignDetails, setEsignDetails] = useState({
+  const [showDraftForm, setShowDraftForm] = useState(false);
+  const [draftDetails, setDraftDetails] = useState({
     name: "",
-    aadhaar: "",
-    otpSent: false,
-    otp: "",
-    verified: false,
+    address: "",
+    phone: "",
+    opponentName: "",
+    opponentAddress: "",
+    incidentDate: "",
   });
   const [followUps, setFollowUps] = useState([]);
   const [copiedMsg, setCopiedMsg] = useState(-1);
@@ -351,6 +353,18 @@ async function handleDocumentUpload(e) {
   }
 
   async function runTool(kind) {
+    if (kind === "complaint") {
+      setDraftDetails({
+        name: "",
+        address: "",
+        phone: "",
+        opponentName: "",
+        opponentAddress: "",
+        incidentDate: "",
+      });
+      setShowDraftForm(true);
+      return;
+    }
     setTool({ kind, loading: true, text: "" });
     setToolText("");
     setCopied(false);
@@ -370,6 +384,44 @@ async function handleDocumentUpload(e) {
       setToolText(text);
     } catch (_) {
       setTool({ kind, loading: false, text: t.networkErr });
+      setToolText(t.networkErr);
+    }
+  }
+
+  async function runDraftGeneration(details) {
+    setShowDraftForm(false);
+    setTool({ kind: "complaint", loading: true, text: "" });
+    setToolText("");
+    setCopied(false);
+    try {
+      const detailPrompt = `You are NyayTak's complaint/notice draft generator for India.
+Generate a FORMAL draft for Category: "${catEn}". Issue: "${scenario}".
+Use the following details of the user and case to draft it, inserting them directly in the text (do NOT write brackets like [Name] for these, write them exactly):
+- SENDER / COMPLAINANT NAME: ${details.name || "________"}
+- SENDER / COMPLAINANT ADDRESS: ${details.address || "________"}
+- SENDER PHONE: ${details.phone || "________"}
+- OPPONENT / RESPONDENT NAME: ${details.opponentName || "________"}
+- OPPONENT / RESPONDENT ADDRESS: ${details.opponentAddress || "________"}
+- DATE OF INCIDENT: ${details.incidentDate || "________"}
+
+Write the ENTIRE draft in ${langPrompt}. Structure: To (correct authority name/designation), Subject, body of facts containing these details, specific relief requested, relevant law/section, and Date/Place/Signature block at bottom.
+Return ONLY the draft. No preamble, no explanation.`;
+
+      const text =
+        cleanMd(
+          await callClaude({
+            messages: [
+              {
+                role: "user",
+                content: detailPrompt,
+              },
+            ],
+          }),
+        ) || t.noAnswer;
+      setTool({ kind: "complaint", loading: false, text });
+      setToolText(text);
+    } catch (_) {
+      setTool({ kind: "complaint", loading: false, text: t.networkErr });
       setToolText(t.networkErr);
     }
   }
@@ -1246,30 +1298,6 @@ async function handleDocumentUpload(e) {
                   {t.download}
                 </button>
               </div>
-              {tool.kind === "complaint" && (
-                <button
-                  onClick={() => setInfo("esign")}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: 11,
-                    marginTop: 8,
-                    cursor: "pointer",
-                    background: "rgba(34,197,94,0.12)",
-                    border: "1px solid rgba(34,197,94,0.35)",
-                    color: "#16a34a",
-                    fontSize: "calc(13.5px * var(--fs))",
-                    fontWeight: 700,
-                    fontFamily: "inherit",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6
-                  }}
-                >
-                  ✍️ {lang === "hi" ? "आधार e-Sign द्वारा प्रमाणित करें" : lang === "hinglish" ? "Aadhaar e-Sign se sign karein" : "Digitally Sign with Aadhaar e-Sign"}
-                </button>
-              )}
             </div>
           )}
         </PanelShell>
@@ -1878,190 +1906,188 @@ async function handleDocumentUpload(e) {
         </PanelShell>
       )}
 
-      {info === "esign" && (
+      {showDraftForm && (
         <PanelShell
-          title={lang === "hi" ? "डिजिटल हस्ताक्षर (Aadhaar e-Sign)" : lang === "hinglish" ? "Digital Signature (e-Sign)" : "Aadhaar Digital Signature"}
-          icon={<Users size={17} />}
-          onClose={() => setInfo(null)}
+          title={lang === "hi" ? "शिकायत का विवरण दर्ज करें" : "Enter Complaint Details"}
+          icon={<FileText size={17} />}
+          onClose={() => setShowDraftForm(false)}
         >
-          {!esignDetails.verified ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  background: "rgba(240,165,0,0.08)",
-                  border: "1px solid rgba(240,165,0,0.22)",
-                  fontSize: "calc(12px * var(--fs))",
-                  color: "var(--text)",
-                  lineHeight: 1.5,
-                }}
-              >
-                🔒 **Secured by UIDAI**: {lang === "hi" ? "यह एक सुरक्षित ई-हस्ताक्षर प्रमाणन प्रक्रिया है। हस्ताक्षर सत्यापित होने के बाद दस्तावेज़ के नीचे जोड़ दिया जाएगा।" : "This is a secure e-Sign process powered by UIDAI. The signature block will be appended upon verification."}
-              </div>
-
-              {!esignDetails.otpSent ? (
-                <>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
-                      {lang === "hi" ? "पूरा नाम (आधार के अनुसार)" : "Full Name (as on Aadhaar)"}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Sudhanshu Kumar"
-                      value={esignDetails.name}
-                      onChange={(e) => setEsignDetails({ ...esignDetails, name: e.target.value })}
-                      style={{
-                        padding: "10px 12px",
-                        borderRadius: 8,
-                        border: "1px solid var(--border)",
-                        background: "var(--surface)",
-                        color: "var(--text)",
-                        fontFamily: "inherit",
-                        fontSize: "calc(13px * var(--fs))",
-                      }}
-                    />
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
-                      {lang === "hi" ? "आधार कार्ड नंबर" : "Aadhaar Card Number"}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="XXXX XXXX XXXX"
-                      maxLength="12"
-                      value={esignDetails.aadhaar}
-                      onChange={(e) => setEsignDetails({ ...esignDetails, aadhaar: e.target.value.replace(/\D/g, "") })}
-                      style={{
-                        padding: "10px 12px",
-                        borderRadius: 8,
-                        border: "1px solid var(--border)",
-                        background: "var(--surface)",
-                        color: "var(--text)",
-                        fontFamily: "inherit",
-                        fontSize: "calc(13px * var(--fs))",
-                        letterSpacing: "1px",
-                      }}
-                    />
-                  </div>
-                  <button
-                    disabled={!esignDetails.name.trim() || esignDetails.aadhaar.length !== 12}
-                    onClick={() => setEsignDetails({ ...esignDetails, otpSent: true })}
-                    style={{
-                      marginTop: 8,
-                      padding: "12px",
-                      borderRadius: 10,
-                      border: "none",
-                      background: (!esignDetails.name.trim() || esignDetails.aadhaar.length !== 12) ? "var(--border)" : "linear-gradient(135deg,#f0a500,#d4860a)",
-                      color: "#0a0e1a",
-                      fontWeight: 700,
-                      cursor: (!esignDetails.name.trim() || esignDetails.aadhaar.length !== 12) ? "not-allowed" : "pointer",
-                      fontSize: "calc(13px * var(--fs))",
-                    }}
-                  >
-                    🚀 {lang === "hi" ? "ओटीपी भेजें (Request OTP)" : "Send OTP"}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      padding: "10px 12px",
-                      background: "rgba(34,197,94,0.12)",
-                      border: "1px solid rgba(34,197,94,0.22)",
-                      borderRadius: 10,
-                      fontSize: "calc(12px * var(--fs))",
-                      color: "#22c55e",
-                      fontWeight: 600,
-                      textAlign: "center",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                    }}
-                  >
-                    <span>📲 {lang === "hi" ? "डेमो ओटीपी भेजा गया!" : "Demo OTP Sent!"}</span>
-                    <span style={{ fontSize: "calc(13.5px * var(--fs))", letterSpacing: "1px", color: "var(--text)" }}>
-                      OTP: <b>123456</b>
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
-                      {lang === "hi" ? "ओटीपी दर्ज करें" : "Enter 6-digit OTP"}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter 6-digit OTP"
-                      maxLength="6"
-                      value={esignDetails.otp}
-                      onChange={(e) => setEsignDetails({ ...esignDetails, otp: e.target.value.replace(/\D/g, "") })}
-                      style={{
-                        padding: "10px 12px",
-                        borderRadius: 8,
-                        border: "1px solid var(--border)",
-                        background: "var(--surface)",
-                        color: "var(--text)",
-                        fontFamily: "inherit",
-                        fontSize: "calc(13.5px * var(--fs))",
-                        textAlign: "center",
-                        letterSpacing: "4px",
-                      }}
-                    />
-                  </div>
-                  <button
-                    disabled={esignDetails.otp.length !== 6}
-                    onClick={() => {
-                      const sigBlock = `\n\n====================================\n✍️ DIGITAL SIGNATURE VERIFICATION (UIDAI e-Sign)\nSignee: ${esignDetails.name}\nDate: ${new Date().toLocaleDateString("en-IN")}\nStatus: VERIFIED & SECURED\nSignature Hash: esign_sha256_${Math.random().toString(36).substring(2, 10).toUpperCase()}_nyaytak\n====================================`;
-                      setToolText((prev) => prev + sigBlock);
-                      setEsignDetails({ ...esignDetails, verified: true });
-                    }}
-                    style={{
-                      marginTop: 8,
-                      padding: "12px",
-                      borderRadius: 10,
-                      border: "none",
-                      background: esignDetails.otp.length !== 6 ? "var(--border)" : "linear-gradient(135deg,#22c55e,#16a34a)",
-                      color: "#0a0e1a",
-                      fontWeight: 700,
-                      cursor: esignDetails.otp.length !== 6 ? "not-allowed" : "pointer",
-                      fontSize: "calc(13px * var(--fs))",
-                    }}
-                  >
-                    ✅ {lang === "hi" ? "सत्यापित करें और हस्ताक्षर करें" : "Verify & Sign"}
-                  </button>
-                </>
-              )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                background: "rgba(240,165,0,0.08)",
+                border: "1px solid rgba(240,165,0,0.2)",
+                fontSize: "calc(11.5px * var(--fs))",
+                color: "var(--text-mid)",
+                lineHeight: 1.4,
+                textAlign: "left"
+              }}
+            >
+              📝 {lang === "hi" ? "यह जानकारी सीधे शिकायत पत्र में जोड़ दी जाएगी ताकि आपको बाद में हाथ से बदलाव न करने पड़ें।" : "These details will be directly filled in the complaint letter so you don't have to edit placeholder brackets later."}
             </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "center", padding: "10px 0" }}>
-              <div style={{ fontSize: "40px" }}>🎉</div>
-              <b style={{ color: "var(--text)", fontSize: "calc(15.5px * var(--fs))" }}>
-                {lang === "hi" ? "दस्तावेज़ सफलतापूर्वक हस्ताक्षरित हुआ!" : "Document Signed Successfully!"}
-              </b>
-              <p style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", lineHeight: 1.5 }}>
-                {lang === "hi"
-                  ? "UIDAI आधार e-Sign वेरिफिकेशन पूरा हो चुका है। खसड़े के अंत में एक सुरक्षित डिजिटल हस्ताक्षर ब्लॉक जोड़ दिया गया है।"
-                  : "UIDAI Aadhaar e-Sign verification is complete. A secure digital signature block has been appended to the end of the draft."}
-              </p>
-              <button
-                onClick={() => {
-                  setInfo(null);
-                  setEsignDetails({ name: "", aadhaar: "", otpSent: false, otp: "", verified: false });
-                }}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, textAlign: "left" }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                👤 {lang === "hi" ? "आपका पूरा नाम" : "Your Full Name"}
+              </label>
+              <input
+                type="text"
+                placeholder={lang === "hi" ? "उदा. रमेश कुमार" : "e.g. Ramesh Kumar"}
+                value={draftDetails.name}
+                onChange={(e) => setDraftDetails({ ...draftDetails, name: e.target.value })}
                 style={{
-                  padding: "11px",
-                  borderRadius: 10,
-                  border: "none",
-                  background: "linear-gradient(135deg,#f0a500,#d4860a)",
-                  color: "#0a0e1a",
-                  fontWeight: 700,
-                  cursor: "pointer",
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
                   fontSize: "calc(13px * var(--fs))",
                 }}
-              >
-                🏡 {lang === "hi" ? "वापस ड्राफ्ट पर जाएं" : "Go Back to Draft"}
-              </button>
+              />
             </div>
-          )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, textAlign: "left" }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                📍 {lang === "hi" ? "आपका पता" : "Your Address"}
+              </label>
+              <input
+                type="text"
+                placeholder={lang === "hi" ? "उदा. सेक्टर 4, नई दिल्ली" : "e.g. Sector 4, New Delhi"}
+                value={draftDetails.address}
+                onChange={(e) => setDraftDetails({ ...draftDetails, address: e.target.value })}
+                style={{
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(13px * var(--fs))",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, textAlign: "left" }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                📞 {lang === "hi" ? "आपका मोबाइल नंबर" : "Your Phone Number"}
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 9876543210"
+                maxLength="10"
+                value={draftDetails.phone}
+                onChange={(e) => setDraftDetails({ ...draftDetails, phone: e.target.value.replace(/\D/g, "") })}
+                style={{
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(13px * var(--fs))",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, textAlign: "left" }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                🏢 {lang === "hi" ? "विपक्षी का नाम (जिसके खिलाफ शिकायत है)" : "Opponent Name (against whom)"}
+              </label>
+              <input
+                type="text"
+                placeholder={lang === "hi" ? "उदा. स्टोर या कंपनी का नाम" : "e.g. Store/Company or Person Name"}
+                value={draftDetails.opponentName}
+                onChange={(e) => setDraftDetails({ ...draftDetails, opponentName: e.target.value })}
+                style={{
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(13px * var(--fs))",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, textAlign: "left" }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                📍 {lang === "hi" ? "विपक्षी का पता" : "Opponent Address"}
+              </label>
+              <input
+                type="text"
+                placeholder={lang === "hi" ? "उदा. कंपनी का कार्यालय पता" : "e.g. Opponent Office Address"}
+                value={draftDetails.opponentAddress}
+                onChange={(e) => setDraftDetails({ ...draftDetails, opponentAddress: e.target.value })}
+                style={{
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(13px * var(--fs))",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, textAlign: "left" }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                📅 {lang === "hi" ? "घटना की तारीख" : "Date of Incident"}
+              </label>
+              <input
+                type="text"
+                placeholder={lang === "hi" ? "उदा. 15 अगस्त 2024" : "e.g. 15 August 2024"}
+                value={draftDetails.incidentDate}
+                onChange={(e) => setDraftDetails({ ...draftDetails, incidentDate: e.target.value })}
+                style={{
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(13px * var(--fs))",
+                }}
+              />
+            </div>
+
+            <button
+              onClick={() => runDraftGeneration(draftDetails)}
+              style={{
+                marginTop: 10,
+                padding: "12px",
+                borderRadius: 10,
+                border: "none",
+                background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                color: "#0a0e1a",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontSize: "calc(13.5px * var(--fs))",
+              }}
+            >
+              🚀 {lang === "hi" ? "शिकायत पत्र तैयार करें" : "Generate Custom Complaint"}
+            </button>
+
+            <button
+              onClick={() => runDraftGeneration({})}
+              style={{
+                padding: "10px",
+                borderRadius: 10,
+                border: "1px solid var(--border)",
+                background: "transparent",
+                color: "var(--text-mid)",
+                fontWeight: 600,
+                cursor: "pointer",
+                fontSize: "calc(12px * var(--fs))",
+              }}
+            >
+              🚫 {lang === "hi" ? "जानकारी के बिना खाली टेम्पलेट बनाएं" : "Skip & Generate Template"}
+            </button>
+          </div>
         </PanelShell>
       )}
     </div>
