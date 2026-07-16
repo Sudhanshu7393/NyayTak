@@ -151,6 +151,7 @@ function ChatScreen({
   const [showDraftForm, setShowDraftForm] = useState(false);
   const [draftDetails, setDraftDetails] = useState({
     name: "",
+    fatherName: "",
     address: "",
     phone: "",
     opponentName: "",
@@ -356,6 +357,7 @@ async function handleDocumentUpload(e) {
     if (kind === "complaint") {
       setDraftDetails({
         name: "",
+        fatherName: "",
         address: "",
         phone: "",
         opponentName: "",
@@ -394,18 +396,27 @@ async function handleDocumentUpload(e) {
     setToolText("");
     setCopied(false);
     try {
-      const detailPrompt = `You are NyayTak's complaint/notice draft generator for India.
-Generate a FORMAL draft for Category: "${catEn}". Issue: "${scenario}".
-Use the following details of the user and case to draft it, inserting them directly in the text (do NOT write brackets like [Name] for these, write them exactly):
-- SENDER / COMPLAINANT NAME: ${details.name || "________"}
-- SENDER / COMPLAINANT ADDRESS: ${details.address || "________"}
+      const detailPrompt = `You are NyayTak's professional legal complaint/notice draft generator for India.
+Generate a FORMAL, legally precise complaint letter for Category: "${catEn}". Issue: "${scenario}".
+
+The application MUST be written in ${langPrompt}.
+Addressed to: Use the correct respected official title in India for the authority (e.g., "श्रीमान तहसीलदार महोदय" or "थानाध्यक्ष महोदय" or "जिलाधिकारी महोदय" - NEVER translate "Member" or write "सदस्य, तहसीलदार").
+
+Use these EXACT details of the sender and opponent (insert them directly, do NOT write brackets like [Name] or [____] for these):
+- SENDER NAME: ${details.name || "________"}
+- SENDER FATHER/SPOUSE NAME: ${details.fatherName || "________"}
+- SENDER ADDRESS: ${details.address || "________"}
 - SENDER PHONE: ${details.phone || "________"}
-- OPPONENT / RESPONDENT NAME: ${details.opponentName || "________"}
-- OPPONENT / RESPONDENT ADDRESS: ${details.opponentAddress || "________"}
+- OPPONENT NAME: ${details.opponentName || "________"}
+- OPPONENT ADDRESS: ${details.opponentAddress || "________"}
 - DATE OF INCIDENT: ${details.incidentDate || "________"}
 
-Write the ENTIRE draft in ${langPrompt}. Structure: To (correct authority name/designation), Subject, body of facts containing these details, specific relief requested, relevant law/section, and Date/Place/Signature block at bottom.
-Return ONLY the draft. No preamble, no explanation.`;
+GUIDELINES FOR THE BODY:
+1. SENDER LINE: Write it formally as: "मैं, ${details.name || "________"} पुत्र/पत्नी ${details.fatherName || "________"} निवासी ${details.address || "________"}..."
+2. DETAILED FACTS: Write a realistic, detailed description of the incident. For example, if the issue is a neighbor encroaching and building a house on the user's land during their absence, write this specific fact in detail in the letter. Do NOT use generic sentences like "अनुचित व्यवहार किया गया". Describe it clearly as a physical trespass and unauthorized construction.
+3. LEGAL SECTIONS: Cite the correct legal sections under both the new Bharatiya Nyaya Sanhita (BNS) 2023 and the old Indian Penal Code (IPC) parenthetically (e.g., "Criminal Trespass under Section 329 of BNS, 2023 (previously Section 441/447 of IPC)").
+4. RELIEF: Clearly state the specific relief demanded (e.g., removal of the illegal encroachment/construction, protection of the property, and legal action against the opponent).
+5. FORMAT: NO preamble, NO markdown bold text (**), NO backticks (\`). Return ONLY the draft, ending with Date, Place, and Signature blocks.`;
 
       const text =
         cleanMd(
@@ -1937,6 +1948,27 @@ Return ONLY the draft. No preamble, no explanation.`;
                 placeholder={lang === "hi" ? "उदा. रमेश कुमार" : "e.g. Ramesh Kumar"}
                 value={draftDetails.name}
                 onChange={(e) => setDraftDetails({ ...draftDetails, name: e.target.value })}
+                style={{
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  fontFamily: "inherit",
+                  fontSize: "calc(13px * var(--fs))",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, textAlign: "left" }}>
+              <label style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>
+                👥 {lang === "hi" ? "पिता/पति का नाम" : "Father's/Spouse's Name"}
+              </label>
+              <input
+                type="text"
+                placeholder={lang === "hi" ? "उदा. श्री राम कुमार" : "e.g. Shri Ram Kumar"}
+                value={draftDetails.fatherName}
+                onChange={(e) => setDraftDetails({ ...draftDetails, fatherName: e.target.value })}
                 style={{
                   padding: "9px 12px",
                   borderRadius: 8,
