@@ -256,30 +256,28 @@ export const authService = {
   signInWithGoogle: async (customEmail) => {
     if (realAuth) {
       const provider = new GoogleAuthProvider();
-      
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile) {
+      try {
+        const cred = await signInWithPopup(realAuth, provider);
+        try {
+          const raw = localStorage.getItem("nyaytak_registered_users") || "[]";
+          const list = JSON.parse(raw);
+          if (!list.some(u => u.email.toLowerCase() === cred.user.email.toLowerCase())) {
+            list.push({
+              uid: cred.user.uid,
+              email: cred.user.email,
+              displayName: cred.user.displayName || cred.user.email.split("@")[0],
+              createdAt: new Date().toLocaleDateString("en-IN")
+            });
+            localStorage.setItem("nyaytak_registered_users", JSON.stringify(list));
+          }
+        } catch (_) {}
+        return cred.user;
+      } catch (popupError) {
+        console.warn("Google popup blocked/failed, falling back to redirect:", popupError);
+        // Fallback to redirect if popup is blocked
         await signInWithRedirect(realAuth, provider);
         return null;
       }
-      
-      const cred = await signInWithPopup(realAuth, provider);
-      
-      try {
-        const raw = localStorage.getItem("nyaytak_registered_users") || "[]";
-        const list = JSON.parse(raw);
-        if (!list.some(u => u.email.toLowerCase() === cred.user.email.toLowerCase())) {
-          list.push({
-            uid: cred.user.uid,
-            email: cred.user.email,
-            displayName: cred.user.displayName || cred.user.email.split("@")[0],
-            createdAt: new Date().toLocaleDateString("en-IN")
-          });
-          localStorage.setItem("nyaytak_registered_users", JSON.stringify(list));
-        }
-      } catch (_) {}
-
-      return cred.user;
     }
     
     // Use selected email or fallback
