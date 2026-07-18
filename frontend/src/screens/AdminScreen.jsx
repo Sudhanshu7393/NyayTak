@@ -38,13 +38,12 @@ function AdminScreen({ onBack, lang }) {
     // Load admin emails
     try {
       const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
-      if (rawAdmins) {
-        setAdminEmails(JSON.parse(rawAdmins));
-      } else {
-        const defaultAdmins = ["sudhanshupandey7393@gmail.com"];
-        setAdminEmails(defaultAdmins);
-        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(defaultAdmins));
+      let list = rawAdmins ? JSON.parse(rawAdmins) : [];
+      if (!list.includes("sudhanshupandey7393@gmail.com")) {
+        list.push("sudhanshupandey7393@gmail.com");
+        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(list));
       }
+      setAdminEmails(list);
     } catch (_) {}
 
     // Load registered users list

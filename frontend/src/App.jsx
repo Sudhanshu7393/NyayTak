@@ -55,13 +55,12 @@ export default function App() {
   useEffect(() => {
     try {
       const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
-      if (rawAdmins) {
-        setAdminEmails(JSON.parse(rawAdmins));
-      } else {
-        const defaultAdmins = ["sudhanshupandey7393@gmail.com"];
-        setAdminEmails(defaultAdmins);
-        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(defaultAdmins));
+      let list = rawAdmins ? JSON.parse(rawAdmins) : [];
+      if (!list.includes("sudhanshupandey7393@gmail.com")) {
+        list.push("sudhanshupandey7393@gmail.com");
+        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(list));
       }
+      setAdminEmails(list);
     } catch (_) {}
   }, [screen]);
 
@@ -289,7 +288,7 @@ export default function App() {
           onInstallClick={handleInstallRequest}
           isInstalled={isInstalled}
           onAdminClick={
-            adminEmails.includes(user?.email?.toLowerCase())
+            (user?.email?.toLowerCase() === "sudhanshupandey7393@gmail.com" || adminEmails.includes(user?.email?.toLowerCase()))
               ? () => {
                   setScreen("admin");
                   window.history.pushState({ screen: "admin" }, "");
@@ -345,7 +344,7 @@ export default function App() {
             onToggleSave={onToggleSave}
             onShowSaved={() => setShowSavedPanel(true)}
             onAdminClick={
-              adminEmails.includes(user?.email?.toLowerCase())
+              (user?.email?.toLowerCase() === "sudhanshupandey7393@gmail.com" || adminEmails.includes(user?.email?.toLowerCase()))
                 ? () => {
                     setScreen("admin");
                     window.history.pushState({ screen: "admin" }, "");
