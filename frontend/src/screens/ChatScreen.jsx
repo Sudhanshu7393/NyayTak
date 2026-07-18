@@ -229,12 +229,13 @@ async function ask(history) {
   histRef.current = history;
 
   try {
-    const isFollowUp = history.length > 1;
+    const userMsgCount = history.filter((m) => m.role === "user").length;
+    const isFollowUp = userMsgCount > 1;
     const systemPrompt = isFollowUp
       ? `You are NyayTak's legal assistant.
 The user is asking a follow-up question regarding their legal issue.
 Answer their question DIRECTLY, conversationally, and precisely in ${langPrompt}.
-Do NOT repeat the "Haq", "Kanoon", "Kadam", "Samay" structure headings. Just reply naturally to their question.
+Do NOT repeat the "Haq", "Kanoon", "Kadam", "Samay", "Precedent" structure headings. Just reply naturally to their question.
 Keep your response under 15 lines.
 At the very end of your response, you MUST append follow-up questions formatted exactly as:
 ###FU###
