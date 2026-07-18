@@ -53,6 +53,7 @@ import {
   CAT_PORTAL,
   stateSearchUrl,
   buildPrompt,
+  toolPrompt,
   FONT_HEAD,
   FONT_BODY,
 } from "../data.js";
