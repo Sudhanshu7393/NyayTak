@@ -249,7 +249,7 @@ export const authService = {
     return simulatedAuthInstance.signOut();
   },
 
-  signInWithGoogle: async () => {
+  signInWithGoogle: async (customEmail) => {
     if (realAuth) {
       const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
       const provider = new GoogleAuthProvider();
@@ -271,7 +271,36 @@ export const authService = {
 
       return cred.user;
     }
-    return simulatedAuthInstance.signInWithGoogle();
+    
+    // Use selected email or fallback
+    const email = (customEmail || "sudhanshupandey7393@gmail.com").trim().toLowerCase();
+    const displayName = email.split("@")[0];
+    
+    const users = simulatedAuthInstance.getRegisteredUsers();
+    let user = users.find(u => u.email.toLowerCase() === email);
+    if (!user) {
+      user = {
+        uid: `google-${Date.now()}`,
+        email: email,
+        password: "google-linked",
+        displayName: displayName.charAt(0).toUpperCase() + displayName.slice(1),
+        createdAt: new Date().toLocaleDateString("en-IN")
+      };
+      users.push(user);
+      localStorage.setItem("nyaytak_registered_users", JSON.stringify(users));
+    }
+
+    const sessionUser = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      createdAt: user.createdAt
+    };
+
+    simulatedAuthInstance.currentUser = sessionUser;
+    localStorage.setItem("nyaytak_simulated_user", JSON.stringify(sessionUser));
+    simulatedAuthInstance.notify();
+    return sessionUser;
   },
 
   getUsersList: () => {

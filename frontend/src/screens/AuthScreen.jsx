@@ -9,6 +9,7 @@ function AuthScreen({ onAuthSuccess, lang }) {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showGoogleChooser, setShowGoogleChooser] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -249,6 +250,10 @@ function AuthScreen({ onAuthSuccess, lang }) {
           type="button"
           onClick={async () => {
             setErrorMsg("");
+            if (authService.isSimulated) {
+              setShowGoogleChooser(true);
+              return;
+            }
             setLoading(true);
             try {
               const user = await authService.signInWithGoogle();
@@ -293,6 +298,147 @@ function AuthScreen({ onAuthSuccess, lang }) {
           </div>
         )}
       </div>
+
+      {/* Mock Account Chooser Overlay Modal */}
+      {showGoogleChooser && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(2, 6, 17, 0.8)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: 16
+        }}>
+          <div style={{
+            width: "100%",
+            maxWidth: 380,
+            background: "#ffffff",
+            borderRadius: 16,
+            padding: "24px",
+            color: "#1f2937",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+            textAlign: "center",
+            position: "relative"
+          }}>
+            <div style={{ marginBottom: 16 }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" style={{ display: "inline-block" }}>
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.49 3.77v3.12h4.01c2.34-2.15 3.69-5.32 3.69-8.74z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.89-3.02c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.21v3.23C3.18 21.82 7.31 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.27 14.27a7.18 7.18 0 0 1 0-4.54V6.5H1.21a11.97 11.97 0 0 0 0 11.01l4.06-3.24z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43C17.96 1.19 15.24 0 12 0 7.31 0 3.18 2.18 1.21 5.75l4.06 3.23c.95-2.85 3.6-4.96 6.73-4.96z"/>
+              </svg>
+            </div>
+            
+            <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: 700, color: "#111827" }}>
+              {lang === "hi" ? "एक खाता चुनें" : "Choose an account"}
+            </h3>
+            <p style={{ margin: "0 0 20px 0", fontSize: "13px", color: "#6b7280" }}>
+              {lang === "hi" ? "NyayTak पर जारी रखने के लिए" : "to continue to NyayTak"}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 1, textAlign: "left", background: "#f3f4f6", borderRadius: 12, overflow: "hidden", marginBottom: 18 }}>
+              {[
+                { name: "Sudhanshu Pandey", email: "sudhanshupandey7393@gmail.com", bg: "#f59e0b", label: "S" },
+                { name: "Amit Kumar (Assistant)", email: "amit.counsel@gmail.com", bg: "#3b82f6", label: "A" },
+                { name: "Guest User", email: "guest.user@gmail.com", bg: "#10b981", label: "G" }
+              ].map((acc) => (
+                <div
+                  key={acc.email}
+                  onClick={async () => {
+                    setShowGoogleChooser(false);
+                    setLoading(true);
+                    try {
+                      const user = await authService.signInWithGoogle(acc.email);
+                      onAuthSuccess(user);
+                    } catch (err) {
+                      setErrorMsg(err.message || "Google Authentication failed.");
+                      setLoading(false);
+                    }
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "12px 14px",
+                    background: "#ffffff",
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                    borderBottom: "1px solid #f3f4f6"
+                  }}
+                >
+                  <div style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    background: acc.bg,
+                    color: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                    fontSize: "14px"
+                  }}>
+                    {acc.label}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "13.5px", fontWeight: 600, color: "#1f2937" }}>{acc.name}</div>
+                    <div style={{ fontSize: "11.5px", color: "#6b7280" }}>{acc.email}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowGoogleChooser(false);
+                const custom = prompt(lang === "hi" ? "कोई भी ईमेल पता दर्ज करें:" : "Enter any email address:");
+                if (custom && custom.trim()) {
+                  setLoading(true);
+                  authService.signInWithGoogle(custom).then(onAuthSuccess).catch(err => {
+                    setErrorMsg(err.message);
+                    setLoading(false);
+                  });
+                }
+              }}
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "none",
+                background: "transparent",
+                color: "#4285F4",
+                fontWeight: 700,
+                fontSize: "13px",
+                cursor: "pointer"
+              }}
+            >
+              👤 {lang === "hi" ? "किसी अन्य खाते का उपयोग करें" : "Use another account"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowGoogleChooser(false)}
+              style={{
+                marginTop: 10,
+                width: "100%",
+                padding: "10px",
+                borderRadius: 8,
+                border: "1px solid #d1d5db",
+                background: "#ffffff",
+                color: "#374151",
+                fontWeight: 700,
+                fontSize: "13px",
+                cursor: "pointer"
+              }}
+            >
+              {lang === "hi" ? "रद्द करें" : "Cancel"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
