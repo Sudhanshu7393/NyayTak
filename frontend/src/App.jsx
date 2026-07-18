@@ -49,6 +49,11 @@ export default function App() {
     const unsubscribe = authService.onAuthStateChanged((u) => {
       setUser(u);
     });
+    if (authService.handleRedirectResult) {
+      authService.handleRedirectResult((u) => {
+        if (u) setUser(u);
+      });
+    }
     return unsubscribe;
   }, []);
 

@@ -24,7 +24,11 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from "firebase/auth";
 
 const keys = {
@@ -251,8 +255,14 @@ export const authService = {
 
   signInWithGoogle: async (customEmail) => {
     if (realAuth) {
-      const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
       const provider = new GoogleAuthProvider();
+      
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(realAuth, provider);
+        return null;
+      }
+      
       const cred = await signInWithPopup(realAuth, provider);
       
       try {
@@ -301,6 +311,32 @@ export const authService = {
     localStorage.setItem("nyaytak_simulated_user", JSON.stringify(sessionUser));
     simulatedAuthInstance.notify();
     return sessionUser;
+  },
+
+  handleRedirectResult: async (callback) => {
+    if (realAuth) {
+      try {
+        const result = await getRedirectResult(realAuth);
+        if (result?.user) {
+          try {
+            const raw = localStorage.getItem("nyaytak_registered_users") || "[]";
+            const list = JSON.parse(raw);
+            if (!list.some(u => u.email.toLowerCase() === result.user.email.toLowerCase())) {
+              list.push({
+                uid: result.user.uid,
+                email: result.user.email,
+                displayName: result.user.displayName || result.user.email.split("@")[0],
+                createdAt: new Date().toLocaleDateString("en-IN")
+              });
+              localStorage.setItem("nyaytak_registered_users", JSON.stringify(list));
+            }
+          } catch (_) {}
+          callback(result.user);
+        }
+      } catch (error) {
+        console.error("Redirect auth error:", error);
+      }
+    }
   },
 
   getUsersList: () => {
