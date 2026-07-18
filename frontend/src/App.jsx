@@ -51,9 +51,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Check if prompt was already captured globally
+    if (window.deferredInstallPrompt && !isInstalled) {
+      setInstallPrompt(window.deferredInstallPrompt);
+      setShowInstallPopup(true);
+    }
+
     const handlePrompt = (e) => {
       e.preventDefault();
-      // Only show install popup if not already running as installed app
+      window.deferredInstallPrompt = e;
       if (!isInstalled) {
         setInstallPrompt(e);
         setShowInstallPopup(true);
@@ -61,10 +67,19 @@ export default function App() {
     };
     window.addEventListener("beforeinstallprompt", handlePrompt);
 
+    const handleCustomPrompt = () => {
+      if (window.deferredInstallPrompt && !isInstalled) {
+        setInstallPrompt(window.deferredInstallPrompt);
+        setShowInstallPopup(true);
+      }
+    };
+    window.addEventListener("pwa-prompt-available", handleCustomPrompt);
+
     const handleInstalled = () => {
       setIsInstalled(true);
       setInstallPrompt(null);
       setShowInstallPopup(false);
+      window.deferredInstallPrompt = null;
     };
     window.addEventListener("appinstalled", handleInstalled);
 
@@ -76,18 +91,33 @@ export default function App() {
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handlePrompt);
+      window.removeEventListener("pwa-prompt-available", handleCustomPrompt);
       window.removeEventListener("appinstalled", handleInstalled);
       mediaQuery.removeEventListener('change', handleMediaChange);
     };
   }, [isInstalled]);
 
   const handleInstallClick = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    console.log(`User response to install: ${outcome}`);
-    setInstallPrompt(null);
-    setShowInstallPopup(false);
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      console.log(`User response to install: ${outcome}`);
+      setInstallPrompt(null);
+      setShowInstallPopup(false);
+    } else if (window.deferredInstallPrompt) {
+      const prompt = window.deferredInstallPrompt;
+      prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      console.log(`User response to install: ${outcome}`);
+      window.deferredInstallPrompt = null;
+      setInstallPrompt(null);
+      setShowInstallPopup(false);
+    } else {
+      alert(lang === "hi" 
+        ? "आपका ब्राउज़र डायरेक्ट डाउनलोड का समर्थन नहीं कर रहा है। कृपया ब्राउज़र मेनू (⋮) खोलकर 'Add to Home screen' या 'Install App' चुनें।" 
+        : "Direct installation is not supported by your browser. Please open the browser menu (⋮) and select 'Add to Home screen' or 'Install App'.");
+      setShowInstallPopup(false);
+    }
   };
 
   const handleInstallRequest = async () => {
@@ -97,8 +127,17 @@ export default function App() {
       console.log(`User response to install: ${outcome}`);
       setInstallPrompt(null);
       setShowInstallPopup(false);
+    } else if (window.deferredInstallPrompt) {
+      const prompt = window.deferredInstallPrompt;
+      prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      console.log(`User response to install: ${outcome}`);
+      window.deferredInstallPrompt = null;
+      setInstallPrompt(null);
+      setShowInstallPopup(false);
     } else {
-      setShowInstallGuide(true);
+      // Show the install popup card at the bottom of the screen instead of showing the help instructions modal
+      setShowInstallPopup(true);
     }
   };
 
