@@ -151,6 +151,41 @@ class SimulatedAuth {
     return sessionUser;
   }
 
+  async signInWithGoogle() {
+    const mockEmail = prompt("Enter simulated Google email address to sign in:", "sudhanshu.google@gmail.com");
+    if (!mockEmail || !mockEmail.trim()) {
+      throw new Error("Google login cancelled or invalid email.");
+    }
+    const email = mockEmail.trim().toLowerCase();
+    const displayName = email.split("@")[0];
+    
+    const users = this.getRegisteredUsers();
+    let user = users.find(u => u.email.toLowerCase() === email);
+    if (!user) {
+      user = {
+        uid: `google-${Date.now()}`,
+        email: email,
+        password: "google-linked",
+        displayName: displayName.charAt(0).toUpperCase() + displayName.slice(1),
+        createdAt: new Date().toLocaleDateString("en-IN")
+      };
+      users.push(user);
+      localStorage.setItem("nyaytak_registered_users", JSON.stringify(users));
+    }
+
+    const sessionUser = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      createdAt: user.createdAt
+    };
+
+    this.currentUser = sessionUser;
+    localStorage.setItem("nyaytak_simulated_user", JSON.stringify(sessionUser));
+    this.notify();
+    return sessionUser;
+  }
+
   async signOut() {
     this.currentUser = null;
     localStorage.removeItem("nyaytak_simulated_user");
@@ -212,6 +247,31 @@ export const authService = {
       return signOut(realAuth);
     }
     return simulatedAuthInstance.signOut();
+  },
+
+  signInWithGoogle: async () => {
+    if (realAuth) {
+      const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+      const provider = new GoogleAuthProvider();
+      const cred = await signInWithPopup(realAuth, provider);
+      
+      try {
+        const raw = localStorage.getItem("nyaytak_registered_users") || "[]";
+        const list = JSON.parse(raw);
+        if (!list.some(u => u.email.toLowerCase() === cred.user.email.toLowerCase())) {
+          list.push({
+            uid: cred.user.uid,
+            email: cred.user.email,
+            displayName: cred.user.displayName || cred.user.email.split("@")[0],
+            createdAt: new Date().toLocaleDateString("en-IN")
+          });
+          localStorage.setItem("nyaytak_registered_users", JSON.stringify(list));
+        }
+      } catch (_) {}
+
+      return cred.user;
+    }
+    return simulatedAuthInstance.signInWithGoogle();
   },
 
   getUsersList: () => {

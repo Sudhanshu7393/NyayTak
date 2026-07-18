@@ -237,6 +237,55 @@ function AuthScreen({ onAuthSuccess, lang }) {
           </button>
         </form>
 
+        <div style={{ display: "flex", alignItems: "center", margin: "20px 0" }}>
+          <div style={{ flex: 1, height: "1px", background: "rgba(255, 255, 255, 0.08)" }} />
+          <span style={{ padding: "0 10px", fontSize: "11.5px", color: "#64748b", fontWeight: 600 }}>
+            {lang === "hi" ? "अथवा" : "OR"}
+          </span>
+          <div style={{ flex: 1, height: "1px", background: "rgba(255, 255, 255, 0.08)" }} />
+        </div>
+
+        <button
+          type="button"
+          onClick={async () => {
+            setErrorMsg("");
+            setLoading(true);
+            try {
+              const user = await authService.signInWithGoogle();
+              onAuthSuccess(user);
+            } catch (err) {
+              setErrorMsg(err.message || "Google Authentication failed.");
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "13px",
+            borderRadius: 12,
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "rgba(255, 255, 255, 0.05)",
+            color: "#ffffff",
+            fontWeight: 700,
+            fontSize: "13.5px",
+            cursor: loading ? "not-allowed" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            transition: "background 0.2s"
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.49 3.77v3.12h4.01c2.34-2.15 3.69-5.32 3.69-8.74z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.89-3.02c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.21v3.23C3.18 21.82 7.31 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.27 14.27a7.18 7.18 0 0 1 0-4.54V6.5H1.21a11.97 11.97 0 0 0 0 11.01l4.06-3.24z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43C17.96 1.19 15.24 0 12 0 7.31 0 3.18 2.18 1.21 5.75l4.06 3.23c.95-2.85 3.6-4.96 6.73-4.96z"/>
+          </svg>
+          <span>{lang === "hi" ? "गूगल के साथ लॉगिन करें" : "Sign in with Google"}</span>
+        </button>
+
         {/* Sandbox Notice */}
         {authService.isSimulated && (
           <div style={{ marginTop: 24, fontSize: "11px", color: "#64748b" }}>
