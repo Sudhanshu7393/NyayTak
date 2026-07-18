@@ -699,6 +699,7 @@ const SEC_STYLE = {
   "🏛️": { c: "#a78bfa", b: "rgba(167,139,250,0.14)" },
   "⚠️": { c: "#fb7185", b: "rgba(251,113,133,0.14)" },
   "🫂": { c: "#fb7185", b: "rgba(251,113,133,0.14)" },
+  "📜": { c: "#38bdf8", b: "rgba(56,189,248,0.14)" },
 };
 
 const SEC_KEYS = Object.keys(SEC_STYLE);
