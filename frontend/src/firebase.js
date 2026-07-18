@@ -335,6 +335,7 @@ export const authService = {
         }
       } catch (error) {
         console.error("Redirect auth error:", error);
+        alert("Firebase Auth Redirect Error: " + error.message);
       }
     }
   },
