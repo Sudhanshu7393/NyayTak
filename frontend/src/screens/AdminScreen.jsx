@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Trash2, Plus, Users, Calendar, TrendingUp, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Users, Calendar, TrendingUp, ShieldCheck, Mail, ShieldAlert } from "lucide-react";
 import { STATE_DISTRICTS } from "../districts.js";
 import { REAL_LAWYERS } from "../lawyers.js";
+import { authService } from "../firebase.js";
 
 function AdminScreen({ onBack, lang }) {
   const [activeTab, setActiveTab] = useState("lawyers");
   const [customLawyers, setCustomLawyers] = useState({});
   const [appointments, setAppointments] = useState([]);
+  const [adminEmails, setAdminEmails] = useState([]);
+  const [usersList, setUsersList] = useState([]);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
   
   // New Lawyer Form State
   const [selectedState, setSelectedState] = useState("");
@@ -30,6 +34,21 @@ function AdminScreen({ onBack, lang }) {
       const rawApts = localStorage.getItem("nyaytak_appointments");
       if (rawApts) setAppointments(JSON.parse(rawApts));
     } catch (_) {}
+
+    // Load admin emails
+    try {
+      const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
+      if (rawAdmins) {
+        setAdminEmails(JSON.parse(rawAdmins));
+      } else {
+        const defaultAdmins = ["sudhanshupandey7393@gmail.com"];
+        setAdminEmails(defaultAdmins);
+        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(defaultAdmins));
+      }
+    } catch (_) {}
+
+    // Load registered users list
+    setUsersList(authService.getUsersList());
   }, []);
 
   const saveCustomLawyers = (updated) => {
@@ -91,6 +110,35 @@ function AdminScreen({ onBack, lang }) {
     } catch (_) {}
   };
 
+  const handleAddAdmin = (e) => {
+    e.preventDefault();
+    if (!newAdminEmail.trim() || !newAdminEmail.includes("@")) {
+      alert("Please enter a valid email address!");
+      return;
+    }
+    const email = newAdminEmail.trim().toLowerCase();
+    if (adminEmails.includes(email)) {
+      alert("This email is already an admin!");
+      return;
+    }
+    const updated = [...adminEmails, email];
+    setAdminEmails(updated);
+    localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
+    setNewAdminEmail("");
+    alert(`${email} added as administrator.`);
+  };
+
+  const handleDeleteAdmin = (email) => {
+    if (email === "sudhanshupandey7393@gmail.com") {
+      alert("Root administrator cannot be removed!");
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to remove ${email} from administrators?`)) return;
+    const updated = adminEmails.filter(e => e !== email);
+    setAdminEmails(updated);
+    localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
+  };
+
   // Merge static real lawyers and custom ones for counting
   const allKeys = Array.from(new Set([...Object.keys(REAL_LAWYERS), ...Object.keys(customLawyers)]));
   let totalLawyers = 0;
@@ -135,7 +183,7 @@ function AdminScreen({ onBack, lang }) {
             <ShieldCheck size={22} /> {lang === "hi" ? "नियंत्रण पटल (Admin Control)" : "Admin Dashboard"}
           </h2>
           <span style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)" }}>
-            Configure directory listings and view scheduled bookings
+            Configure directory listings, view users database, and approve admins
           </span>
         </div>
       </div>
@@ -144,8 +192,8 @@ function AdminScreen({ onBack, lang }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 24 }}>
         <div style={{ background: "var(--surface)", padding: 14, borderRadius: 14, border: "1px solid var(--border)", textAlign: "center" }}>
           <Users size={20} style={{ color: "#f0a500", marginBottom: 4 }} />
-          <div style={{ fontSize: "calc(18px * var(--fs))", fontWeight: 800 }}>{totalLawyers}</div>
-          <div style={{ fontSize: "calc(10.5px * var(--fs))", color: "var(--text-dim)" }}>Total Lawyers</div>
+          <div style={{ fontSize: "calc(18px * var(--fs))", fontWeight: 800 }}>{usersList.length}</div>
+          <div style={{ fontSize: "calc(10.5px * var(--fs))", color: "var(--text-dim)" }}>Signed-up Users</div>
         </div>
         <div style={{ background: "var(--surface)", padding: 14, borderRadius: 14, border: "1px solid var(--border)", textAlign: "center" }}>
           <Calendar size={20} style={{ color: "#22c55e", marginBottom: 4 }} />
@@ -154,13 +202,13 @@ function AdminScreen({ onBack, lang }) {
         </div>
         <div style={{ background: "var(--surface)", padding: 14, borderRadius: 14, border: "1px solid var(--border)", textAlign: "center" }}>
           <TrendingUp size={20} style={{ color: "#3b82f6", marginBottom: 4 }} />
-          <div style={{ fontSize: "calc(18px * var(--fs))", fontWeight: 800 }}>{allKeys.length}</div>
-          <div style={{ fontSize: "calc(10.5px * var(--fs))", color: "var(--text-dim)" }}>Active Cities</div>
+          <div style={{ fontSize: "calc(18px * var(--fs))", fontWeight: 800 }}>{totalLawyers}</div>
+          <div style={{ fontSize: "calc(10.5px * var(--fs))", color: "var(--text-dim)" }}>Active Directory</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid var(--border)", marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid var(--border)", marginBottom: 20, overflowX: "auto", whiteSpace: "nowrap" }}>
         <button
           onClick={() => setActiveTab("lawyers")}
           style={{
@@ -169,12 +217,12 @@ function AdminScreen({ onBack, lang }) {
             background: "transparent",
             color: activeTab === "lawyers" ? "#f0a500" : "var(--text-dim)",
             fontWeight: 700,
-            fontSize: "calc(13.5px * var(--fs))",
+            fontSize: "calc(13px * var(--fs))",
             borderBottom: activeTab === "lawyers" ? "2px solid #f0a500" : "none",
             cursor: "pointer"
           }}
         >
-          👥 Manage Lawyers
+          👥 Lawyers
         </button>
         <button
           onClick={() => setActiveTab("bookings")}
@@ -184,17 +232,47 @@ function AdminScreen({ onBack, lang }) {
             background: "transparent",
             color: activeTab === "bookings" ? "#f0a500" : "var(--text-dim)",
             fontWeight: 700,
-            fontSize: "calc(13.5px * var(--fs))",
+            fontSize: "calc(13px * var(--fs))",
             borderBottom: activeTab === "bookings" ? "2px solid #f0a500" : "none",
             cursor: "pointer"
           }}
         >
-          📅 Bookings List
+          📅 Bookings
+        </button>
+        <button
+          onClick={() => setActiveTab("users")}
+          style={{
+            padding: "10px 14px",
+            border: "none",
+            background: "transparent",
+            color: activeTab === "users" ? "#f0a500" : "var(--text-dim)",
+            fontWeight: 700,
+            fontSize: "calc(13px * var(--fs))",
+            borderBottom: activeTab === "users" ? "2px solid #f0a500" : "none",
+            cursor: "pointer"
+          }}
+        >
+          👤 Registered Users
+        </button>
+        <button
+          onClick={() => setActiveTab("admins")}
+          style={{
+            padding: "10px 14px",
+            border: "none",
+            background: "transparent",
+            color: activeTab === "admins" ? "#f0a500" : "var(--text-dim)",
+            fontWeight: 700,
+            fontSize: "calc(13px * var(--fs))",
+            borderBottom: activeTab === "admins" ? "2px solid #f0a500" : "none",
+            cursor: "pointer"
+          }}
+        >
+          🛡️ Admin Emails
         </button>
       </div>
 
       {/* Tab Contents */}
-      {activeTab === "lawyers" ? (
+      {activeTab === "lawyers" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Add Lawyer Form */}
           <form onSubmit={handleAddLawyer} style={{
@@ -372,7 +450,9 @@ function AdminScreen({ onBack, lang }) {
             )}
           </div>
         </div>
-      ) : (
+      )}
+
+      {activeTab === "bookings" && (
         <div style={{ textAlign: "left" }}>
           <h3 style={{ fontSize: "calc(14.5px * var(--fs))", fontWeight: 700, color: "var(--text)", margin: "0 0 12px 0" }}>
             🗓️ User Booked Consultations
@@ -431,6 +511,150 @@ function AdminScreen({ onBack, lang }) {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === "users" && (
+        <div style={{ textAlign: "left" }}>
+          <h3 style={{ fontSize: "calc(14.5px * var(--fs))", fontWeight: 700, color: "var(--text)", margin: "0 0 12px 0" }}>
+            👤 Registered Users Database
+          </h3>
+          {usersList.length === 0 ? (
+            <div style={{ padding: "40px 10px", background: "var(--surface)", border: "1px dashed var(--border)", borderRadius: 12, textAlign: "center", color: "var(--text-dim)", fontSize: "calc(12.5px * var(--fs))" }}>
+              No users registered yet.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {usersList.map((user) => (
+                <div key={user.uid} style={{
+                  padding: "12px 14px",
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 12,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}>
+                  <div>
+                    <b style={{ color: "var(--text)", fontSize: "calc(13.5px * var(--fs))" }}>{user.displayName}</b>
+                    <div style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)" }}>📧 {user.email}</div>
+                    <div style={{ fontSize: "calc(10.5px * var(--fs))", color: "var(--text-dim)", marginTop: 2 }}>
+                      Registered on: {user.createdAt || "N/A"}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: "calc(11px * var(--fs))", color: "var(--text-dim)", fontFamily: "monospace" }}>
+                    {user.uid}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "admins" && (
+        <div style={{ textAlign: "left" }}>
+          {/* Add Admin Email Form */}
+          <form onSubmit={handleAddAdmin} style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10
+          }}>
+            <h3 style={{ margin: 0, fontSize: "calc(14px * var(--fs))", fontWeight: 700, color: "var(--text)" }}>
+              🛡️ Authorize New Administrator Email
+            </h3>
+            <p style={{ margin: 0, fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)" }}>
+              Only users logged in with these email addresses will be allowed to access the admin portal dashboard.
+            </p>
+            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+              <input
+                type="email"
+                placeholder="e.g. advocate.friend@gmail.com"
+                value={newAdminEmail}
+                onChange={(e) => setNewAdminEmail(e.target.value)}
+                required
+                style={{
+                  flex: 1,
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--bg)",
+                  color: "var(--text)",
+                  fontFamily: "inherit"
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: "0 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#f0a500",
+                  color: "#0a0e1a",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4
+                }}
+              >
+                <Plus size={16} /> Authorize
+              </button>
+            </div>
+          </form>
+
+          <h3 style={{ fontSize: "calc(14.5px * var(--fs))", fontWeight: 700, color: "var(--text)", margin: "0 0 12px 0" }}>
+            🔒 Approved Admin Emails
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {adminEmails.map((email) => (
+              <div key={email} style={{
+                padding: "12px 14px",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 12,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Mail size={16} style={{ color: "#f0a500" }} />
+                  <span style={{ fontWeight: 600, fontSize: "calc(13.5px * var(--fs))", color: "var(--text)" }}>
+                    {email}
+                  </span>
+                  {email === "sudhanshupandey7393@gmail.com" && (
+                    <span style={{ fontSize: "calc(10px * var(--fs))", background: "rgba(240,165,0,0.15)", color: "#f0a500", padding: "1px 6px", borderRadius: 10, fontWeight: 700 }}>
+                      ROOT OWNER
+                    </span>
+                  )}
+                </div>
+                {email !== "sudhanshupandey7393@gmail.com" && (
+                  <button
+                    onClick={() => handleDeleteAdmin(email)}
+                    style={{
+                      background: "rgba(239,68,68,0.1)",
+                      border: "none",
+                      borderRadius: 8,
+                      width: 32,
+                      height: 32,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      color: "#ef4444"
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

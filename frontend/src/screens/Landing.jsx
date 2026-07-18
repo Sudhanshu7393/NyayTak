@@ -453,20 +453,17 @@ function Landing({
           <span style={{ color: "#f0a500", fontWeight: 700 }}>
             Sudhanshu Pandey
           </span>
-          {" | "}
-          <span
-            onClick={() => {
-              const pin = prompt(lang === "hi" ? "नियंत्रण पटल अनलॉक करने के लिए पिन दर्ज करें (डिफ़ॉल्ट: 9935):" : "Enter PIN to unlock Admin Control (Default: 9935):");
-              if (pin === "9935") {
-                onAdminClick();
-              } else if (pin !== null) {
-                alert(lang === "hi" ? "गलत पिन कोड!" : "Invalid PIN!");
-              }
-            }}
-            style={{ cursor: "pointer", color: "var(--text-dim)", textDecoration: "underline" }}
-          >
-            {lang === "hi" ? "नियंत्रण पटल" : "Admin Portal"}
-          </span>
+          {onAdminClick && (
+            <>
+              {" | "}
+              <span
+                onClick={onAdminClick}
+                style={{ cursor: "pointer", color: "var(--text-dim)", textDecoration: "underline" }}
+              >
+                {lang === "hi" ? "नियंत्रण पटल" : "Admin Portal"}
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -7,6 +7,8 @@ import ScenarioSelect from "./screens/ScenarioSelect.jsx";
 import ChatScreen from "./screens/ChatScreen.jsx";
 import SavedPanel from "./screens/SavedPanel.jsx";
 import AdminScreen from "./screens/AdminScreen.jsx";
+import AuthScreen from "./screens/AuthScreen.jsx";
+import { authService } from "./firebase.js";
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
@@ -15,6 +17,9 @@ export default function App() {
   const [lang, setLang] = useState("hinglish");
   const [theme, setTheme] = useState("dark");
   const [fontScale, setFontScale] = useState(1);
+
+  const [user, setUser] = useState(null);
+  const [adminEmails, setAdminEmails] = useState([]);
 
   const [saved, setSaved] = useState(() => {
     try {
@@ -39,6 +44,26 @@ export default function App() {
     document.body.style.background = theme === "dark" ? "#0a0e1a" : "#f5f3ef";
     document.body.style.color = theme === "dark" ? "#e0e0e0" : "#1a1a1a";
   }, [fontScale, theme]);
+
+  useEffect(() => {
+    const unsubscribe = authService.onAuthStateChanged((u) => {
+      setUser(u);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    try {
+      const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
+      if (rawAdmins) {
+        setAdminEmails(JSON.parse(rawAdmins));
+      } else {
+        const defaultAdmins = ["sudhanshupandey7393@gmail.com"];
+        setAdminEmails(defaultAdmins);
+        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(defaultAdmins));
+      }
+    } catch (_) {}
+  }, [screen]);
 
   useEffect(() => {
     window.history.pushState({ screen }, "");
@@ -192,6 +217,10 @@ export default function App() {
     }
   };
 
+  if (!user) {
+    return <AuthScreen onAuthSuccess={setUser} lang={lang} />;
+  }
+
   return (
     <div
       style={{
@@ -259,10 +288,14 @@ export default function App() {
           }}
           onInstallClick={handleInstallRequest}
           isInstalled={isInstalled}
-          onAdminClick={() => {
-            setScreen("admin");
-            window.history.pushState({ screen: "admin" }, "");
-          }}
+          onAdminClick={
+            adminEmails.includes(user?.email?.toLowerCase())
+              ? () => {
+                  setScreen("admin");
+                  window.history.pushState({ screen: "admin" }, "");
+                }
+              : null
+          }
         />
       )}
 
@@ -311,10 +344,14 @@ export default function App() {
             saved={saved}
             onToggleSave={onToggleSave}
             onShowSaved={() => setShowSavedPanel(true)}
-            onAdminClick={() => {
-              setScreen("admin");
-              window.history.pushState({ screen: "admin" }, "");
-            }}
+            onAdminClick={
+              adminEmails.includes(user?.email?.toLowerCase())
+                ? () => {
+                    setScreen("admin");
+                    window.history.pushState({ screen: "admin" }, "");
+                  }
+                : null
+            }
           />
         );
       })()}

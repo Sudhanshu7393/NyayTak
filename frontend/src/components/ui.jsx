@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { FONT_HEAD, FONT_BODY, LANGS, STATES } from "../data.js";
 import { startVoice } from "../lib.js";
+import { authService } from "../firebase.js";
 
 const JaliSVG = ({ opacity = 0.2 }) => (
   <svg
@@ -404,16 +405,11 @@ function SettingsBtn({
               <button
                 onClick={() => {
                   setOpen(false);
-                  const pin = prompt(t.langCode === "hi" ? "नियंत्रण पटल अनलॉक करने के लिए पिन दर्ज करें (डिफ़ॉल्ट: 9935):" : "Enter PIN to unlock Admin Control (Default: 9935):");
-                  if (pin === "9935") {
-                    onAdminClick();
-                  } else if (pin !== null) {
-                    alert(t.langCode === "hi" ? "गलत पिन कोड!" : "Invalid PIN!");
-                  }
+                  onAdminClick();
                 }}
                 style={{
                   width: "100%",
-                  marginTop: 6,
+                  marginTop: 8,
                   padding: "9px",
                   borderRadius: 10,
                   cursor: "pointer",
@@ -425,9 +421,32 @@ function SettingsBtn({
                   color: "#f0a500",
                 }}
               >
-                ⚙️ {t.langCode === "hi" ? "नियंत्रण पटल (Admin Portal)" : "Admin Portal"}
+                ⚙️ {t.langCode === "hi" ? "नियंत्रण पटल" : "Admin Portal"}
               </button>
             )}
+            <button
+              onClick={() => {
+                setOpen(false);
+                if (window.confirm(t.langCode === "hi" ? "क्या आप लॉग आउट करना चाहते हैं?" : "Are you sure you want to sign out?")) {
+                  authService.signOut();
+                }
+              }}
+              style={{
+                width: "100%",
+                marginTop: 6,
+                padding: "9px",
+                borderRadius: 10,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                fontSize: "calc(11.5px * var(--fs))",
+                fontWeight: 700,
+                background: "rgba(239,68,68,0.06)",
+                border: "1px dashed rgba(239,68,68,0.3)",
+                color: "#ef4444",
+              }}
+            >
+              🚪 {t.langCode === "hi" ? "लॉग आउट करें" : "Sign Out"}
+            </button>
           </div>
         </>
       )}
