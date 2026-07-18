@@ -11,7 +11,14 @@ export async function callClaude(body) {
       ...body,
     }),
   });
-  if (!res.ok) throw new Error("API error " + res.status);
+  if (!res.ok) {
+    let errMsg = "API error " + res.status;
+    try {
+      const errData = await res.json();
+      if (errData.error) errMsg = errData.error;
+    } catch (_) {}
+    throw new Error(errMsg);
+  }
   const data = await res.json();
   return (data.content || [])
     .filter((b) => b.type === "text")

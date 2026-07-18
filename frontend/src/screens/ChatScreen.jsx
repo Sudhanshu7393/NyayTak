@@ -178,6 +178,7 @@ function ChatScreen({
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const docInputRef = useRef(null);
   const catEn = cat.tr.en.t;
+  const isError = toolText.startsWith("API error") || toolText.includes("Network issues") || toolText.includes("Failed to fetch") || toolText === t.networkErr;
   const langPrompt = LANGS.find((l) => l.code === lang).prompt;
   const speechLang = LANGS.find((l) => l.code === lang).speech;
   const crisis = isCrisis(cat.id, scenarioIdx, custom ? scenario : null);
@@ -417,9 +418,10 @@ async function handleDocumentUpload(e) {
         ) || t.noAnswer;
       setTool({ kind, loading: false, text });
       setToolText(text);
-    } catch (_) {
-      setTool({ kind, loading: false, text: t.networkErr });
-      setToolText(t.networkErr);
+    } catch (e) {
+      const errMsg = e.message || t.networkErr;
+      setTool({ kind, loading: false, text: errMsg });
+      setToolText(errMsg);
     }
   }
 
@@ -468,9 +470,10 @@ GUIDELINES FOR THE BODY:
         ) || t.noAnswer;
       setTool({ kind: "complaint", loading: false, text });
       setToolText(text);
-    } catch (_) {
-      setTool({ kind: "complaint", loading: false, text: t.networkErr });
-      setToolText(t.networkErr);
+    } catch (e) {
+      const errMsg = e.message || t.networkErr;
+      setTool({ kind: "complaint", loading: false, text: errMsg });
+      setToolText(errMsg);
     }
   }
 
@@ -1260,7 +1263,7 @@ GUIDELINES FOR THE BODY:
                 }}
               />
             </>
-          ) : tool.kind === "docs" && parseDocs(toolText).length > 0 ? (
+          ) : tool.kind === "docs" && !isError && parseDocs(toolText).length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", textAlign: "left", marginBottom: 4 }}>
                 📋 {lang === "hi" ? "दस्तावेज चेकलिस्ट (इकट्ठा किए गए दस्तावेजों को टिक करें):" : "Document Checklist (Check items as you collect them):"}
@@ -1298,42 +1301,75 @@ GUIDELINES FOR THE BODY:
                 </label>
               ))}
             </div>
-          ) : tool.kind === "strength" ? (
+          ) : tool.kind === "strength" && !isError ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: 14,
-                padding: 16,
-                textAlign: "left"
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <span style={{ fontSize: "calc(13px * var(--fs))", fontWeight: 600, color: "var(--text-mid)" }}>
-                    {lang === "hi" ? "केस की मजबूती:" : "Case Strength:"}
-                  </span>
-                  <span style={{
-                    fontSize: "calc(13.5px * var(--fs))",
-                    fontWeight: 700,
-                    color: getStrengthLevel(toolText) === "strong" ? "#22c55e" : getStrengthLevel(toolText) === "weak" ? "#ef4444" : "#f0a500",
-                    textTransform: "uppercase"
-                  }}>
-                    {getStrengthLevel(toolText) === "strong" 
-                      ? (lang === "hi" ? "मजबूत (Strong)" : "Strong") 
-                      : getStrengthLevel(toolText) === "weak" 
-                      ? (lang === "hi" ? "कमजोर (Weak)" : "Weak") 
-                      : (lang === "hi" ? "मध्यम (Medium)" : "Medium")}
-                  </span>
-                </div>
-                <div style={{ width: "100%", height: 8, background: "var(--border-soft)", borderRadius: 4, overflow: "hidden", marginBottom: 6 }}>
+              {(() => {
+                const level = getStrengthLevel(toolText);
+                const pct = level === "strong" ? 85 : level === "weak" ? 25 : 55;
+                const color = level === "strong" ? "#22c55e" : level === "weak" ? "#ef4444" : "#f0a500";
+                const label = level === "strong" ? (lang === "hi" ? "मजबूत (Strong)" : "Strong") : level === "weak" ? (lang === "hi" ? "कमजोर (Weak)" : "Weak") : (lang === "hi" ? "मध्यम (Medium)" : "Medium");
+                const bg = level === "strong" ? "rgba(34,197,94,0.1)" : level === "weak" ? "rgba(239,68,68,0.1)" : "rgba(240,165,0,0.1)";
+                const radius = 30;
+                const circ = Math.PI * radius;
+                const offset = circ * (1 - pct / 100);
+
+                return (
                   <div style={{
-                    width: getStrengthLevel(toolText) === "strong" ? "85%" : getStrengthLevel(toolText) === "weak" ? "25%" : "55%",
-                    height: "100%",
-                    background: getStrengthLevel(toolText) === "strong" ? "linear-gradient(90deg,#22c55e,#16a34a)" : getStrengthLevel(toolText) === "weak" ? "linear-gradient(90deg,#ef4444,#dc2626)" : "linear-gradient(90deg,#f0a500,#d4860a)",
-                    borderRadius: 4,
-                    transition: "width 0.8s ease-out"
-                  }} />
-                </div>
-              </div>
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "16px",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 16,
+                    textAlign: "center"
+                  }}>
+                    <div style={{ position: "relative", width: 140, height: 75, display: "flex", justifyContent: "center" }}>
+                      <svg width="140" height="80" viewBox="0 0 100 55">
+                        <path
+                          d="M 20,50 A 30,30 0 0,1 80,50"
+                          fill="none"
+                          stroke="var(--border-soft)"
+                          strokeWidth="7"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M 20,50 A 30,30 0 0,1 80,50"
+                          fill="none"
+                          stroke={color}
+                          strokeWidth="7"
+                          strokeLinecap="round"
+                          strokeDasharray={circ}
+                          strokeDashoffset={offset}
+                          style={{ transition: "stroke-dashoffset 1s ease-out" }}
+                        />
+                      </svg>
+                      <div style={{
+                        position: "absolute",
+                        bottom: 4,
+                        fontSize: "calc(17px * var(--fs))",
+                        fontWeight: 800,
+                        color: "var(--text)"
+                      }}>
+                        {pct}%
+                      </div>
+                    </div>
+                    <div style={{
+                      fontSize: "calc(12px * var(--fs))",
+                      fontWeight: 700,
+                      color: color,
+                      textTransform: "uppercase",
+                      marginTop: 2,
+                      padding: "3px 10px",
+                      background: bg,
+                      borderRadius: 20
+                    }}>
+                      {label}
+                    </div>
+                  </div>
+                );
+              })()}
               <pre
                 style={{
                   whiteSpace: "pre-wrap",
