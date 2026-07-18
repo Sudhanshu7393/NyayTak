@@ -6,6 +6,7 @@ import CategorySelect from "./screens/CategorySelect.jsx";
 import ScenarioSelect from "./screens/ScenarioSelect.jsx";
 import ChatScreen from "./screens/ChatScreen.jsx";
 import SavedPanel from "./screens/SavedPanel.jsx";
+import AdminScreen from "./screens/AdminScreen.jsx";
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
@@ -183,6 +184,9 @@ export default function App() {
     } else if (screen === "category") {
       setScreen("landing");
       window.history.pushState({ screen: "landing" }, "");
+    } else if (screen === "admin") {
+      setScreen("landing");
+      window.history.pushState({ screen: "landing" }, "");
     } else if (screen === "landing") {
       // Already on landing
     }
@@ -255,6 +259,10 @@ export default function App() {
           }}
           onInstallClick={handleInstallRequest}
           isInstalled={isInstalled}
+          onAdminClick={() => {
+            setScreen("admin");
+            window.history.pushState({ screen: "admin" }, "");
+          }}
         />
       )}
 
@@ -303,9 +311,20 @@ export default function App() {
             saved={saved}
             onToggleSave={onToggleSave}
             onShowSaved={() => setShowSavedPanel(true)}
+            onAdminClick={() => {
+              setScreen("admin");
+              window.history.pushState({ screen: "admin" }, "");
+            }}
           />
         );
       })()}
+
+      {screen === "admin" && (
+        <AdminScreen
+          onBack={onBack}
+          lang={lang}
+        />
+      )}
 
       <Disclaimer t={t} />
 

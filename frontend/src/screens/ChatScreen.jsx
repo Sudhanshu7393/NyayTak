@@ -77,7 +77,7 @@ import {
   Disclaimer,
 } from "../components/ui.jsx";
 import { STATE_DISTRICTS } from "../districts.js";
-import { REAL_LAWYERS } from "../lawyers.js";
+import { REAL_LAWYERS, getMergedLawyers } from "../lawyers.js";
 
 function ChatScreen({
   cat,
@@ -94,6 +94,7 @@ function ChatScreen({
   saved,
   onToggleSave,
   onShowSaved,
+  onAdminClick,
 }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -277,6 +278,10 @@ async function handleDocumentUpload(e) {
       setMessages(first);
       ask(first);
     }
+    try {
+      const raw = localStorage.getItem("nyaytak_appointments");
+      if (raw) setAppointments(JSON.parse(raw));
+    } catch (_) {}
     scrollDown();
   }, []);
 
@@ -621,7 +626,7 @@ GUIDELINES FOR THE BODY:
           )}
         </button>
         <LangSelect lang={lang} setLang={setLang} />
-        <SettingsBtn t={t} {...settings} />
+        <SettingsBtn t={t} {...settings} onAdminClick={onAdminClick} />
       </div>
 
       {crisis && (
@@ -1742,7 +1747,7 @@ GUIDELINES FOR THE BODY:
                 }
 
                 const key = `${selectedState}|${selectedDistrict}`;
-                let lawyersList = REAL_LAWYERS[key] || [];
+                let lawyersList = getMergedLawyers()[key] || [];
 
                 if (lawyersList.length === 0 && selectedState && selectedDistrict) {
                   // Generate highly realistic local mock specialist advocates dynamically!
@@ -1971,12 +1976,20 @@ GUIDELINES FOR THE BODY:
                       alert(lang === "hi" ? "कृपया एक मान्य 10-अंकीय मोबाइल नंबर दर्ज करें!" : "Please enter a valid 10-digit mobile number!");
                       return;
                     }
-                    setAppointments(prev => [...prev, {
+                    const newBooking = {
+                      bookingId: "NT-BOOK-" + Math.floor(100000 + Math.random() * 900000),
                       lawyerName: bookingLawyer.name,
                       date: bookingDetails.date,
                       time: bookingDetails.time,
                       phone: bookingDetails.phone
-                    }]);
+                    };
+                    setAppointments(prev => {
+                      const updated = [...prev, newBooking];
+                      try {
+                        localStorage.setItem("nyaytak_appointments", JSON.stringify(updated));
+                      } catch (_) {}
+                      return updated;
+                    });
                     setBookingStep(2);
                   }}
                   style={{

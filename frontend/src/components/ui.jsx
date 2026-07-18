@@ -290,6 +290,7 @@ function SettingsBtn({
   setTheme,
   fontScale,
   setFontScale,
+  onAdminClick,
 }) {
   const [open, setOpen] = useState(false);
   const sizes = [
@@ -399,6 +400,34 @@ function SettingsBtn({
                 </button>
               ))}
             </div>
+            {onAdminClick && (
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  const pin = prompt(t.langCode === "hi" ? "नियंत्रण पटल अनलॉक करने के लिए पिन दर्ज करें (डिफ़ॉल्ट: 9935):" : "Enter PIN to unlock Admin Control (Default: 9935):");
+                  if (pin === "9935") {
+                    onAdminClick();
+                  } else if (pin !== null) {
+                    alert(t.langCode === "hi" ? "गलत पिन कोड!" : "Invalid PIN!");
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: 6,
+                  padding: "9px",
+                  borderRadius: 10,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  fontSize: "calc(11.5px * var(--fs))",
+                  fontWeight: 700,
+                  background: "rgba(240,165,0,0.06)",
+                  border: "1px dashed rgba(240,165,0,0.3)",
+                  color: "#f0a500",
+                }}
+              >
+                ⚙️ {t.langCode === "hi" ? "नियंत्रण पटल (Admin Portal)" : "Admin Portal"}
+              </button>
+            )}
           </div>
         </>
       )}

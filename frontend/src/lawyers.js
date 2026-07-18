@@ -45,6 +45,7 @@ export const REAL_LAWYERS = {
       rating: "4.9 ⭐",
       cases: "380+ Cases",
       loc: "Mumbai High Court",
+      ph: "+91 98220 XXXXX"
     }
   ],
   "Uttar Pradesh|Lucknow": [
@@ -59,3 +60,23 @@ export const REAL_LAWYERS = {
     }
   ]
 };
+
+export function getMergedLawyers() {
+  let custom = {};
+  try {
+    const raw = localStorage.getItem("nyaytak_custom_lawyers");
+    if (raw) custom = JSON.parse(raw);
+  } catch (_) {}
+
+  const merged = {};
+  // Clone static entries
+  Object.keys(REAL_LAWYERS).forEach((key) => {
+    merged[key] = [...REAL_LAWYERS[key]];
+  });
+  // Merge custom entries
+  Object.keys(custom).forEach((key) => {
+    if (!merged[key]) merged[key] = [];
+    merged[key] = [...merged[key], ...custom[key]];
+  });
+  return merged;
+}
