@@ -12,6 +12,24 @@ function AdminScreen({ onBack, lang }) {
   const [usersList, setUsersList] = useState([]);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   
+  const getTabStyle = (tabId) => {
+    const isAct = activeTab === tabId;
+    return {
+      padding: "10px 16px",
+      borderRadius: "10px",
+      border: isAct ? "1px solid #f0a500" : "1px solid rgba(255, 255, 255, 0.12)",
+      background: isAct ? "rgba(240, 165, 0, 0.15)" : "rgba(255, 255, 255, 0.05)",
+      color: isAct ? "#f0a500" : "#a3aed0",
+      fontWeight: 700,
+      fontSize: "calc(13px * var(--fs))",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      transition: "all 0.2s ease"
+    };
+  };
+
   // New Lawyer Form State
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
@@ -207,65 +225,26 @@ function AdminScreen({ onBack, lang }) {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 10, borderBottom: "1px solid var(--border)", marginBottom: 20, overflowX: "auto", whiteSpace: "nowrap" }}>
-        <button
-          onClick={() => setActiveTab("lawyers")}
-          style={{
-            padding: "10px 14px",
-            border: "none",
-            background: "transparent",
-            color: activeTab === "lawyers" ? "#f0a500" : "var(--text-dim)",
-            fontWeight: 700,
-            fontSize: "calc(13px * var(--fs))",
-            borderBottom: activeTab === "lawyers" ? "2px solid #f0a500" : "none",
-            cursor: "pointer"
-          }}
-        >
+      <div style={{ 
+        display: "flex", 
+        gap: 12, 
+        borderBottom: "1px solid var(--border)", 
+        paddingBottom: 14, 
+        marginBottom: 20, 
+        overflowX: "auto", 
+        whiteSpace: "nowrap",
+        scrollbarWidth: "auto"
+      }}>
+        <button onClick={() => setActiveTab("lawyers")} style={getTabStyle("lawyers")}>
           👥 Lawyers
         </button>
-        <button
-          onClick={() => setActiveTab("bookings")}
-          style={{
-            padding: "10px 14px",
-            border: "none",
-            background: "transparent",
-            color: activeTab === "bookings" ? "#f0a500" : "var(--text-dim)",
-            fontWeight: 700,
-            fontSize: "calc(13px * var(--fs))",
-            borderBottom: activeTab === "bookings" ? "2px solid #f0a500" : "none",
-            cursor: "pointer"
-          }}
-        >
+        <button onClick={() => setActiveTab("bookings")} style={getTabStyle("bookings")}>
           📅 Bookings
         </button>
-        <button
-          onClick={() => setActiveTab("users")}
-          style={{
-            padding: "10px 14px",
-            border: "none",
-            background: "transparent",
-            color: activeTab === "users" ? "#f0a500" : "var(--text-dim)",
-            fontWeight: 700,
-            fontSize: "calc(13px * var(--fs))",
-            borderBottom: activeTab === "users" ? "2px solid #f0a500" : "none",
-            cursor: "pointer"
-          }}
-        >
+        <button onClick={() => setActiveTab("users")} style={getTabStyle("users")}>
           👤 Registered Users
         </button>
-        <button
-          onClick={() => setActiveTab("admins")}
-          style={{
-            padding: "10px 14px",
-            border: "none",
-            background: "transparent",
-            color: activeTab === "admins" ? "#f0a500" : "var(--text-dim)",
-            fontWeight: 700,
-            fontSize: "calc(13px * var(--fs))",
-            borderBottom: activeTab === "admins" ? "2px solid #f0a500" : "none",
-            cursor: "pointer"
-          }}
-        >
+        <button onClick={() => setActiveTab("admins")} style={getTabStyle("admins")}>
           🛡️ Admin Emails
         </button>
       </div>
