@@ -1749,49 +1749,25 @@ GUIDELINES FOR THE BODY:
                 const key = `${selectedState}|${selectedDistrict}`;
                 let lawyersList = getMergedLawyers()[key] || [];
 
-                if (lawyersList.length === 0 && selectedState && selectedDistrict) {
-                  // Generate highly realistic local mock specialist advocates dynamically!
-                  lawyersList = [
-                    {
-                      id: `gen-${selectedDistrict}-1`,
-                      name: `Adv. Santosh Pandey`,
-                      exp: "Property, Civil Disputes & Land Mutations",
-                      rating: "4.8 ⭐",
-                      cases: "160+ Local Cases",
-                      loc: `${selectedDistrict} District Court`,
-                      ph: "+91 94150 XXXXX"
-                    },
-                    {
-                      id: `gen-${selectedDistrict}-2`,
-                      name: `Adv. Anand Mishra`,
-                      exp: "Criminal Defense, Trespass & Boundary Matters",
-                      rating: "4.7 ⭐",
-                      cases: "120+ Local Cases",
-                      loc: `${selectedDistrict} Court Premises`,
-                      ph: "+91 94120 XXXXX"
-                    }
-                  ];
-                }
-
                 if (lawyersList.length === 0) {
                   return (
                     <div
                       style={{
                         padding: "24px 16px",
                         borderRadius: 12,
-                        background: "rgba(239,68,68,0.05)",
-                        border: "1px dashed rgba(239,68,68,0.22)",
+                        background: "rgba(240,165,0,0.06)",
+                        border: "1px dashed rgba(240,165,0,0.3)",
                         textAlign: "center",
                         color: "var(--text-mid)",
                         fontSize: "calc(13px * var(--fs))",
                         lineHeight: 1.5,
                       }}
                     >
-                      🚧 <b>{lang === "hi" ? "इस फ़ंक्शन पर काम चल रहा है" : "Working on this function"}</b>
+                      🚧 <b>{lang === "hi" ? "यह सुविधा जल्द ही उपलब्ध होगी" : "This function will be available soon"}</b>
                       <p style={{ fontSize: "calc(11.5px * var(--fs))", color: "var(--text-dim)", marginTop: 4 }}>
                         {lang === "hi" 
-                          ? "आपके चुने गए जिले में वकीलों को ऑनबोर्ड किया जा रहा है। जल्द ही यह सेवा शुरू होगी!" 
-                          : "Verified lawyers are being onboarded in your selected district. Coming soon!"}
+                          ? "आपके चुने गए जिले में वकीलों को ऑनबोर्ड किया जा रहा है।" 
+                          : "Advocates are being onboarded in your selected district."}
                       </p>
                     </div>
                   );
