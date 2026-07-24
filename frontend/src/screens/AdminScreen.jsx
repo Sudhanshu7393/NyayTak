@@ -54,15 +54,25 @@ function AdminScreen({ onBack, lang }) {
     } catch (_) {}
 
     // Load admin emails
-    try {
-      const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
-      let list = rawAdmins ? JSON.parse(rawAdmins) : [];
-      if (!list.includes("sudhanshupandey7393@gmail.com")) {
-        list.push("sudhanshupandey7393@gmail.com");
-        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(list));
-      }
-      setAdminEmails(list);
-    } catch (_) {}
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
+    fetch(`${API_BASE}/api/admins`)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((list) => {
+        setAdminEmails(list);
+      })
+      .catch(() => {
+        try {
+          const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
+          let list = rawAdmins ? JSON.parse(rawAdmins) : [];
+          if (!list.includes("sudhanshupandey7393@gmail.com")) {
+            list.push("sudhanshupandey7393@gmail.com");
+          }
+          setAdminEmails(list);
+        } catch (_) {}
+      });
 
     // Load registered users list
     setUsersList(authService.getUsersList());
@@ -138,11 +148,29 @@ function AdminScreen({ onBack, lang }) {
       alert("This email is already an admin!");
       return;
     }
-    const updated = [...adminEmails, email];
-    setAdminEmails(updated);
-    localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
-    setNewAdminEmail("");
-    alert(`${email} added as administrator.`);
+
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
+    fetch(`${API_BASE}/api/admins`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("API error");
+        return res.json();
+      })
+      .then(list => {
+        setAdminEmails(list);
+        setNewAdminEmail("");
+        alert(`${email} added as administrator.`);
+      })
+      .catch(() => {
+        const updated = [...adminEmails, email];
+        setAdminEmails(updated);
+        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
+        setNewAdminEmail("");
+        alert(`${email} added as administrator (local fallback).`);
+      });
   };
 
   const handleDeleteAdmin = (email) => {
@@ -151,9 +179,25 @@ function AdminScreen({ onBack, lang }) {
       return;
     }
     if (!window.confirm(`Are you sure you want to remove ${email} from administrators?`)) return;
-    const updated = adminEmails.filter(e => e !== email);
-    setAdminEmails(updated);
-    localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
+
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
+    fetch(`${API_BASE}/api/admins?email=${encodeURIComponent(email)}`, {
+      method: "DELETE"
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("API error");
+        return res.json();
+      })
+      .then(list => {
+        setAdminEmails(list);
+        alert(`${email} removed from administrators.`);
+      })
+      .catch(() => {
+        const updated = adminEmails.filter(e => e !== email);
+        setAdminEmails(updated);
+        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
+        alert(`${email} removed from administrators (local fallback).`);
+      });
   };
 
   // Merge static real lawyers and custom ones for counting

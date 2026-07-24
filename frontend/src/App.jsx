@@ -65,15 +65,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    try {
-      const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
-      let list = rawAdmins ? JSON.parse(rawAdmins) : [];
-      if (!list.includes("sudhanshupandey7393@gmail.com")) {
-        list.push("sudhanshupandey7393@gmail.com");
-        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(list));
-      }
-      setAdminEmails(list);
-    } catch (_) {}
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
+    fetch(`${API_BASE}/api/admins`)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((list) => {
+        setAdminEmails(list);
+      })
+      .catch(() => {
+        try {
+          const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
+          let list = rawAdmins ? JSON.parse(rawAdmins) : [];
+          if (!list.includes("sudhanshupandey7393@gmail.com")) {
+            list.push("sudhanshupandey7393@gmail.com");
+          }
+          setAdminEmails(list);
+        } catch (_) {}
+      });
   }, [screen]);
 
   useEffect(() => {

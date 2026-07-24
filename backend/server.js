@@ -3,6 +3,9 @@ import cors from "cors";
 import "dotenv/config";
 import multer from "multer";
 import pdfParse from "pdf-parse";
+import fs from "fs";
+import path from "path";
+
 
 const app = express();
 app.use(cors());
@@ -265,6 +268,76 @@ Be thorough but concise. Use clear language, no jargon.`;
     console.error("❌ Document analysis error:", String(e));
     return res.status(500).json({ error: String(e) });
   }
+});
+
+// ── Shared Admin Emails Database ──
+const ADMINS_FILE = path.join(process.cwd(), "admins.json");
+let authorizedAdmins = ["sudhanshupandey7393@gmail.com"];
+
+function loadAdmins() {
+  try {
+    if (fs.existsSync(ADMINS_FILE)) {
+      const data = fs.readFileSync(ADMINS_FILE, "utf8");
+      const list = JSON.parse(data);
+      if (Array.isArray(list)) {
+        // Ensure root owner is always included
+        if (!list.includes("sudhanshupandey7393@gmail.com")) {
+          list.push("sudhanshupandey7393@gmail.com");
+        }
+        authorizedAdmins = list;
+        return;
+      }
+    }
+  } catch (e) {
+    console.error("Error reading admins.json:", e);
+  }
+  // Fallback / Save default
+  saveAdmins(authorizedAdmins);
+}
+
+function saveAdmins(list) {
+  try {
+    fs.writeFileSync(ADMINS_FILE, JSON.stringify(list, null, 2), "utf8");
+  } catch (e) {
+    console.error("Error writing admins.json:", e);
+  }
+}
+
+// Initial Load
+loadAdmins();
+
+app.get("/api/admins", (req, res) => {
+  return res.json(authorizedAdmins);
+});
+
+app.post("/api/admins", (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.includes("@")) {
+    return res.status(400).json({ error: "Invalid email address" });
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  if (authorizedAdmins.includes(cleanEmail)) {
+    return res.json(authorizedAdmins);
+  }
+  authorizedAdmins.push(cleanEmail);
+  saveAdmins(authorizedAdmins);
+  console.log(`🛡️ Admin authorized: ${cleanEmail}`);
+  return res.json(authorizedAdmins);
+});
+
+app.delete("/api/admins", (req, res) => {
+  const email = req.query.email || req.body.email;
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  if (cleanEmail === "sudhanshupandey7393@gmail.com") {
+    return res.status(403).json({ error: "Root administrator cannot be removed" });
+  }
+  authorizedAdmins = authorizedAdmins.filter(e => e !== cleanEmail);
+  saveAdmins(authorizedAdmins);
+  console.log(`🛡️ Admin removed: ${cleanEmail}`);
+  return res.json(authorizedAdmins);
 });
 
 app.get("/", (_req, res) =>
