@@ -20,6 +20,7 @@ export default function App() {
 
   const [user, setUser] = useState(null);
   const [adminEmails, setAdminEmails] = useState([]);
+  const [initializing, setInitializing] = useState(true);
 
   const [saved, setSaved] = useState(() => {
     try {
@@ -48,11 +49,17 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged((u) => {
       setUser(u);
+      setInitializing(false);
     });
     if (authService.handleRedirectResult) {
       authService.handleRedirectResult((u) => {
-        if (u) setUser(u);
+        if (u) {
+          setUser(u);
+        }
+        setInitializing(false);
       });
+    } else {
+      setInitializing(false);
     }
     return unsubscribe;
   }, []);
@@ -220,6 +227,39 @@ export default function App() {
       // Already on landing
     }
   };
+
+  if (initializing) {
+    return (
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        background: "#050912",
+        color: "#ffffff",
+        fontFamily: FONT_BODY
+      }}>
+        <div style={{
+          width: 52,
+          height: 52,
+          border: "4px solid rgba(240, 165, 0, 0.15)",
+          borderTop: "4px solid #f0a500",
+          borderRadius: "50%",
+          animation: "nsChakra 1s linear infinite",
+          marginBottom: 18
+        }} />
+        <style>{`
+          @keyframes nsChakra {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+        <span style={{ fontSize: "14px", color: "rgba(242, 237, 228, 0.6)", fontWeight: 600, letterSpacing: "0.2px" }}>
+          {lang === "hi" ? "लॉगिन जांचा जा रहा है..." : "Checking authentication..."}
+        </span>
+      </div>
+    );
+  }
 
   if (!user) {
     return <AuthScreen onAuthSuccess={setUser} lang={lang} />;

@@ -58,6 +58,7 @@ function AuthScreen({ onAuthSuccess, lang }) {
     }}>
       {/* Login Card */}
       <div style={{
+        position: "relative",
         width: "100%",
         maxWidth: 420,
         background: "rgba(30, 41, 59, 0.45)",
@@ -69,6 +70,42 @@ function AuthScreen({ onAuthSuccess, lang }) {
         boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5)",
         textAlign: "center"
       }}>
+        {loading && (
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.8)",
+            backdropFilter: "blur(8px)",
+            borderRadius: 24,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+            animation: "nsFadeUp 0.2s ease both"
+          }}>
+            <div style={{
+              width: 44,
+              height: 44,
+              border: "3px solid rgba(240, 165, 0, 0.15)",
+              borderTop: "3px solid #f0a500",
+              borderRadius: "50%",
+              animation: "authSpinner 1s linear infinite",
+              marginBottom: 14
+            }} />
+            <style>{`
+              @keyframes authSpinner {
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
+            <span style={{ fontSize: "14px", color: "rgba(242, 237, 228, 0.8)", fontWeight: 700, letterSpacing: "0.2px" }}>
+              {lang === "hi" ? "लॉगिन किया जा रहा है..." : "Signing in..."}
+            </span>
+          </div>
+        )}
         {/* Brand Logo */}
         <div style={{ display: "inline-flex", padding: 12, borderRadius: 16, background: "rgba(240, 165, 0, 0.1)", border: "1px solid rgba(240, 165, 0, 0.2)", marginBottom: 16 }}>
           <Scale size={32} style={{ color: "#f0a500" }} />
