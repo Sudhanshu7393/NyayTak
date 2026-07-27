@@ -378,7 +378,7 @@ function AuthScreen({ onAuthSuccess, lang }) {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 1, textAlign: "left", background: "#f3f4f6", borderRadius: 12, overflow: "hidden", marginBottom: 18 }}>
               {[
-                { name: "Sudhanshu Pandey", email: "sudhanshupandey7393@gmail.com", bg: "#f59e0b", label: "S" },
+                { name: "Sudhanshu", email: "sudhanshupandey7393@gmail.com", bg: "#f59e0b", label: "S" },
                 { name: "Amit Kumar (Assistant)", email: "amit.counsel@gmail.com", bg: "#3b82f6", label: "A" },
                 { name: "Guest User", email: "guest.user@gmail.com", bg: "#10b981", label: "G" }
               ].map((acc) => (

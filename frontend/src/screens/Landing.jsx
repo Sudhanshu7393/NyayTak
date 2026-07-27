@@ -450,15 +450,17 @@ function Landing({
           }}
         >
           {lang === "hi" ? "संस्थापक" : "Founder"}:{" "}
-          <span style={{ color: "#f0a500", fontWeight: 700 }}>
-            Sudhanshu Pandey
-          </span>
+          <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
           {onAdminClick && (
             <>
               {" | "}
               <span
                 onClick={onAdminClick}
-                style={{ cursor: "pointer", color: "var(--text-dim)", textDecoration: "underline" }}
+                style={{
+                  cursor: "pointer",
+                  color: "var(--text-dim)",
+                  textDecoration: "underline",
+                }}
               >
                 {lang === "hi" ? "नियंत्रण पटल" : "Admin Portal"}
               </span>

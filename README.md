@@ -1,7 +1,7 @@
 # ⚖️ NyayTak — Vakil se pehle, nyay tak
 
 Anonymous, free, multilingual **AI legal-awareness** platform for India.
-Built by **Sudhanshu Pandey** · Founder.
+Built by **Sudhanshu** · Founder.
 
 > Legal awareness only — for serious matters, consult a qualified lawyer.
 
