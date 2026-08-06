@@ -16,6 +16,8 @@ Example format:
 ]
 ============================================================
 */
+import scrapedLawyers from "./scraped_lawyers.json";
+
 export const REAL_LAWYERS = {
   "Delhi|New Delhi": [
     {
@@ -69,14 +71,31 @@ export function getMergedLawyers() {
   } catch (_) {}
 
   const merged = {};
+  
   // Clone static entries
   Object.keys(REAL_LAWYERS).forEach((key) => {
     merged[key] = [...REAL_LAWYERS[key]];
   });
+
+  // Merge scraped entries
+  Object.keys(scrapedLawyers).forEach((key) => {
+    if (!merged[key]) {
+      merged[key] = [];
+    }
+    // Filter duplicates by name & id
+    const existingNames = new Set(merged[key].map(l => l.name.toLowerCase()));
+    scrapedLawyers[key].forEach(lawyer => {
+      if (!existingNames.has(lawyer.name.toLowerCase())) {
+        merged[key].push(lawyer);
+      }
+    });
+  });
+
   // Merge custom entries
   Object.keys(custom).forEach((key) => {
     if (!merged[key]) merged[key] = [];
     merged[key] = [...merged[key], ...custom[key]];
   });
+  
   return merged;
 }
