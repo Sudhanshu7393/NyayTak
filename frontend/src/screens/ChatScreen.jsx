@@ -200,7 +200,7 @@ DOCUMENT DRAFTING MODE (CRITICAL):
 - When drafting a document, you MUST ignore the 15-line response limit and output the complete, detailed draft.
 - For all other standard follow-up questions, keep your response under 15 lines.
 
-Answer their question DIRECTLY, conversationally, and precisely in ${langPrompt}.
+Answer their question DIRECTLY, conversationally, and precisely in the language and script (e.g., Hindi, Hinglish, English, or any other regional language) used by the user in their last message. If the user's language or script is unclear, default to ${langPrompt}.
 Do NOT repeat the "Haq", "Kanoon", "Kadam", "Samay", "Precedent" structure headings. Just reply naturally to their question.
 
 At the very end of your response, you MUST append follow-up questions formatted exactly as:
