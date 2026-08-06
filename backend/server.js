@@ -340,6 +340,68 @@ app.delete("/api/admins", (req, res) => {
   return res.json(authorizedAdmins);
 });
 
+// ── Shared Registered Users Database ──
+const USERS_FILE = path.join(process.cwd(), "users.json");
+let registeredUsers = [];
+
+function loadUsers() {
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      const data = fs.readFileSync(USERS_FILE, "utf8");
+      const list = JSON.parse(data);
+      if (Array.isArray(list)) {
+        registeredUsers = list;
+        return;
+      }
+    }
+  } catch (e) {
+    console.error("Error reading users.json:", e);
+  }
+}
+
+function saveUsers(list) {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(list, null, 2), "utf8");
+  } catch (e) {
+    console.error("Error writing users.json:", e);
+  }
+}
+
+// Initial Load
+loadUsers();
+
+app.get("/api/users", (req, res) => {
+  return res.json(registeredUsers);
+});
+
+app.post("/api/users", (req, res) => {
+  const { uid, email, displayName, createdAt } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const existingIndex = registeredUsers.findIndex(u => u.email.toLowerCase() === cleanEmail);
+
+  if (existingIndex > -1) {
+    registeredUsers[existingIndex] = {
+      ...registeredUsers[existingIndex],
+      uid: uid || registeredUsers[existingIndex].uid,
+      displayName: displayName || registeredUsers[existingIndex].displayName,
+    };
+  } else {
+    registeredUsers.push({
+      uid: uid || `user-${Date.now()}`,
+      email: cleanEmail,
+      displayName: displayName || cleanEmail.split("@")[0],
+      createdAt: createdAt || new Date().toLocaleDateString("en-IN")
+    });
+  }
+
+  saveUsers(registeredUsers);
+  return res.json(registeredUsers);
+});
+
 app.get("/", (_req, res) =>
   res.send("NyayTak backend (Groq) is running. POST /api/chat"),
 );

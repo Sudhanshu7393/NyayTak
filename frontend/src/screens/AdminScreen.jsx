@@ -75,7 +75,17 @@ function AdminScreen({ onBack, lang }) {
       });
 
     // Load registered users list
-    setUsersList(authService.getUsersList());
+    fetch(`${API_BASE}/api/users`)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((list) => {
+        setUsersList(list);
+      })
+      .catch(() => {
+        setUsersList(authService.getUsersList());
+      });
   }, []);
 
   const saveCustomLawyers = (updated) => {

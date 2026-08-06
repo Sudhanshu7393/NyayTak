@@ -47,14 +47,32 @@ export default function App() {
   }, [fontScale, theme]);
 
   useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_BASE || "";
+    const syncUser = (u) => {
+      if (!u) return;
+      fetch(`${API_BASE}/api/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: u.uid,
+          email: u.email,
+          displayName: u.displayName || u.email.split("@")[0],
+          createdAt: new Date().toLocaleDateString("en-IN")
+        })
+      }).catch((e) => console.error("Error syncing user to backend:", e));
+    };
+
     const unsubscribe = authService.onAuthStateChanged((u) => {
       setUser(u);
       setInitializing(false);
+      if (u) syncUser(u);
     });
+
     if (authService.handleRedirectResult) {
       authService.handleRedirectResult((u) => {
         if (u) {
           setUser(u);
+          syncUser(u);
         }
         setInitializing(false);
       });
