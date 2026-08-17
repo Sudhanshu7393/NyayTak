@@ -231,10 +231,11 @@ Follow-up Question 2?`
     setLoading(false);
     loadingRef.current = false;
     await streamIn(answer || t.noAnswer);
-  } catch (_) {
+  } catch (err) {
     setLoading(false);
     loadingRef.current = false;
-    setMessages((m) => [...m, { role: "assistant", text: t.networkErr }]);
+    const errorText = err.message || t.networkErr;
+    setMessages((m) => [...m, { role: "assistant", text: errorText }]);
     setErrored(true);
     scrollDown();
   }
