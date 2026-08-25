@@ -366,18 +366,48 @@ export const authService = {
 export const dbService = {
   // ── Admins ──
   getAdmins: async () => {
+    let firestoreAdmins = [];
+    let loadFromApi = false;
+
     if (db) {
       try {
         const snap = await getDocs(collection(db, "admins"));
-        const list = snap.docs.map(doc => doc.data().email.trim().toLowerCase());
-        if (!list.includes("sudhanshupandey7393@gmail.com")) {
-          list.push("sudhanshupandey7393@gmail.com");
+        firestoreAdmins = snap.docs.map(doc => doc.data().email.trim().toLowerCase());
+        if (!firestoreAdmins.includes("sudhanshupandey7393@gmail.com")) {
+          firestoreAdmins.push("sudhanshupandey7393@gmail.com");
         }
-        return list;
+        if (firestoreAdmins.length <= 1) {
+          loadFromApi = true;
+        } else {
+          return firestoreAdmins;
+        }
       } catch (e) {
         console.error("Firestore getAdmins error:", e);
+        loadFromApi = true;
       }
+    } else {
+      loadFromApi = true;
     }
+
+    // Load from backend API as migration source/fallback
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE || "";
+      const res = await fetch(`${API_BASE}/api/admins`);
+      if (res.ok) {
+        const apiAdmins = await res.json();
+        if (apiAdmins && apiAdmins.length > 0) {
+          if (db) {
+            apiAdmins.forEach(email => {
+              dbService.addAdmin(email).catch(() => {});
+            });
+          }
+          return apiAdmins;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load admins from API fallback:", e);
+    }
+
     // Fallback
     try {
       const raw = localStorage.getItem("nyaytak_admin_emails");
@@ -434,14 +464,45 @@ export const dbService = {
 
   // ── Users ──
   getUsers: async () => {
+    let firestoreUsers = [];
+    let loadFromApi = false;
+
     if (db) {
       try {
         const snap = await getDocs(collection(db, "users"));
-        return snap.docs.map(doc => doc.data());
+        firestoreUsers = snap.docs.map(doc => doc.data());
+        if (firestoreUsers.length === 0) {
+          loadFromApi = true;
+        } else {
+          return firestoreUsers;
+        }
       } catch (e) {
         console.error("Firestore getUsers error:", e);
+        loadFromApi = true;
       }
+    } else {
+      loadFromApi = true;
     }
+
+    // Load from backend API as migration source/fallback
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE || "";
+      const res = await fetch(`${API_BASE}/api/users`);
+      if (res.ok) {
+        const apiUsers = await res.json();
+        if (apiUsers && apiUsers.length > 0) {
+          if (db) {
+            apiUsers.forEach(u => {
+              dbService.saveUser(u).catch(() => {});
+            });
+          }
+          return apiUsers;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load users from API fallback:", e);
+    }
+
     // Fallback
     try {
       const raw = localStorage.getItem("nyaytak_registered_users");
