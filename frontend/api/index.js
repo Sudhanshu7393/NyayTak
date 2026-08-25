@@ -161,8 +161,11 @@ app.post("/api/chat", async (req, res) => {
       return res.status(r.status).json({ error: msg });
     }
 
-    const text = (data?.choices?.[0]?.message?.content || "").trim();
+    let text = (data?.choices?.[0]?.message?.content || "").trim();
     if (!text) return res.status(502).json({ error: "Empty response" });
+
+    // Strip thinking process tags if returned by reasoning models
+    text = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 
     return res.json({ content: [{ type: "text", text }] });
   } catch (e) {
