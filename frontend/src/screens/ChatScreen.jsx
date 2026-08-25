@@ -79,6 +79,8 @@ import {
 import { STATE_DISTRICTS } from "../districts.js";
 import { REAL_LAWYERS, getMergedLawyers } from "../lawyers.js";
 import { dbService } from "../firebase.js";
+import { IPC_BNS_MAPPING } from "../lawsConverter.js";
+import { DOCUMENT_TEMPLATES } from "../templatesData.js";
 
 
 function ChatScreen({
@@ -123,6 +125,12 @@ function ChatScreen({
   const [appointments, setAppointments] = useState([]);
   const [followUps, setFollowUps] = useState([]);
   const [copiedMsg, setCopiedMsg] = useState(-1);
+  const [showIpcBns, setShowIpcBns] = useState(false);
+  const [ipcSearchQuery, setIpcSearchQuery] = useState("");
+  const [showDraftWizard, setShowDraftWizard] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState(null);
+  const [templateFormValues, setTemplateFormValues] = useState({});
+  const [generatedDocText, setGeneratedDocText] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [bookingLawyer, setBookingLawyer] = useState(null);
@@ -516,8 +524,8 @@ GUIDELINES FOR THE BODY:
     (m) => m.role === "assistant" && isLegalAnswer(m.text),
   );
   const showFollowUps =
-    firstLegalIdx !== -1 &&
-    firstLegalIdx === messages.length - 1 &&
+    messages.length > 0 &&
+    messages[messages.length - 1].role === "assistant" &&
     !loading &&
     !streaming &&
     !errored;
@@ -931,24 +939,38 @@ GUIDELINES FOR THE BODY:
         )}
         {showFollowUps && (
           <div
-            style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 2 }}
+            style={{
+              display: "flex",
+              gap: 8,
+              marginTop: 4,
+              overflowX: "auto",
+              paddingBottom: 6,
+              width: "100%",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none"
+            }}
           >
             {(followUps.length ? followUps : t.fu).map((q) => (
               <button
                 key={q}
                 onClick={() => send(q)}
                 style={{
-                  padding: "7px 12px",
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                  padding: "8px 14px",
                   borderRadius: 20,
                   cursor: "pointer",
-                  background: "var(--surface)",
-                  border: `1px solid ${cat.border}`,
-                  color: "var(--text-mid)",
-                  fontSize: "calc(12px * var(--fs))",
+                  background: "rgba(240,165,0,0.08)",
+                  border: `1px solid rgba(240,165,0,0.3)`,
+                  color: "#f0a500",
+                  fontWeight: 600,
+                  fontSize: "calc(11.5px * var(--fs))",
                   fontFamily: "inherit",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  transition: "all 0.15s",
                 }}
               >
-                {q}
+                💡 {q}
               </button>
             ))}
           </div>
@@ -1044,6 +1066,48 @@ GUIDELINES FOR THE BODY:
         >
           <BookOpen size={13} />
           {t.lawsBtn}
+        </button>
+        <button
+          onClick={() => setShowIpcBns(true)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            whiteSpace: "nowrap",
+            padding: "8px 13px",
+            borderRadius: 20,
+            cursor: "pointer",
+            background: "rgba(240,165,0,0.1)",
+            border: "1px solid rgba(240,165,0,0.3)",
+            color: "#c98a06",
+            fontSize: "calc(12px * var(--fs))",
+            fontWeight: 600,
+            fontFamily: "inherit",
+            flexShrink: 0,
+          }}
+        >
+          ⚖️ {lang === "hi" ? "IPC ⇄ BNS कनवर्टर" : lang === "hinglish" ? "IPC ⇄ BNS Converter" : "IPC ⇄ BNS Converter"}
+        </button>
+        <button
+          onClick={() => setShowDraftWizard(true)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            whiteSpace: "nowrap",
+            padding: "8px 13px",
+            borderRadius: 20,
+            cursor: "pointer",
+            background: "rgba(240,165,0,0.1)",
+            border: "1px solid rgba(240,165,0,0.3)",
+            color: "#c98a06",
+            fontSize: "calc(12px * var(--fs))",
+            fontWeight: 600,
+            fontFamily: "inherit",
+            flexShrink: 0,
+          }}
+        >
+          📝 {lang === "hi" ? "दस्तावेज़ ड्राफ्ट" : lang === "hinglish" ? "Draft Templates" : "Draft Templates"}
         </button>
         <button
           onClick={() => setInfo("help")}
@@ -2318,6 +2382,290 @@ GUIDELINES FOR THE BODY:
             >
               🚫 {lang === "hi" ? "जानकारी के बिना खाली टेम्पलेट बनाएं" : "Skip & Generate Template"}
             </button>
+          </div>
+        </PanelShell>
+      )}
+
+      {showIpcBns && (
+        <PanelShell
+          title={lang === "hi" ? "IPC ⇄ BNS कनवर्टर" : "IPC ⇄ BNS Converter"}
+          icon={<BookOpen size={17} />}
+          onClose={() => {
+            setShowIpcBns(false);
+            setIpcSearchQuery("");
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <input
+              type="text"
+              placeholder={lang === "hi" ? "धारा संख्या या कीवर्ड दर्ज करें (उदा. 302, चोरी)..." : "Type section number or keyword (e.g., 302, murder)..."}
+              value={ipcSearchQuery}
+              onChange={(e) => setIpcSearchQuery(e.target.value)}
+              style={{
+                padding: "10px 12px",
+                borderRadius: 8,
+                border: "1px solid var(--border)",
+                background: "var(--surface)",
+                color: "var(--text)",
+                fontSize: "calc(13.5px * var(--fs))",
+                width: "100%"
+              }}
+            />
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 350, overflowY: "auto", marginTop: 10 }}>
+              {(() => {
+                const q = ipcSearchQuery.trim().toLowerCase();
+                const filtered = IPC_BNS_MAPPING.filter(item => 
+                  item.ipc.includes(q) || 
+                  item.bns.includes(q) || 
+                  item.offence.toLowerCase().includes(q) || 
+                  (item.desc_en && item.desc_en.toLowerCase().includes(q)) || 
+                  (item.desc_hi && item.desc_hi.toLowerCase().includes(q))
+                );
+                
+                if (filtered.length === 0) {
+                  return (
+                    <div style={{ textAlign: "center", color: "var(--text-dim)", padding: "20px 0", fontSize: "calc(13px * var(--fs))" }}>
+                      {lang === "hi" ? "कोई परिणाम नहीं मिला। कृपया दूसरा शब्द खोजें।" : "No matches found. Try another query."}
+                    </div>
+                  );
+                }
+                
+                return filtered.map(item => (
+                  <div 
+                    key={item.ipc}
+                    style={{
+                      padding: 12,
+                      borderRadius: 10,
+                      background: "rgba(255, 255, 255, 0.03)",
+                      border: "1px solid var(--border-soft)",
+                      textAlign: "left"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <span style={{ fontSize: "calc(12px * var(--fs))", color: "#f0a500", fontWeight: 700 }}>
+                        IPC Section {item.ipc}
+                      </span>
+                      <span style={{ fontSize: "calc(12px * var(--fs))", color: "#22c55e", fontWeight: 700 }}>
+                        BNS Section {item.bns}
+                      </span>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: "calc(13.5px * var(--fs))", marginBottom: 6, color: "var(--text)" }}>
+                      {item.offence}
+                    </div>
+                    <div style={{ fontSize: "calc(12px * var(--fs))", color: "var(--text-mid)", marginBottom: 8 }}>
+                      {lang === "hi" ? item.desc_hi : item.desc_en}
+                    </div>
+                    <div style={{ 
+                      fontSize: "calc(11.5px * var(--fs))", 
+                      padding: "5px 8px", 
+                      background: "rgba(240, 165, 0, 0.06)", 
+                      borderRadius: 6,
+                      color: "#c98a06",
+                      borderLeft: "2px solid #f0a500"
+                    }}>
+                      <b>Saza / Punishment:</b> {lang === "hi" ? item.punishment_hi : item.punishment_en}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+        </PanelShell>
+      )}
+
+      {showDraftWizard && (
+        <PanelShell
+          title={lang === "hi" ? "लीगल ड्राफ्ट टेम्पलेट्स" : "Legal Document Draft Wizard"}
+          icon={<FileText size={17} />}
+          onClose={() => {
+            setShowDraftWizard(false);
+            setCurrentTemplate(null);
+            setTemplateFormValues({});
+            setGeneratedDocText("");
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {!currentTemplate && !generatedDocText && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ fontSize: "calc(12.5px * var(--fs))", color: "var(--text-dim)", marginBottom: 4, textAlign: "left" }}>
+                  {lang === "hi" ? "दस्तावेज़ का प्रकार चुनें जिसे आप ड्राफ्ट करना चाहते हैं:" : "Select a document type to draft:"}
+                </div>
+                {DOCUMENT_TEMPLATES.map((tmpl) => (
+                  <button
+                    key={tmpl.id}
+                    onClick={() => {
+                      setCurrentTemplate(tmpl);
+                      setTemplateFormValues({});
+                    }}
+                    style={{
+                      padding: 12,
+                      borderRadius: 10,
+                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                      color: "var(--text)",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      fontSize: "calc(13.5px * var(--fs))",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    📄 {lang === "hi" ? tmpl.name_hi : tmpl.name_en}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {currentTemplate && !generatedDocText && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}>
+                <button 
+                  onClick={() => setCurrentTemplate(null)}
+                  style={{
+                    alignSelf: "flex-start",
+                    background: "transparent",
+                    border: "none",
+                    color: "#f0a500",
+                    cursor: "pointer",
+                    fontSize: "calc(12px * var(--fs))",
+                    fontWeight: 700,
+                    marginBottom: 6
+                  }}
+                >
+                  ← {lang === "hi" ? "पीछे जाएँ" : "Back to Templates"}
+                </button>
+
+                <div style={{ fontWeight: 700, fontSize: "calc(14px * var(--fs))", marginBottom: 6, color: "var(--text)" }}>
+                  {lang === "hi" ? currentTemplate.name_hi : currentTemplate.name_en}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 300, overflowY: "auto", paddingRight: 4 }}>
+                  {currentTemplate.fields.map((f) => (
+                    <div key={f.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      <label style={{ fontSize: "calc(12px * var(--fs))", fontWeight: 600, color: "var(--text-mid)" }}>
+                        {lang === "hi" ? f.label_hi : f.label_en}
+                      </label>
+                      {f.type === "textarea" ? (
+                        <textarea
+                          placeholder={f.placeholder}
+                          value={templateFormValues[f.id] || ""}
+                          onChange={(e) => setTemplateFormValues({ ...templateFormValues, [f.id]: e.target.value })}
+                          rows={3}
+                          style={{
+                            padding: "8px 10px",
+                            borderRadius: 8,
+                            border: "1px solid var(--border)",
+                            background: "var(--surface)",
+                            color: "var(--text)",
+                            fontSize: "calc(13px * var(--fs))",
+                            fontFamily: "inherit",
+                            width: "100%"
+                          }}
+                        />
+                      ) : (
+                        <input
+                          type={f.type}
+                          placeholder={f.placeholder}
+                          value={templateFormValues[f.id] || ""}
+                          onChange={(e) => setTemplateFormValues({ ...templateFormValues, [f.id]: e.target.value })}
+                          style={{
+                            padding: "8px 10px",
+                            borderRadius: 8,
+                            border: "1px solid var(--border)",
+                            background: "var(--surface)",
+                            color: "var(--text)",
+                            fontSize: "calc(13px * var(--fs))",
+                            fontFamily: "inherit",
+                            width: "100%"
+                          }}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    let text = lang === "hi" ? currentTemplate.template_hi : currentTemplate.template_en;
+                    currentTemplate.fields.forEach(f => {
+                      const val = templateFormValues[f.id] || `[${lang === "hi" ? "खाली / Empty" : "Empty"}]`;
+                      text = text.replaceAll(`{{${f.id}}}`, val);
+                    });
+                    setGeneratedDocText(text);
+                  }}
+                  style={{
+                    marginTop: 10,
+                    padding: 12,
+                    borderRadius: 10,
+                    border: "none",
+                    background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                    color: "#0a0e1a",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontSize: "calc(13.5px * var(--fs))"
+                  }}
+                >
+                  🚀 {lang === "hi" ? "दस्तावेज़ तैयार करें" : "Generate Document"}
+                </button>
+              </div>
+            )}
+
+            {generatedDocText && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <button 
+                    onClick={() => setGeneratedDocText("")}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#f0a500",
+                      cursor: "pointer",
+                      fontSize: "calc(12px * var(--fs))",
+                      fontWeight: 700
+                    }}
+                  >
+                    ← {lang === "hi" ? "संपादन करें" : "Edit Details"}
+                  </button>
+                  
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedDocText);
+                      alert(lang === "hi" ? "कॉपी हो गया!" : "Copied to clipboard!");
+                    }}
+                    style={{
+                      background: "rgba(240,165,0,0.15)",
+                      border: "1px solid rgba(240,165,0,0.4)",
+                      borderRadius: 6,
+                      padding: "4px 10px",
+                      color: "#f0a500",
+                      cursor: "pointer",
+                      fontSize: "calc(12px * var(--fs))",
+                      fontWeight: 700
+                    }}
+                  >
+                    📋 {lang === "hi" ? "कॉपी करें" : "Copy Draft"}
+                  </button>
+                </div>
+
+                <pre
+                  style={{
+                    padding: 14,
+                    borderRadius: 10,
+                    background: "rgba(0,0,0,0.3)",
+                    border: "1px solid var(--border-soft)",
+                    color: "var(--text)",
+                    fontSize: "calc(12.5px * var(--fs))",
+                    fontFamily: "monospace",
+                    whiteSpace: "pre-wrap",
+                    maxHeight: 300,
+                    overflowY: "auto",
+                    textAlign: "left"
+                  }}
+                >
+                  {generatedDocText}
+                </pre>
+              </div>
+            )}
           </div>
         </PanelShell>
       )}
