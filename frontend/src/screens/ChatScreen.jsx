@@ -78,6 +78,8 @@ import {
 } from "../components/ui.jsx";
 import { STATE_DISTRICTS } from "../districts.js";
 import { REAL_LAWYERS, getMergedLawyers } from "../lawyers.js";
+import { dbService } from "../firebase.js";
+
 
 function ChatScreen({
   cat,
@@ -92,6 +94,7 @@ function ChatScreen({
   fontScale,
   state,
   saved,
+  user,
   onToggleSave,
   onShowSaved,
   onAdminClick,
@@ -159,7 +162,7 @@ function ChatScreen({
       const toks = full.split(/(\s+)/);
       let i = 0;
       const tick = () => {
-        i += 2;
+        i += 6;
         const part = toks.slice(0, i).join("");
         setMessages((m) => {
           const c = [...m];
@@ -200,7 +203,7 @@ DOCUMENT DRAFTING MODE (CRITICAL):
 - When drafting a document, you MUST ignore the 15-line response limit and output the complete, detailed draft.
 - For all other standard follow-up questions, keep your response under 15 lines.
 
-Answer their question DIRECTLY, conversationally, and precisely in the language and script (e.g., Hindi, Hinglish, English, or any other regional language) used by the user in their last message. If the user's language or script is unclear, default to ${langPrompt}.
+Answer their question DIRECTLY, conversationally, and precisely in ${langPrompt}. Regardless of the script or language used by the user in their last message, you MUST write the entire response in ${langPrompt}.
 Do NOT repeat the "Haq", "Kanoon", "Kadam", "Samay", "Precedent" structure headings. Just reply naturally to their question.
 
 At the very end of your response, you MUST append follow-up questions formatted exactly as:
@@ -241,10 +244,15 @@ Follow-up Question 2?`
   }
 }
 
-// ← यहाँ add कर (ask के बाहर):
 async function handleDocumentUpload(e) {
   const file = e.target.files?.[0];
   if (!file) return;
+
+  if (file.size > 4 * 1024 * 1024) {
+    alert(lang === "hi" ? "फ़ाइल का आकार 4MB से अधिक नहीं होना चाहिए! कृपया छोटी फ़ाइल अपलोड करें।" : "File size cannot exceed 4MB! Please upload a smaller file.");
+    e.target.value = "";
+    return;
+  }
 
   setUploadingDoc(true);
   try {
@@ -288,10 +296,11 @@ async function handleDocumentUpload(e) {
       setMessages(first);
       ask(first);
     }
-    try {
-      const raw = localStorage.getItem("nyaytak_appointments");
-      if (raw) setAppointments(JSON.parse(raw));
-    } catch (_) {}
+    dbService.getAppointments(user?.uid)
+      .then((list) => {
+        if (list) setAppointments(list);
+      })
+      .catch(() => {});
     scrollDown();
   }, []);
 
@@ -1967,15 +1976,14 @@ GUIDELINES FOR THE BODY:
                       lawyerName: bookingLawyer.name,
                       date: bookingDetails.date,
                       time: bookingDetails.time,
-                      phone: bookingDetails.phone
+                      phone: bookingDetails.phone,
+                      userUid: user?.uid || "anonymous",
+                      userName: user?.displayName || "Anonymous",
+                      userEmail: user?.email || "anonymous",
+                      createdAt: new Date().toLocaleDateString("en-IN")
                     };
-                    setAppointments(prev => {
-                      const updated = [...prev, newBooking];
-                      try {
-                        localStorage.setItem("nyaytak_appointments", JSON.stringify(updated));
-                      } catch (_) {}
-                      return updated;
-                    });
+                    dbService.saveAppointment(newBooking);
+                    setAppointments(prev => [...prev, newBooking]);
                     setBookingStep(2);
                   }}
                   style={{

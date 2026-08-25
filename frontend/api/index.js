@@ -34,6 +34,9 @@ const MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 async function searchCaseLaw(query) {
   if (!IK_KEY) return [];
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+
     const form = new URLSearchParams();
     form.append("formInput", query);
     form.append("pagenum", "0");
@@ -45,12 +48,15 @@ async function searchCaseLaw(query) {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: form.toString(),
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (!r.ok) return [];
     const data = await r.json();
 
-    return (data.results || []).slice(0, 2).map((doc) => ({
+    return (data.docs || []).slice(0, 2).map((doc) => ({
       title: doc.title || "Untitled",
       court: doc.docsource || "Indian Court",
       date: doc.publishdate || "",
@@ -58,7 +64,7 @@ async function searchCaseLaw(query) {
       url: `https://indiankanoon.org/doc/${doc.tid}/`,
     }));
   } catch (e) {
-    console.error("⚠️ Indian Kanoon error:", String(e));
+    console.error("⚠️ Indian Kanoon error (timeout/failed):", String(e));
     return [];
   }
 }

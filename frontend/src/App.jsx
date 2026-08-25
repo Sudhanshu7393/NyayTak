@@ -8,7 +8,7 @@ import ChatScreen from "./screens/ChatScreen.jsx";
 import SavedPanel from "./screens/SavedPanel.jsx";
 import AdminScreen from "./screens/AdminScreen.jsx";
 import AuthScreen from "./screens/AuthScreen.jsx";
-import { authService } from "./firebase.js";
+import { authService, dbService } from "./firebase.js";
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
@@ -47,19 +47,9 @@ export default function App() {
   }, [fontScale, theme]);
 
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_BASE || "";
     const syncUser = (u) => {
       if (!u) return;
-      fetch(`${API_BASE}/api/users`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uid: u.uid,
-          email: u.email,
-          displayName: u.displayName || u.email.split("@")[0],
-          createdAt: new Date().toLocaleDateString("en-IN")
-        })
-      }).catch((e) => console.error("Error syncing user to backend:", e));
+      dbService.saveUser(u);
     };
 
     const unsubscribe = authService.onAuthStateChanged((u) => {
@@ -83,25 +73,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_BASE || "";
-    fetch(`${API_BASE}/api/admins`)
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
+    dbService.getAdmins()
       .then((list) => {
         setAdminEmails(list);
       })
-      .catch(() => {
-        try {
-          const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
-          let list = rawAdmins ? JSON.parse(rawAdmins) : [];
-          if (!list.includes("sudhanshupandey7393@gmail.com")) {
-            list.push("sudhanshupandey7393@gmail.com");
-          }
-          setAdminEmails(list);
-        } catch (_) {}
-      });
+      .catch(() => {});
   }, [screen]);
 
   useEffect(() => {
@@ -414,6 +390,7 @@ export default function App() {
             }}
             fontScale={fontScale}
             saved={saved}
+            user={user}
             onToggleSave={onToggleSave}
             onShowSaved={() => setShowSavedPanel(true)}
             onAdminClick={

@@ -30,6 +30,19 @@ import {
   signInWithRedirect,
   getRedirectResult
 } from "firebase/auth";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  deleteDoc,
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where
+} from "firebase/firestore";
+
 
 const keys = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -44,6 +57,7 @@ const isRealFirebaseConfigured = keys.apiKey && keys.apiKey !== "YOUR_API_KEY_HE
 
 let firebaseApp = null;
 let realAuth = null;
+let db = null;
 
 if (isRealFirebaseConfigured) {
   try {
@@ -51,8 +65,9 @@ if (isRealFirebaseConfigured) {
       firebaseApp = initializeApp(keys);
     }
     realAuth = getAuth();
+    db = getFirestore(firebaseApp);
   } catch (error) {
-    console.error("Firebase Auth initialization failed, falling back to simulation mode:", error);
+    console.error("Firebase Auth & Firestore initialization failed, falling back to simulation mode:", error);
   }
 }
 
@@ -347,3 +362,226 @@ export const authService = {
     }
   }
 };
+
+export const dbService = {
+  // ── Admins ──
+  getAdmins: async () => {
+    if (db) {
+      try {
+        const snap = await getDocs(collection(db, "admins"));
+        const list = snap.docs.map(doc => doc.data().email.trim().toLowerCase());
+        if (!list.includes("sudhanshupandey7393@gmail.com")) {
+          list.push("sudhanshupandey7393@gmail.com");
+        }
+        return list;
+      } catch (e) {
+        console.error("Firestore getAdmins error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_admin_emails");
+      let list = raw ? JSON.parse(raw) : [];
+      if (!list.includes("sudhanshupandey7393@gmail.com")) {
+        list.push("sudhanshupandey7393@gmail.com");
+      }
+      return list;
+    } catch (_) {
+      return ["sudhanshupandey7393@gmail.com"];
+    }
+  },
+
+  addAdmin: async (email) => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (db) {
+      try {
+        await setDoc(doc(db, "admins", cleanEmail), { email: cleanEmail });
+        return;
+      } catch (e) {
+        console.error("Firestore addAdmin error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_admin_emails") || "[]";
+      const list = JSON.parse(raw);
+      if (!list.includes(cleanEmail)) {
+        list.push(cleanEmail);
+        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(list));
+      }
+    } catch (_) {}
+  },
+
+  deleteAdmin: async (email) => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail === "sudhanshupandey7393@gmail.com") return;
+    if (db) {
+      try {
+        await deleteDoc(doc(db, "admins", cleanEmail));
+        return;
+      } catch (e) {
+        console.error("Firestore deleteAdmin error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_admin_emails") || "[]";
+      let list = JSON.parse(raw);
+      list = list.filter(e => e.trim().toLowerCase() !== cleanEmail);
+      localStorage.setItem("nyaytak_admin_emails", JSON.stringify(list));
+    } catch (_) {}
+  },
+
+  // ── Users ──
+  getUsers: async () => {
+    if (db) {
+      try {
+        const snap = await getDocs(collection(db, "users"));
+        return snap.docs.map(doc => doc.data());
+      } catch (e) {
+        console.error("Firestore getUsers error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_registered_users");
+      return raw ? JSON.parse(raw) : [];
+    } catch (_) {
+      return [];
+    }
+  },
+
+  saveUser: async (user) => {
+    if (!user || !user.email) return;
+    const cleanEmail = user.email.trim().toLowerCase();
+    const userData = {
+      uid: user.uid,
+      email: cleanEmail,
+      displayName: user.displayName || cleanEmail.split("@")[0],
+      createdAt: user.createdAt || new Date().toLocaleDateString("en-IN")
+    };
+    if (db) {
+      try {
+        await setDoc(doc(db, "users", cleanEmail), userData);
+        return;
+      } catch (e) {
+        console.error("Firestore saveUser error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_registered_users") || "[]";
+      const list = JSON.parse(raw);
+      const idx = list.findIndex(u => u.email.toLowerCase() === cleanEmail);
+      if (idx > -1) {
+        list[idx] = { ...list[idx], ...userData };
+      } else {
+        list.push(userData);
+      }
+      localStorage.setItem("nyaytak_registered_users", JSON.stringify(list));
+    } catch (_) {}
+  },
+
+  // ── Appointments ──
+  getAppointments: async (userUid = null) => {
+    if (db) {
+      try {
+        let snap;
+        if (userUid) {
+          const q = query(collection(db, "appointments"), where("userUid", "==", userUid));
+          snap = await getDocs(q);
+        } else {
+          snap = await getDocs(collection(db, "appointments"));
+        }
+        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (e) {
+        console.error("Firestore getAppointments error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_appointments") || "[]";
+      const list = JSON.parse(raw);
+      if (userUid) {
+        return list.filter(a => a.userUid === userUid);
+      }
+      return list;
+    } catch (_) {
+      return [];
+    }
+  },
+
+  saveAppointment: async (app) => {
+    if (db) {
+      try {
+        await addDoc(collection(db, "appointments"), app);
+        return;
+      } catch (e) {
+        console.error("Firestore saveAppointment error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_appointments") || "[]";
+      const list = JSON.parse(raw);
+      list.push({ id: `app-${Date.now()}`, ...app });
+      localStorage.setItem("nyaytak_appointments", JSON.stringify(list));
+    } catch (_) {}
+  },
+
+  deleteAppointment: async (id) => {
+    if (db) {
+      try {
+        await deleteDoc(doc(db, "appointments", id));
+        return;
+      } catch (e) {
+        console.error("Firestore deleteAppointment error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_appointments") || "[]";
+      let list = JSON.parse(raw);
+      list = list.filter(a => a.id !== id && a.bookingId !== id);
+      localStorage.setItem("nyaytak_appointments", JSON.stringify(list));
+    } catch (_) {}
+  },
+
+  // ── Custom Lawyers ──
+  getCustomLawyers: async () => {
+    if (db) {
+      try {
+        const snap = await getDocs(collection(db, "custom_lawyers"));
+        return snap.docs.map(doc => doc.data());
+      } catch (e) {
+        console.error("Firestore getCustomLawyers error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_custom_lawyers");
+      return raw ? JSON.parse(raw) : [];
+    } catch (_) {
+      return [];
+    }
+  },
+
+  saveCustomLawyer: async (lawyer) => {
+    if (db) {
+      try {
+        await setDoc(doc(db, "custom_lawyers", lawyer.id), lawyer);
+        return;
+      } catch (e) {
+        console.error("Firestore saveCustomLawyer error:", e);
+      }
+    }
+    // Fallback
+    try {
+      const raw = localStorage.getItem("nyaytak_custom_lawyers") || "[]";
+      const list = JSON.parse(raw);
+      list.push(lawyer);
+      localStorage.setItem("nyaytak_custom_lawyers", JSON.stringify(list));
+    } catch (_) {}
+  }
+};
+

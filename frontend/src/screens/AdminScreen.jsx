@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Trash2, Plus, Users, Calendar, TrendingUp, ShieldCheck, Mail, ShieldAlert } from "lucide-react";
 import { STATE_DISTRICTS } from "../districts.js";
 import { REAL_LAWYERS } from "../lawyers.js";
-import { authService } from "../firebase.js";
+import { authService, dbService } from "../firebase.js";
 
 function AdminScreen({ onBack, lang }) {
   const [activeTab, setActiveTab] = useState("lawyers");
@@ -47,45 +47,26 @@ function AdminScreen({ onBack, lang }) {
       if (raw) setCustomLawyers(JSON.parse(raw));
     } catch (_) {}
 
-    // Load booked appointments from localStorage
-    try {
-      const rawApts = localStorage.getItem("nyaytak_appointments");
-      if (rawApts) setAppointments(JSON.parse(rawApts));
-    } catch (_) {}
+    // Load booked appointments from dbService
+    dbService.getAppointments()
+      .then((list) => {
+        setAppointments(list);
+      })
+      .catch(() => {});
 
     // Load admin emails
-    const API_BASE = import.meta.env.VITE_API_BASE || "";
-    fetch(`${API_BASE}/api/admins`)
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
+    dbService.getAdmins()
       .then((list) => {
         setAdminEmails(list);
       })
-      .catch(() => {
-        try {
-          const rawAdmins = localStorage.getItem("nyaytak_admin_emails");
-          let list = rawAdmins ? JSON.parse(rawAdmins) : [];
-          if (!list.includes("sudhanshupandey7393@gmail.com")) {
-            list.push("sudhanshupandey7393@gmail.com");
-          }
-          setAdminEmails(list);
-        } catch (_) {}
-      });
+      .catch(() => {});
 
     // Load registered users list
-    fetch(`${API_BASE}/api/users`)
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
+    dbService.getUsers()
       .then((list) => {
         setUsersList(list);
       })
-      .catch(() => {
-        setUsersList(authService.getUsersList());
-      });
+      .catch(() => {});
   }, []);
 
   const saveCustomLawyers = (updated) => {
@@ -138,16 +119,25 @@ function AdminScreen({ onBack, lang }) {
     saveCustomLawyers(updated);
   };
 
-  const handleDeleteAppointment = (idx) => {
+  const handleDeleteAppointment = async (idx) => {
     if (!window.confirm("Are you sure you want to delete this appointment?")) return;
-    const updated = appointments.filter((_, i) => i !== idx);
-    setAppointments(updated);
+    const target = appointments[idx];
+    if (!target) return;
     try {
-      localStorage.setItem("nyaytak_appointments", JSON.stringify(updated));
-    } catch (_) {}
+      if (target.id) {
+        await dbService.deleteAppointment(target.id);
+      } else {
+        await dbService.deleteAppointment(target.bookingId);
+      }
+      const list = await dbService.getAppointments();
+      setAppointments(list);
+      alert("Appointment deleted successfully.");
+    } catch (err) {
+      alert("Failed to delete appointment: " + err.message);
+    }
   };
 
-  const handleAddAdmin = (e) => {
+  const handleAddAdmin = async (e) => {
     e.preventDefault();
     if (!newAdminEmail.trim() || !newAdminEmail.includes("@")) {
       alert("Please enter a valid email address!");
@@ -159,55 +149,32 @@ function AdminScreen({ onBack, lang }) {
       return;
     }
 
-    const API_BASE = import.meta.env.VITE_API_BASE || "";
-    fetch(`${API_BASE}/api/admins`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("API error");
-        return res.json();
-      })
-      .then(list => {
-        setAdminEmails(list);
-        setNewAdminEmail("");
-        alert(`${email} added as administrator.`);
-      })
-      .catch(() => {
-        const updated = [...adminEmails, email];
-        setAdminEmails(updated);
-        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
-        setNewAdminEmail("");
-        alert(`${email} added as administrator (local fallback).`);
-      });
+    try {
+      await dbService.addAdmin(email);
+      const list = await dbService.getAdmins();
+      setAdminEmails(list);
+      setNewAdminEmail("");
+      alert(`${email} added as administrator.`);
+    } catch (err) {
+      alert("Failed to add administrator: " + err.message);
+    }
   };
 
-  const handleDeleteAdmin = (email) => {
+  const handleDeleteAdmin = async (email) => {
     if (email === "sudhanshupandey7393@gmail.com") {
       alert("Root administrator cannot be removed!");
       return;
     }
     if (!window.confirm(`Are you sure you want to remove ${email} from administrators?`)) return;
 
-    const API_BASE = import.meta.env.VITE_API_BASE || "";
-    fetch(`${API_BASE}/api/admins?email=${encodeURIComponent(email)}`, {
-      method: "DELETE"
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("API error");
-        return res.json();
-      })
-      .then(list => {
-        setAdminEmails(list);
-        alert(`${email} removed from administrators.`);
-      })
-      .catch(() => {
-        const updated = adminEmails.filter(e => e !== email);
-        setAdminEmails(updated);
-        localStorage.setItem("nyaytak_admin_emails", JSON.stringify(updated));
-        alert(`${email} removed from administrators (local fallback).`);
-      });
+    try {
+      await dbService.deleteAdmin(email);
+      const list = await dbService.getAdmins();
+      setAdminEmails(list);
+      alert(`${email} removed from administrators.`);
+    } catch (err) {
+      alert("Failed to remove administrator: " + err.message);
+    }
   };
 
   // Merge static real lawyers and custom ones for counting
