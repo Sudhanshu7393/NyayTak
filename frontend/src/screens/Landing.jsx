@@ -318,7 +318,7 @@ function Landing({
                 "0 8px 24px rgba(240,165,0,0.32)";
             }}
           >
-            {t.cta} ✨ <Sparkles size={16} />
+            {t.cta} <Sparkles size={16} />
           </button>
 
           <div
@@ -358,42 +358,22 @@ function Landing({
             ))}
           </div>
 
-          <div style={{ marginTop: 14, width: "100%" }}>
-            <div
-              style={{
-                fontSize: "calc(10.5px * var(--fs))",
-                color: "var(--text-dim)",
-                lineHeight: 1.5,
-                marginBottom: 8,
-                fontWeight: 600,
-              }}
-            >
-              🗣️ {t.chatLangNote}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 5,
-                justifyContent: "center",
-              }}
-            >
-              {CHAT_LANGS.map((l) => (
-                <span
-                  key={l}
-                  style={{
-                    fontSize: "calc(10px * var(--fs))",
-                    padding: "3px 9px",
-                    borderRadius: 20,
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid var(--border-soft)",
-                    color: "var(--text-mid)",
-                  }}
-                >
-                  {l}
-                </span>
-              ))}
-            </div>
+          <div
+            style={{
+              fontSize: "calc(10.5px * var(--fs))",
+              color: "var(--text-dim)",
+              marginTop: 10,
+              fontStyle: "italic",
+              fontWeight: 500,
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
+            {lang === "hi"
+              ? "* AI इन सभी भाषाओं में जवाब दे सकता है"
+              : lang === "hinglish"
+                ? "* AI in sabhi bhashaon mein jawab de sakta hai"
+                : "* AI supports and replies in all the above languages"}
           </div>
         </div>
       </div>
