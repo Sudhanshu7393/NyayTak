@@ -28,7 +28,7 @@ const upload = multer({
 
 const KEY = process.env.GROQ_API_KEY;
 const IK_KEY = process.env.INDIAN_KANOON_API_TOKEN;
-const MODEL = process.env.GROQ_MODEL || "qwen/qwen3.6-27b";
+const MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
 // ── Indian Kanoon Search ──
 async function searchCaseLaw(query) {
