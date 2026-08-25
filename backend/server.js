@@ -29,7 +29,7 @@ const upload = multer({
 
 const KEY = process.env.GROQ_API_KEY;
 const IK_KEY = process.env.INDIAN_KANOON_API_TOKEN;
-const MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+const MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
 console.log(
   "🔑 Groq key loaded:",
