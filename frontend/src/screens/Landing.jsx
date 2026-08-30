@@ -25,6 +25,7 @@ function Landing({
   onAdminClick,
 }) {
   const [v, setV] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   useEffect(() => {
     setTimeout(() => setV(true), 60);
   }, []);
@@ -430,7 +431,26 @@ function Landing({
           }}
         >
           {lang === "hi" ? "संस्थापक" : "Founder"}:{" "}
-          <span style={{ color: "#f0a500", fontWeight: 700 }}>Sudhanshu</span>
+          <a
+            href="https://github.com/Sudhanshu7393"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#f0a500", fontWeight: 700, textDecoration: "none" }}
+          >
+            Sudhanshu Pandey
+          </a>
+          {" | "}
+          <span
+            onClick={() => setShowPrivacy(true)}
+            style={{
+              cursor: "pointer",
+              color: "#f0a500",
+              textDecoration: "underline",
+              fontWeight: 600
+            }}
+          >
+            🛡️ {lang === "hi" ? "सुरक्षा एवं गोपनीयता" : "Security & Privacy"}
+          </span>
           {onAdminClick && (
             <>
               {" | "}
@@ -448,6 +468,112 @@ function Landing({
           )}
         </div>
       </div>
+
+      {showPrivacy && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(10, 14, 26, 0.9)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+            padding: 16,
+          }}
+        >
+          <div
+            style={{
+              background: "#161b2c",
+              border: "1px solid rgba(240, 165, 0, 0.3)",
+              borderRadius: 14,
+              maxWidth: 500,
+              width: "100%",
+              padding: 20,
+              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+              color: "#f3f4f6",
+              fontFamily: "system-ui, sans-serif",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: "calc(16px * var(--fs))", color: "#f0a500", fontWeight: 700 }}>
+                🛡️ {lang === "hi" ? "सुरक्षा और गोपनीयता गारंटी" : "Security & Privacy Guarantee"}
+              </h3>
+              <button
+                onClick={() => setShowPrivacy(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#f0a500",
+                  cursor: "pointer",
+                  fontSize: 20,
+                  fontWeight: 700
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: "calc(12.5px * var(--fs))", lineHeight: 1.5, maxHeight: 350, overflowY: "auto" }}>
+              <p style={{ margin: 0 }}>
+                <b>{lang === "hi" ? "संस्थापक" : "Founder"}:</b>{" "}
+                <a 
+                  href="https://github.com/Sudhanshu7393" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: "#f0a500", textDecoration: "underline", fontWeight: 700 }}
+                >
+                  Sudhanshu Pandey
+                </a>
+              </p>
+
+              <div style={{ padding: 10, background: "rgba(34,197,94,0.08)", borderLeft: "3px solid #22c55e", borderRadius: 4, color: "#22c55e", textAlign: "left" }}>
+                🔒 <b>{lang === "hi" ? "100% सुरक्षित और अनाम" : "100% Secure & Anonymous"}</b>
+                <br />
+                {lang === "hi" 
+                  ? "NyayTak एक गैर-लाभकारी, ओपन-सोर्स कानूनी जागरूकता मंच है। हम कभी भी आपकी संवेदनशील जानकारी जैसे आधार, पैन कार्ड, बैंक खाता विवरण, ओटीपी या कोई भी व्यक्तिगत संपर्क विवरण नहीं मांगते हैं और न ही सहेजते हैं।" 
+                  : "NyayTak is a non-profit, open-source legal awareness platform. We NEVER request, store, or process any sensitive credentials such as Aadhaar, PAN card, bank details, OTPs, or personal phone numbers."}
+              </div>
+
+              <p style={{ margin: 0, textAlign: "left" }}>
+                <b>{lang === "hi" ? "डेटा सुरक्षा और होस्टिंग" : "Data Security & Hosting"}:</b>
+                <br />
+                {lang === "hi"
+                  ? "यह वेबसाइट Google Cloud Firestore और Vercel edge networks पर सुरक्षित रूप से होस्ट की गई है। डेटा ट्रांसमिशन एंड-टू-एंड SSL/HTTPS एन्क्रिप्शन द्वारा सुरक्षित है।"
+                  : "This application is securely deployed on Google Cloud Firestore and Vercel networks. All network transmissions are protected by end-to-end SSL/HTTPS encryption."}
+              </p>
+
+              <p style={{ margin: 0, textAlign: "left" }}>
+                <b>{lang === "hi" ? "ओपन-सोर्स सत्यापन" : "Open-Source Verification"}:</b>
+                <br />
+                {lang === "hi"
+                  ? "इस प्रोजेक्ट का पूरा कोड पारदर्शी (transparent) है। आप इसे ऊपर संस्थापक लिंक पर क्लिक करके गिटहब पर सत्यापित कर सकते हैं।"
+                  : "To verify the security and logic of the platform, the full source code is public and open-source."}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowPrivacy(false)}
+              style={{
+                marginTop: 18,
+                width: "100%",
+                padding: 10,
+                borderRadius: 8,
+                border: "none",
+                background: "linear-gradient(135deg,#f0a500,#d4860a)",
+                color: "#0a0e1a",
+                fontWeight: 700,
+                cursor: "pointer"
+              }}
+            >
+              {lang === "hi" ? "समझ गया" : "I Understand"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
