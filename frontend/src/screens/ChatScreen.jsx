@@ -40,8 +40,6 @@ import {
   Sparkles,
   Pencil,
   Copy,
-  ShieldAlert,
-  CheckSquare,
   ShieldCheck,
 } from "lucide-react";
 import {
@@ -59,8 +57,6 @@ import {
   toolPrompt,
   FONT_HEAD,
   FONT_BODY,
-  EVIDENCE_PRESERVATION_CHECKLIST,
-  ARREST_RIGHTS_SOS,
 } from "../data.js";
 import {
   callClaude,
@@ -133,8 +129,6 @@ function ChatScreen({
   const [copiedMsg, setCopiedMsg] = useState(-1);
   const [showIpcBns, setShowIpcBns] = useState(false);
   const [ipcSearchQuery, setIpcSearchQuery] = useState("");
-  const [showEvidence, setShowEvidence] = useState(false);
-  const [showArrestSOS, setShowArrestSOS] = useState(false);
   const [showDraftWizard, setShowDraftWizard] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState(null);
   const [templateFormValues, setTemplateFormValues] = useState({});
@@ -1124,50 +1118,6 @@ GUIDELINES FOR THE BODY:
           }}
         >
           📝 {lang === "hi" ? "दस्तावेज़ ड्राफ्ट" : lang === "hinglish" ? "Draft Templates" : "Draft Templates"}
-        </button>
-        <button
-          onClick={() => setShowEvidence(true)}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            whiteSpace: "nowrap",
-            padding: "8px 13px",
-            borderRadius: 20,
-            cursor: "pointer",
-            background: "rgba(59,130,246,0.1)",
-            border: "1px solid rgba(59,130,246,0.3)",
-            color: "#2563eb",
-            fontSize: "calc(12px * var(--fs))",
-            fontWeight: 600,
-            fontFamily: "inherit",
-            flexShrink: 0,
-          }}
-        >
-          <CheckSquare size={13} />
-          {lang === "hi" ? "24h सबूत सुरक्षा" : lang === "hinglish" ? "24h Evidence Checklist" : "24h Evidence Checklist"}
-        </button>
-        <button
-          onClick={() => setShowArrestSOS(true)}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            whiteSpace: "nowrap",
-            padding: "8px 13px",
-            borderRadius: 20,
-            cursor: "pointer",
-            background: "rgba(239,68,68,0.1)",
-            border: "1px solid rgba(239,68,68,0.3)",
-            color: "#dc2626",
-            fontSize: "calc(12px * var(--fs))",
-            fontWeight: 600,
-            fontFamily: "inherit",
-            flexShrink: 0,
-          }}
-        >
-          <ShieldAlert size={13} />
-          {lang === "hi" ? "गिरफ़्तारी अधिकार (SOS)" : lang === "hinglish" ? "Arrest Rights SOS" : "Arrest Rights SOS"}
         </button>
         <button
           onClick={() => setInfo("help")}
@@ -2749,122 +2699,6 @@ GUIDELINES FOR THE BODY:
                 </pre>
               </div>
             )}
-          </div>
-        </PanelShell>
-      )}
-
-      {showEvidence && (
-        <PanelShell
-          title={lang === "hi" ? "24-घंटे सबूत सुरक्षा चेकलिस्ट" : "24-Hour Critical Evidence Preservation Checklist"}
-          icon={<CheckSquare size={17} />}
-          onClose={() => setShowEvidence(false)}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <p style={{ margin: 0, fontSize: "calc(12.5px * var(--fs))", color: "var(--text-mid)", lineHeight: 1.5 }}>
-              {lang === "hi" 
-                ? "कानूनी विवाद या अपराध में पहले 24 घंटे सबसे महत्वपूर्ण होते हैं। समय बीतने पर CCTV फुटेज, कॉल रिकॉर्ड्स (CDR) और साइबर सबूत नष्ट हो जाते हैं। नीचे दी गई चेकलिस्ट का तुरंत पालन करें:"
-                : "The first 24 hours of any dispute or crime are critical. CCTV footage, telecom records, and cyber evidence expire quickly. Follow this statutory preservation guide:"}
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 420, overflowY: "auto", paddingRight: 4 }}>
-              {EVIDENCE_PRESERVATION_CHECKLIST.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    padding: "12px 14px",
-                    borderRadius: 10,
-                    background: item.urgent ? "rgba(239,68,68,0.06)" : "var(--surface)",
-                    border: `1px solid ${item.urgent ? "rgba(239,68,68,0.25)" : "var(--border)"}`,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                    <span style={{ fontWeight: 700, fontSize: "calc(13.5px * var(--fs))", color: item.urgent ? "#dc2626" : "var(--text)" }}>
-                      {lang === "hi" ? item.title_hi : item.title_en}
-                    </span>
-                    {item.urgent && (
-                      <span style={{
-                        fontSize: "calc(10.5px * var(--fs))",
-                        fontWeight: 700,
-                        background: "rgba(239,68,68,0.15)",
-                        color: "#dc2626",
-                        padding: "2px 7px",
-                        borderRadius: 6,
-                        whiteSpace: "nowrap"
-                      }}>
-                        {lang === "hi" ? "अति आवश्यक" : "HIGH PRIORITY"}
-                      </span>
-                    )}
-                  </div>
-                  <p style={{ margin: 0, fontSize: "calc(12.5px * var(--fs))", color: "var(--text-mid)", lineHeight: 1.5 }}>
-                    {lang === "hi" ? item.desc_hi : item.desc_en}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </PanelShell>
-      )}
-
-      {showArrestSOS && (
-        <PanelShell
-          title={lang === "hi" ? "संवैधानिक व वैधानिक गिरफ़्तारी अधिकार (SOS)" : "Statutory Arrest Rights SOS Card (BNSS 2023)"}
-          icon={<ShieldAlert size={17} />}
-          onClose={() => setShowArrestSOS(false)}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{
-              padding: "10px 12px",
-              borderRadius: 8,
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.3)",
-              color: "#dc2626",
-              fontSize: "calc(12px * var(--fs))",
-              fontWeight: 600,
-              lineHeight: 1.4
-            }}>
-              {lang === "hi" 
-                ? "🚨 यदि पुलिस आपको या आपके किसी परिजन को हिरासत में ले रही है, तो भारतीय नागरिक सुरक्षा संहिता (BNSS 2023) और संविधान के तहत ये आपके अनिवार्य अधिकार हैं:"
-                : "🚨 If you or a relative is being detained or questioned by police, these statutory protections under BNSS 2023 and the Constitution are mandatory:"}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 420, overflowY: "auto", paddingRight: 4 }}>
-              {ARREST_RIGHTS_SOS.map((card) => (
-                <div
-                  key={card.id}
-                  style={{
-                    padding: "12px 14px",
-                    borderRadius: 10,
-                    background: "var(--surface)",
-                    border: "1px solid var(--border)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                    <span style={{ fontWeight: 700, fontSize: "calc(13.5px * var(--fs))", color: "var(--text)" }}>
-                      {lang === "hi" ? card.title_hi : card.title_en}
-                    </span>
-                    <span style={{
-                      fontSize: "calc(11px * var(--fs))",
-                      fontWeight: 700,
-                      background: "rgba(240,165,0,0.15)",
-                      color: "#c98a06",
-                      padding: "2px 8px",
-                      borderRadius: 6,
-                      fontFamily: "monospace",
-                      whiteSpace: "nowrap"
-                    }}>
-                      {card.section}
-                    </span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: "calc(12.5px * var(--fs))", color: "var(--text-mid)", lineHeight: 1.5 }}>
-                    {lang === "hi" ? card.detail_hi : card.detail_en}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         </PanelShell>
       )}
