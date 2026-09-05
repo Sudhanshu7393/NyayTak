@@ -4,13 +4,13 @@ export const DOCUMENT_TEMPLATES = [
     name_hi: "पुलिस शिकायत पत्र (Police Complaint)",
     name_en: "Police Complaint Letter",
     fields: [
-      { id: "senderName", label_hi: "आपका नाम (Sender Name)", label_en: "Your Name", type: "text", placeholder: "e.g., Sudhanshu Pandey" },
-      { id: "senderPhone", label_hi: "मोबाइल नंबर (Mobile)", label_en: "Mobile No.", type: "text", placeholder: "e.g., 9876543210" },
-      { id: "stationName", label_hi: "थाने का नाम (Police Station)", label_en: "Police Station Name", type: "text", placeholder: "e.g., Hazratganj Police Station, Lucknow" },
-      { id: "opponentName", label_hi: "आरोपी का नाम (Accused Name)", label_en: "Accused Name (if known)", type: "text", placeholder: "e.g., Unknown / John Doe" },
+      { id: "senderName", label_hi: "आपका नाम (Sender Name)", label_en: "Your Name", type: "text", placeholder: "अपना पूरा नाम दर्ज करें / Enter Full Name" },
+      { id: "senderPhone", label_hi: "मोबाइल नंबर (Mobile)", label_en: "Mobile No.", type: "text", placeholder: "10-अंकों का मोबाइल नंबर / 10-digit Mobile" },
+      { id: "stationName", label_hi: "थाने का नाम (Police Station)", label_en: "Police Station Name", type: "text", placeholder: "संबंधित थाने का नाम / Police Station Name & City" },
+      { id: "opponentName", label_hi: "आरोपी का नाम (Accused Name)", label_en: "Accused Name (if known)", type: "text", placeholder: "आरोपी का नाम (या अज्ञात / Unknown)" },
       { id: "incidentDate", label_hi: "घटना की तारीख (Incident Date)", label_en: "Date of Incident", type: "date" },
-      { id: "incidentPlace", label_hi: "घटना का स्थान (Incident Place)", label_en: "Place of Incident", type: "text", placeholder: "e.g., Hazratganj Chauraha" },
-      { id: "details", label_hi: "शिकायत का विवरण (Incident Details)", label_en: "Description of Incident", type: "textarea", placeholder: "Explain exactly what happened..." }
+      { id: "incidentPlace", label_hi: "घटना का स्थान (Incident Place)", label_en: "Place of Incident", type: "text", placeholder: "घटना स्थल / Incident Location" },
+      { id: "details", label_hi: "शिकायत का विवरण (Incident Details)", label_en: "Description of Incident", type: "textarea", placeholder: "घटना का संपूर्ण विवरण लिखें / Describe the incident..." }
     ],
     template_hi: `सेवा में,
 थाना प्रभारी महोदय,
@@ -62,11 +62,11 @@ Date: {{incidentDate}}`
     name_hi: "आरटीआई आवेदन पत्र (RTI Application)",
     name_en: "RTI Application (Right to Information)",
     fields: [
-      { id: "senderName", label_hi: "आपका नाम (Your Name)", label_en: "Your Name", type: "text", placeholder: "e.g., Rajesh Kumar" },
-      { id: "senderAddress", label_hi: "आपका पता (Address)", label_en: "Your Address", type: "text", placeholder: "e.g., Flat 101, Sector 4, Noida" },
-      { id: "pioOffice", label_hi: "PIO / कार्यालय का नाम (Public Authority Office)", label_en: "Public Authority / PIO Office", type: "text", placeholder: "e.g., Public Information Officer, Municipal Corporation, Lucknow" },
-      { id: "infoNeeded", label_hi: "वांछित जानकारी (Information Sought)", label_en: "Information Needed", type: "textarea", placeholder: "List the exact questions or files you want to inspect..." },
-      { id: "ipoNumber", label_hi: "पोस्टल आर्डर संख्या (IPO/Fee Receipt Number)", label_en: "IPO/Fee Details (Rs. 10)", type: "text", placeholder: "e.g., IPO No. 56F 123456" }
+      { id: "senderName", label_hi: "आपका नाम (Your Name)", label_en: "Your Name", type: "text", placeholder: "आवेदक का पूरा नाम / Full Name" },
+      { id: "senderAddress", label_hi: "आपका पता (Address)", label_en: "Your Address", type: "text", placeholder: "पत्राचार का पूरा पता / Complete Postal Address" },
+      { id: "pioOffice", label_hi: "PIO / कार्यालय का नाम (Public Authority Office)", label_en: "Public Authority / PIO Office", type: "text", placeholder: "संबंधित विभाग या कार्यालय का नाम / Public Authority Name" },
+      { id: "infoNeeded", label_hi: "वांछित जानकारी (Information Sought)", label_en: "Information Needed", type: "textarea", placeholder: "वांछित जानकारी के बिंदु लिखें / Specify details of information needed..." },
+      { id: "ipoNumber", label_hi: "पोस्टल आर्डर संख्या (IPO/Fee Receipt Number)", label_en: "IPO/Fee Details (Rs. 10)", type: "text", placeholder: "रसीद या पोस्टल आर्डर संख्या / Receipt or IPO No." }
     ],
     template_hi: `सूचना का अधिकार अधिनियम, 2005 की धारा 6(1) के तहत आवेदन
 
@@ -116,12 +116,12 @@ Correspondence Address: {{senderAddress}}`
     name_hi: "कानूनी नोटिस - बकाया वसूली (Legal Notice - Dues)",
     name_en: "Legal Notice for Dues Recovery",
     fields: [
-      { id: "senderName", label_hi: "आपका नाम (Client/Sender)", label_en: "Your Name", type: "text", placeholder: "e.g., Anil Verma" },
-      { id: "opponentName", label_hi: "विपक्षी का नाम (Debtor Name)", label_en: "Debtor / Opponent Name", type: "text", placeholder: "e.g., Amit Singh" },
-      { id: "opponentAddress", label_hi: "विपक्षी का पता (Debtor Address)", label_en: "Debtor Address", type: "text", placeholder: "e.g., Sector 12, Indiranagar, Lucknow" },
-      { id: "dueAmount", label_hi: "बकाया राशि (Due Amount in ₹)", label_en: "Due Amount (INR)", type: "text", placeholder: "e.g., ₹50,000" },
+      { id: "senderName", label_hi: "आपका नाम (Client/Sender)", label_en: "Your Name", type: "text", placeholder: "प्रेषक या क्लाइंट का नाम / Full Name" },
+      { id: "opponentName", label_hi: "विपक्षी का नाम (Debtor Name)", label_en: "Debtor / Opponent Name", type: "text", placeholder: "विपक्षी या देनदार का नाम / Opponent Name" },
+      { id: "opponentAddress", label_hi: "विपक्षी का पता (Debtor Address)", label_en: "Debtor Address", type: "text", placeholder: "विपक्षी का पूरा पता / Opponent Full Address" },
+      { id: "dueAmount", label_hi: "बकाया राशि (Due Amount in ₹)", label_en: "Due Amount (INR)", type: "text", placeholder: "बकाया राशि (उदा. ₹50,000) / Due Amount" },
       { id: "dueDate", label_hi: "भुगतान की आखिरी तारीख (Last Due Date)", label_en: "Original Due Date", type: "date" },
-      { id: "noticePeriod", label_hi: "कार्रवाई हेतु समय सीमा (Notice Period in Days)", label_en: "Notice Period (Days)", type: "text", placeholder: "e.g., 15" }
+      { id: "noticePeriod", label_hi: "कार्रवाई हेतु समय सीमा (Notice Period in Days)", label_en: "Notice Period (Days)", type: "text", placeholder: "समय सीमा दिनों में (उदा. 15) / Days" }
     ],
     template_hi: `पंजीकृत ए.डी. / स्पीड पोस्ट द्वारा प्रेषित
 
