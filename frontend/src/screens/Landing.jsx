@@ -24,11 +24,8 @@ function Landing({
   isInstalled,
   onAdminClick,
 }) {
-  const [v, setV] = useState(false);
+  const [v, setV] = useState(true);
   const [showPrivacy, setShowPrivacy] = useState(false);
-  useEffect(() => {
-    setTimeout(() => setV(true), 60);
-  }, []);
 
   const a = (d) =>
     v
@@ -87,10 +84,13 @@ function Landing({
         >
           <img
             src="/logo.jpg"
-            alt=""
+            alt="NyayTak"
+            width={22}
+            height={22}
             style={{
-              width: "calc(22px * var(--fs))",
-              height: "calc(22px * var(--fs))",
+              width: "calc(22px * var(--fs, 1))",
+              height: "calc(22px * var(--fs, 1))",
+              aspectRatio: "1 / 1",
               borderRadius: 4,
               objectFit: "cover",
             }}
@@ -192,9 +192,12 @@ function Landing({
           <img
             src="/logo.jpg"
             alt="NyayTak Logo"
+            width={120}
+            height={120}
             style={{
               width: 120,
               height: 120,
+              aspectRatio: "1 / 1",
               borderRadius: 12,
               border: "none",
               boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
