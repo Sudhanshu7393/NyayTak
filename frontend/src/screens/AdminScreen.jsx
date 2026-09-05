@@ -15,20 +15,22 @@ function AdminScreen({ onBack, lang }) {
   const getTabStyle = (tabId) => {
     const isAct = activeTab === tabId;
     return {
-      padding: "10px 18px",
-      borderRadius: "10px",
-      border: isAct ? "1px solid #f0a500" : "1px solid rgba(255, 255, 255, 0.12)",
-      background: isAct ? "rgba(240, 165, 0, 0.15)" : "rgba(255, 255, 255, 0.05)",
+      padding: "10px 20px",
+      borderRadius: "12px",
+      border: isAct ? "1.5px solid #f0a500" : "1px solid rgba(255, 255, 255, 0.12)",
+      background: isAct ? "rgba(240, 165, 0, 0.18)" : "rgba(255, 255, 255, 0.05)",
       color: isAct ? "#f0a500" : "#a3aed0",
       fontWeight: 700,
       fontSize: "calc(13px * var(--fs))",
       cursor: "pointer",
       display: "inline-flex",
       alignItems: "center",
-      gap: 6,
-      flexShrink: 0,
+      justifyContent: "center",
+      gap: 7,
       whiteSpace: "nowrap",
       lineHeight: 1.3,
+      minHeight: 44,
+      boxSizing: "border-box",
       transition: "all 0.2s ease"
     };
   };
@@ -251,20 +253,14 @@ function AdminScreen({ onBack, lang }) {
 
       {/* Tabs */}
       <div 
-        className="no-scrollbar"
         style={{ 
           display: "flex", 
+          flexWrap: "wrap",
           alignItems: "center",
-          gap: 10, 
+          gap: 12, 
           borderBottom: "1px solid var(--border)", 
-          paddingBottom: 14, 
-          paddingTop: 4,
-          marginBottom: 20, 
-          overflowX: "auto", 
-          whiteSpace: "nowrap",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          WebkitOverflowScrolling: "touch",
+          paddingBottom: 16, 
+          marginBottom: 24, 
         }}
       >
         <button onClick={() => setActiveTab("lawyers")} style={getTabStyle("lawyers")}>
@@ -337,7 +333,7 @@ function AdminScreen({ onBack, lang }) {
               <label style={{ fontSize: "calc(11px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>Advocate Name *</label>
               <input
                 type="text"
-                placeholder="e.g. Adv. Santosh Pandey"
+                placeholder="वकील का पूरा नाम दर्ज करें / Enter Advocate Full Name"
                 value={lawyerName}
                 onChange={(e) => setLawyerName(e.target.value)}
                 required
@@ -349,7 +345,7 @@ function AdminScreen({ onBack, lang }) {
               <label style={{ fontSize: "calc(11px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>Specialization / Exp</label>
               <input
                 type="text"
-                placeholder="e.g. Property Disputes & Civil Mutations"
+                placeholder="विशेषज्ञता / Specialization (e.g. Criminal, Property, Civil)"
                 value={specialization}
                 onChange={(e) => setSpecialization(e.target.value)}
                 style={{ padding: "9px 12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)", fontFamily: "inherit" }}
@@ -362,7 +358,7 @@ function AdminScreen({ onBack, lang }) {
                 <input
                   type="text"
                   maxLength={10}
-                  placeholder="e.g. 9876543210"
+                  placeholder="10-अंकों का संपर्क नंबर / 10-digit Phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                   required
@@ -373,7 +369,7 @@ function AdminScreen({ onBack, lang }) {
                 <label style={{ fontSize: "calc(11px * var(--fs))", color: "var(--text-mid)", fontWeight: 600 }}>Office Location / Court</label>
                 <input
                   type="text"
-                  placeholder="e.g. Deoria Civil Court"
+                  placeholder="कार्यालय या न्यायालय का नाम / Office Location or Court"
                   value={loc}
                   onChange={(e) => setLoc(e.target.value)}
                   style={{ padding: "9px 12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)", fontFamily: "inherit" }}
@@ -584,7 +580,7 @@ function AdminScreen({ onBack, lang }) {
             <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
               <input
                 type="email"
-                placeholder="e.g. advocate.friend@gmail.com"
+                placeholder="व्यवस्थापक ईमेल दर्ज करें / admin.email@domain.com"
                 value={newAdminEmail}
                 onChange={(e) => setNewAdminEmail(e.target.value)}
                 required
