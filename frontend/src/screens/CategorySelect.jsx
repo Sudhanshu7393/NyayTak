@@ -16,7 +16,7 @@ function CategorySelect({ onSelect, onGeneral, onBack, t, lang, setLang, setting
         <LangSelect lang={lang} setLang={setLang}/><SettingsBtn t={t} {...settings}/>
       </div>
       <Stepper step={1} t={t}/>
-      <div style={{ flex:1,overflowY:"auto",padding:"6px 13px 13px",position:"relative",zIndex:10 }}>
+      <div style={{ flex:1,overflowY:"auto",padding:"6px 13px 60px",position:"relative",zIndex:10 }}>
         <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:9 }}>
           {CATEGORIES.map((cat,i)=>{ const c=cat.tr[lang]; const I=ICONS[cat.id]; return (
             <button key={cat.id} onClick={()=>onSelect(cat)} style={{ padding:"14px 8px",borderRadius:14,textAlign:"center",background:cat.card,border:`1px solid ${cat.border}`,cursor:"pointer",fontFamily:FONT_BODY,boxShadow:"0 3px 12px rgba(0,0,0,0.12)",opacity:v?1:0,animation:v?`nsFadeUp 0.3s ease ${i*0.03}s both`:undefined,transition:"transform 0.2s,box-shadow 0.2s" }}

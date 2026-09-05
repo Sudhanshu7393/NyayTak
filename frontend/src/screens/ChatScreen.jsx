@@ -978,6 +978,7 @@ GUIDELINES FOR THE BODY:
       </div>
 
       <div
+        className="no-scrollbar"
         style={{
           position: "relative",
           zIndex: 10,
@@ -988,6 +989,9 @@ GUIDELINES FOR THE BODY:
           borderTop: "1px solid var(--border-soft)",
           flexShrink: 0,
           background: "var(--panel)",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         {[

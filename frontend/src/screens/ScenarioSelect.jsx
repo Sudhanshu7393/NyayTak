@@ -146,7 +146,7 @@ function ScenarioSelect({
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "16px",
+          padding: "16px 16px 60px 16px",
           position: "relative",
           zIndex: 10,
         }}

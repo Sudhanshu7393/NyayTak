@@ -15,7 +15,7 @@ function AdminScreen({ onBack, lang }) {
   const getTabStyle = (tabId) => {
     const isAct = activeTab === tabId;
     return {
-      padding: "10px 16px",
+      padding: "10px 18px",
       borderRadius: "10px",
       border: isAct ? "1px solid #f0a500" : "1px solid rgba(255, 255, 255, 0.12)",
       background: isAct ? "rgba(240, 165, 0, 0.15)" : "rgba(255, 255, 255, 0.05)",
@@ -23,9 +23,12 @@ function AdminScreen({ onBack, lang }) {
       fontWeight: 700,
       fontSize: "calc(13px * var(--fs))",
       cursor: "pointer",
-      display: "flex",
+      display: "inline-flex",
       alignItems: "center",
       gap: 6,
+      flexShrink: 0,
+      whiteSpace: "nowrap",
+      lineHeight: 1.3,
       transition: "all 0.2s ease"
     };
   };
@@ -189,13 +192,14 @@ function AdminScreen({ onBack, lang }) {
     <div style={{
       display: "flex",
       flexDirection: "column",
-      height: "100%",
+      flex: 1,
+      minHeight: 0,
       width: "100%",
       maxWidth: 800,
       margin: "0 auto",
       background: "var(--bg)",
       overflowY: "auto",
-      padding: "20px 16px"
+      padding: "20px 16px 80px 16px"
     }}>
       {/* Admin Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, borderBottom: "1px solid var(--border)", paddingBottom: 16 }}>
@@ -246,16 +250,23 @@ function AdminScreen({ onBack, lang }) {
       </div>
 
       {/* Tabs */}
-      <div style={{ 
-        display: "flex", 
-        gap: 12, 
-        borderBottom: "1px solid var(--border)", 
-        paddingBottom: 14, 
-        marginBottom: 20, 
-        overflowX: "auto", 
-        whiteSpace: "nowrap",
-        scrollbarWidth: "auto"
-      }}>
+      <div 
+        className="no-scrollbar"
+        style={{ 
+          display: "flex", 
+          alignItems: "center",
+          gap: 10, 
+          borderBottom: "1px solid var(--border)", 
+          paddingBottom: 14, 
+          paddingTop: 4,
+          marginBottom: 20, 
+          overflowX: "auto", 
+          whiteSpace: "nowrap",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         <button onClick={() => setActiveTab("lawyers")} style={getTabStyle("lawyers")}>
           👥 Lawyers
         </button>
