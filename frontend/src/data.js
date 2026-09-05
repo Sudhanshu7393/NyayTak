@@ -1174,6 +1174,12 @@ const buildPrompt = (catEn, scenario, langPrompt) => {
   return `You are NyayTak — India's AI legal awareness assistant.
 SITUATION: category "${catEn}" → issue: "${scenario}".
 
+TEMPORAL STATUTORY ACCURACY (JULY 1, 2024 CUTOFF - CRITICAL):
+- In Indian criminal jurisprudence (Art. 20(1) Constitution & Supreme Court directives):
+  * If the incident/offense occurred BEFORE 1 July 2024: You MUST apply the Indian Penal Code (IPC 1860) and CrPC 1973 as the primary active law. Mention the equivalent BNS 2023 / BNSS 2023 section parenthetically for awareness.
+  * If the incident/offense occurred ON OR AFTER 1 July 2024: You MUST apply the Bharatiya Nyaya Sanhita (BNS 2023), BNSS 2023, and BSA 2023 as primary active statutes. Mention the old IPC / CrPC section parenthetically.
+  * If the user has not specified any incident date: Assume the current active law (BNS 2023 / BNSS 2023) and include old IPC / CrPC sections in parentheses.
+
 OFF-TOPIC GUARDRAIL (CRITICAL):
 - If the user's query is NOT related to Indian law, legal awareness, legal rights, police, courts, crimes, governance, government administration, or RTI (e.g., asking for cooking recipes, coding advice, math problems, sports, entertainment, general chit-chat), you MUST ignore the standard response format.
 - Instead, politely decline to answer, stating that you are NyayTak, an AI legal assistant, and you only assist with legal awareness queries in India. Give a brief 2-3 line response in the detected script/language and stop. Do NOT generate standard emoji sections or ###FU###.
@@ -1302,6 +1308,100 @@ In ${langPrompt} give exactly:
 Under 12 lines total. No preamble.`,
   })[kind];
 
+const EVIDENCE_PRESERVATION_CHECKLIST = [
+  {
+    id: "cctv",
+    title_hi: "📹 CCTV फुटेज सुरक्षित करवाएं (7-30 दिन लिमिट)",
+    title_en: "📹 Preserve CCTV Footage (7-30 Day Limit)",
+    desc_hi: "दुकानों और सार्वजनिक कैमरों की रिकॉर्डिंग 7-15 दिनों में ओवरराइट हो जाती है। तुरंत BNSS धारा 94 के तहत थाना प्रभारी या एसपी को लिखित प्रार्थना पत्र देकर फुटेज सीज करने का अनुरोध करें।",
+    desc_en: "CCTV footage usually overwrites within 7-15 days. Immediately submit a written request to the Police Station In-Charge or SP under Section 94 BNSS to seize and preserve local footage.",
+    urgent: true
+  },
+  {
+    id: "cyber",
+    title_hi: "💳 साइबर फ्रॉड: गोल्डन ऑवर (1930 & UTR)",
+    title_en: "💳 Cyber Fraud: Golden Hour (Helpline 1930)",
+    desc_hi: "पैसे कटने के 2 घंटे के भीतर नेशनल साइबर हेल्पलाइन 1930 पर कॉल करें या cybercrime.gov.in पर UTR नंबर व बैंक स्टेटमेंट दर्ज करें, ताकि नोडल अधिकारी आरोपी का बैंक खाता फ्रीज कर सकें।",
+    desc_en: "Report financial fraud within 2 hours on National Cyber Helpline 1930 or cybercrime.gov.in with bank UTR number to immediately freeze fraudulent beneficiary accounts.",
+    urgent: true
+  },
+  {
+    id: "whatsapp",
+    title_hi: "📱 डिजिटल चैट व कॉल रिकॉर्ड्स (BSA 63 सर्टिफिकेट)",
+    title_en: "📱 Digital Chats & Call Records (Section 63 BSA)",
+    desc_hi: "व्हाट्सएप चैट को 'Export Chat With Media' करके ईमेल पर सुरक्षित करें। नए भारतीय साक्ष्य अधिनियम (BSA 2023) की धारा 63 के तहत इलेक्ट्रॉनिक प्रमाण पत्र प्रस्तुत करना अनिवार्य होता है।",
+    desc_en: "Export WhatsApp chats with media to secure cloud/email. Under Section 63 of Bharatiya Sakshya Adhiniyam (BSA 2023), electronic records require mandatory certificate for court admissibility.",
+    urgent: false
+  },
+  {
+    id: "medical",
+    title_hi: "🏥 चोट या मारपीट में तुरंत सरकारी MLC करवाएं",
+    title_en: "🏥 Physical Assault: Immediate Govt MLC",
+    desc_hi: "मारपीट या शारीरिक चोट के मामले में नजदीकी सरकारी अस्पताल में जाकर मेडिको-लीगल केस (MLC) रिपोर्ट बनवाएं। प्राइवेट डॉक्टर की पर्ची की तुलना में सरकारी MLC कोर्ट में निर्णायक सबूत बनती है।",
+    desc_en: "In cases of assault or injury, immediately get a Medico-Legal Case (MLC) examination at the nearest Government Hospital. Govt MLC holds primary evidentiary weight in court.",
+    urgent: true
+  },
+  {
+    id: "cdr",
+    title_hi: "📞 CDR व लोकेशन टॉवर डंप प्रिजर्वेशन",
+    title_en: "📞 Call Detail Records (CDR) & Tower Dump",
+    desc_hi: "टेलीकॉम कंपनियां कॉल रिकॉर्ड (CDR) केवल 1-2 साल रखती हैं। यदि झूठा मुकदमा हो तो अपने वकील के माध्यम से धारा 94 BNSS का आवेदन देकर साबित करें कि घटना के समय आप वहां मौजूद नहीं थे (Alibi)।",
+    desc_en: "Telecom operators retain CDR only for 1-2 years. File an application under Section 94 BNSS to preserve tower location data to prove plea of alibi if falsely implicated.",
+    urgent: false
+  }
+];
+
+const ARREST_RIGHTS_SOS = [
+  {
+    id: "sec35",
+    section: "BNSS Sec 35(3)",
+    title_hi: "7 साल से कम सज़ा में बिना नोटिस गिरफ़्तारी पर रोक",
+    title_en: "Notice of Appearance for Offenses with < 7 Years Punishment",
+    detail_hi: "यदि किसी अपराध में अधिकतम सज़ा 7 वर्ष या उससे कम है, तो पुलिस सीधे गिरफ़्तार नहीं कर सकती। पुलिस को पहले धारा 35(3) BNSS के तहत 'उपस्थिति का नोटिस' (Notice of Appearance) देना अनिवार्य है। (अरणेश कुमार गाइडलाइन्स)",
+    detail_en: "For offenses punishable with imprisonment up to 7 years, police cannot arrest arbitrarily without recording reasons. Serving a formal Notice of Appearance under Section 35(3) BNSS is mandatory."
+  },
+  {
+    id: "sec37",
+    section: "BNSS Sec 37",
+    title_hi: "परिवार या मित्र को तुरंत सूचित करने का अधिकार",
+    title_en: "Right to Inform Nominated Relative or Friend",
+    detail_hi: "गिरफ़्तार व्यक्ति को यह कानूनी अधिकार है कि वह अपनी गिरफ़्तारी और स्थान के बारे में अपने किसी परिजन, मित्र या वकील को तुरंत सूचित करवाए। पुलिस इसका रिकॉर्ड रजिस्टर में दर्ज करेगी।",
+    detail_en: "The arrested person has a statutory right to inform a relative, friend, or nominated advocate immediately regarding the arrest and location of custody."
+  },
+  {
+    id: "sec43",
+    section: "BNSS Sec 43",
+    title_hi: "महिलाओं की सूर्यास्त के बाद गिरफ़्तारी पर सख्त रोक",
+    title_en: "Prohibition on Female Arrest Between Sunset and Sunrise",
+    detail_hi: "किसी भी महिला को सूर्यास्त के बाद और सूर्योदय से पहले गिरफ़्तार नहीं किया जा सकता। असाधारण परिस्थितियों में भी महिला पुलिस अधिकारी की उपस्थिति और प्रथम श्रेणी न्यायिक मजिस्ट्रेट की पूर्व अनुमति आवश्यक है।",
+    detail_en: "No woman can be arrested after sunset and before sunrise. Even in exceptional circumstances, a woman police officer and prior permission from a Judicial Magistrate First Class is mandatory."
+  },
+  {
+    id: "sec53",
+    section: "BNSS Sec 53",
+    title_hi: "तुरंत सरकारी डॉक्टर से मेडिकल जांच का अधिकार",
+    title_en: "Mandatory Medical Examination by Medical Officer",
+    detail_hi: "गिरफ़्तारी के बाद व्यक्ति का सरकारी चिकित्सक द्वारा स्वास्थ्य परीक्षण किया जाएगा। यदि हिरासत में कोई चोट लगी है, तो उसका विस्तृत विवरण मेडिकल मेमो में दर्ज किया जाएगा।",
+    detail_en: "The arrested person must be medically examined by an authorized medical officer immediately after arrest to document preexisting physical condition and prevent custodial violence."
+  },
+  {
+    id: "sec58",
+    section: "BNSS Sec 58",
+    title_hi: "24 घंटे के भीतर मजिस्ट्रेट के सामने पेशी",
+    title_en: "Production Before Nearest Magistrate Within 24 Hours",
+    detail_hi: "पुलिस किसी भी व्यक्ति को 24 घंटे से अधिक समय तक हिरासत में नहीं रख सकती (यात्रा समय को छोड़कर)। 24 घंटे के भीतर निकटतम मजिस्ट्रेट के समक्ष पेश करना संवैधानिक व कानूनी अधिकार है।",
+    detail_en: "No police officer shall detain an arrested person for longer than 24 hours without an order of a Magistrate (Article 22(2) Constitution & Section 58 BNSS)."
+  },
+  {
+    id: "sec39",
+    section: "BNSS Sec 39",
+    title_hi: "पूछताछ के दौरान अपने वकील से मिलने का अधिकार",
+    title_en: "Right to Consult an Advocate of Choice During Interrogation",
+    detail_hi: "पूछताछ के दौरान गिरफ़्तार व्यक्ति को अपनी पसंद के अधिवक्ता (वकील) से मिलने और कानूनी परामर्श लेने का अधिकार है (भले ही पूरी पूछताछ के दौरान नहीं)।",
+    detail_en: "The accused has a right to meet and consult an advocate of choice during interrogation, though not throughout interrogation."
+  }
+];
+
 export {
   FONT_HEAD,
   FONT_BODY,
@@ -1326,4 +1426,6 @@ export {
   POPULAR,
   buildPrompt,
   toolPrompt,
+  EVIDENCE_PRESERVATION_CHECKLIST,
+  ARREST_RIGHTS_SOS,
 };
