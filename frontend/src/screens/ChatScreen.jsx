@@ -524,7 +524,8 @@ GUIDELINES FOR THE BODY:
     (m) => m.role === "assistant" && isLegalAnswer(m.text),
   );
   const showFollowUps =
-    messages.length > 0 &&
+    messages.length > 1 &&
+    messages.some((m) => m.role === "user") &&
     messages[messages.length - 1].role === "assistant" &&
     !loading &&
     !streaming &&
